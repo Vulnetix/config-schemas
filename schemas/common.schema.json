@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/common.schema.json",
+  "title": "Vulnetix config: shared definitions",
+  "description": "Definitions every Vulnetix config kind refers to. Not a document kind itself.",
+  "$defs": {
+    "apiVersion": {
+      "description": "The document format version. Every kind in this release is vulnetix.com/v1.",
+      "const": "vulnetix.com/v1"
+    },
+    "name": {
+      "description": "The object's name, unique per kind within a tenant. It is the natural key: plan, apply, export and the Terraform provider all address an object by kind and name.",
+      "type": "string",
+      "pattern": "^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "$ref": "#/$defs/name" },
+        "org": {
+          "description": "The tenant (organization UUID) the document belongs to. When set, plan and apply refuse to run against any other tenant.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "labels": {
+          "description": "Free key/value labels. Stored with the object, never interpreted by the server.",
+          "type": "object",
+          "additionalProperties": { "type": "string", "maxLength": 256 },
+          "propertyNames": { "pattern": "^[a-z0-9]([a-z0-9._/-]{0,61}[a-z0-9])?$" }
+        },
+        "annotations": {
+          "description": "Free key/value notes for people and tools, such as a ticket link.",
+          "type": "object",
+          "additionalProperties": { "type": "string", "maxLength": 4096 }
+        }
+      }
+    },
+    "singletonMetadata": {
+      "description": "Metadata for a kind the tenant has exactly one of. The name is fixed to default.",
+      "allOf": [
+        { "$ref": "#/$defs/metadata" },
+        { "properties": { "name": { "const": "default" } } }
+      ]
+    },
+    "valueFrom": {
+      "description": "Where a client reads a secret value. The value is resolved on the machine running the client, sent once, and never exported or shown in a plan.",
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "env": { "description": "Name of an environment variable.", "type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" },
+        "file": { "description": "Path to a file holding the value. Trailing newlines are trimmed.", "type": "string", "minLength": 1 }
+      }
+    },
+    "celExpression": {
+      "description": "A CEL expression (https://cel.dev) returning bool. The variables it may use depend on where it appears; each kind's reference lists them. Plan type-checks the expression.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "purl": {
+      "description": "A package URL (https://github.com/package-url/purl-spec). Omit the version to mean every version.",
+      "type": "string",
+      "pattern": "^pkg:[a-z][a-z0-9.+-]*/.+"
+    },
+    "vexJustification": {
+      "description": "Why a vulnerability does not affect a product, in the OpenVEX 0.2.0 vocabulary. CycloneDX VEX justifications map onto these.",
+      "type": "string",
+      "enum": [
+        "component_not_present",
+        "vulnerable_code_not_present",
+        "vulnerable_code_not_in_execute_path",
+        "vulnerable_code_cannot_be_controlled_by_adversary",
+        "inline_mitigations_already_exist"
+      ]
+    }
+  }
+}

@@ -1,0 +1,5 @@
+# metadata.org must be a UUID
+apiVersion: vulnetix.com/v1
+kind: QualityGate
+metadata: {name: default, org: acme}
+spec: {}

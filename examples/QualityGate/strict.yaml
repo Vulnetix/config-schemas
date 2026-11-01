@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/QualityGate.schema.json
+apiVersion: vulnetix.com/v1
+kind: QualityGate
+metadata:
+  name: default
+spec:
+  severity: high
+  exploits: active
+  blockMalware: true
+  blockUnpinned: true
+  cooldownDays: 7
+  eol:
+    block: true
+    severities:
+      nextQuarter: skip
+      thisQuarter: low
+      within30Days: high
+      retired: critical
+  scaAutofix:
+    strategy: safest
+    maxMajorBump: 0

@@ -1,0 +1,5 @@
+# wrong apiVersion
+apiVersion: vulnetix.com/v2
+kind: QualityGate
+metadata: {name: default}
+spec: {}

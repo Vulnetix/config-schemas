@@ -1,0 +1,5 @@
+# unknown field (typo of blockMalware)
+apiVersion: vulnetix.com/v1
+kind: QualityGate
+metadata: {name: default}
+spec: {blockMalwar: true}

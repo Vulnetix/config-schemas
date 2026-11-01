@@ -1,0 +1,5 @@
+# a singleton must be named default
+apiVersion: vulnetix.com/v1
+kind: QualityGate
+metadata: {name: strict}
+spec: {}

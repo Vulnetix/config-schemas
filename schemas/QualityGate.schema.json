@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/QualityGate.schema.json",
+  "title": "QualityGate",
+  "description": "The tenant's quality gate: the checks every vulnetix scan in CI must pass. When a check is set here it overrides the matching scan flag; a check left out leaves the flag in charge. One per tenant.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "QualityGate" },
+    "metadata": { "$ref": "common.schema.json#/$defs/singletonMetadata" },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "severity": {
+          "description": "Fail on any affected vulnerability at or above this severity. Overrides --severity.",
+          "$ref": "common.schema.json#/$defs/severity"
+        },
+        "exploits": {
+          "description": "Fail on a vulnerability with an exploit at or beyond this maturity. Overrides --exploits.",
+          "type": "string",
+          "enum": ["poc", "active", "weaponized"]
+        },
+        "blockMalware": {
+          "description": "Fail when a dependency is known malware. Overrides --block-malware.",
+          "type": "boolean"
+        },
+        "blockUnpinned": {
+          "description": "Fail on a dependency declared without a pinned version. Overrides --block-unpinned.",
+          "type": "boolean"
+        },
+        "cooldownDays": {
+          "description": "Fail on a dependency version published fewer than this many days ago. Overrides --cooldown.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "versionLag": {
+          "description": "Fail on a dependency more than this many releases behind the newest. Overrides --version-lag.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "eol": {
+          "description": "End-of-life policy. A dependency whose product reaches end of life inside a horizon is reported at that horizon's severity, and blocks when it meets the gate.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "block": {
+              "description": "Fail on end-of-life dependencies at all. Overrides --block-eol. The horizon severities are only read when this is true.",
+              "type": "boolean"
+            },
+            "severities": {
+              "description": "The severity given to a dependency by how close its end of life is. skip ignores that horizon.",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "nextQuarter": { "$ref": "#/$defs/eolSeverity", "default": "low" },
+                "thisQuarter": { "$ref": "#/$defs/eolSeverity", "default": "medium" },
+                "within30Days": { "$ref": "#/$defs/eolSeverity", "default": "high" },
+                "retired": { "$ref": "#/$defs/eolSeverity", "default": "critical" }
+              }
+            }
+          }
+        },
+        "scaAutofix": {
+          "description": "How vulnetix fix and scan --sca-autofix choose a target version.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "strategy": {
+              "description": "latest: the newest release. safest: the release with the fewest known vulnerabilities. stable: the newest release past its cooldown. rolling: the newest release that is not malware, known vulnerabilities allowed.",
+              "type": "string",
+              "enum": ["latest", "safest", "stable", "rolling"]
+            },
+            "maxMajorBump": {
+              "description": "The most major versions a fix may jump. 0 keeps fixes within the current major.",
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "eolSeverity": {
+      "type": "string",
+      "enum": ["skip", "low", "medium", "high", "critical"]
+    }
+  }
+}

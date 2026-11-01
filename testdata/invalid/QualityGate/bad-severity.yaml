@@ -1,0 +1,5 @@
+# severity outside the enum
+apiVersion: vulnetix.com/v1
+kind: QualityGate
+metadata: {name: default}
+spec: {severity: urgent}

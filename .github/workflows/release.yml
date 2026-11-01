@@ -1,0 +1,77 @@
+name: Release schemas
+
+# Pushing a tag vMAJOR.MINOR.PATCH publishes that version. The release assets
+# are the canonical schema URLs:
+#   https://github.com/Vulnetix/config-schemas/releases/download/<tag>/<Kind>.schema.json
+# and /releases/latest/download/<Kind>.schema.json follows the newest release.
+#
+# A tag whose release job failed is recovered by running this workflow by hand
+# with that tag. Every step is safe to repeat: assets are uploaded with
+# --clobber onto an existing release.
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to (re)publish, e.g. v1.2.0
+        required: true
+
+permissions:
+  contents: write
+  id-token: write # keyless cosign signing
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: [self-hosted, Linux, X64, vulnetix-local]
+    timeout-minutes: 15
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+      GOTMPDIR: ${{ runner.temp }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: Test
+        run: go test ./...
+
+      # Breaking changes need a major tag. The previous release is the newest
+      # vX.Y.Z tag before this one; the first release has nothing to compare.
+      - name: Check compatibility with the previous release
+        run: |
+          prev=$(git tag --list 'v*.*.*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -rV | awk -v t="$TAG" 'found{print; exit} $0==t{found=1}')
+          if [ -z "$prev" ]; then echo "first release, nothing to compare"; exit 0; fi
+          base="$RUNNER_TEMP/base"
+          mkdir -p "$base"
+          for f in $(git ls-tree --name-only "$prev" schemas/); do git show "$prev:$f" > "$base/$(basename "$f")"; done
+          go run ./cmd/schemacheck compat --base "$base" --version "$TAG" --previous "$prev"
+
+      - name: Build the release files
+        run: go run ./cmd/schemacheck release --version "$TAG" --out dist
+
+      - uses: sigstore/cosign-installer@v3
+
+      - name: Sign every file
+        run: |
+          cd dist
+          for f in *.json SHA256SUMS; do
+            cosign sign-blob --yes --bundle "$f.sigstore.json" "$f" >/dev/null
+          done
+
+      - name: Publish
+        run: |
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --verify-tag --title "$TAG" --generate-notes
+          fi
+          gh release upload "$TAG" dist/* --clobber
