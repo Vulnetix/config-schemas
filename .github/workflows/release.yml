@@ -32,8 +32,10 @@ jobs:
     env:
       TAG: ${{ github.event.inputs.tag || github.ref_name }}
       GH_TOKEN: ${{ github.token }}
-      GOTMPDIR: ${{ runner.temp }}
     steps:
+      # Big Go builds overflow the runner's small /tmp; build in the job's temp.
+      - name: Use the job temp dir for Go
+        run: echo "GOTMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.inputs.tag || github.ref }}

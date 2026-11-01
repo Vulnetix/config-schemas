@@ -12,9 +12,10 @@ jobs:
   test:
     runs-on: [self-hosted, Linux, X64, vulnetix-local]
     timeout-minutes: 10
-    env:
-      GOTMPDIR: ${{ runner.temp }}
     steps:
+      # Big Go builds overflow the runner's small /tmp; build in the job's temp.
+      - name: Use the job temp dir for Go
+        run: echo "GOTMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/checkout@v5
       - uses: actions/setup-go@v6
         with:
