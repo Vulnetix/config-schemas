@@ -13,7 +13,7 @@ spec:
   hold: 15m
   feeds:
     - feedRef: edge-waf
-    - https://vulnetix.com/feeds/0b6f2c1e-4d3a-4e5f-8a9b-7c6d5e4f3a2b/9c8b7a6f-5e4d-4c3b-8a2f-1e0d9c8b7a6f/rules.json
+    - https://vulnetix.com/feeds/0b6f2c1e-4d3a-4e5f-8a9b-7c6d5e4f3a2b/9c8b7a6f-5e4d-4c3b-8a2f-1e0d9c8b7a6f
   forward: [siem]
   inventoryEvery: 6h
   protection: hardened

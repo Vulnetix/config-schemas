@@ -42,7 +42,7 @@
           "items": { "$ref": "#/$defs/entry" }
         },
         "selector": {
-          "description": "Rules chosen by a condition. Not stored yet: the server keeps explicit entries only, so a selector validates and applying it needs the backend change that evaluates it against the rules of the feed's format.",
+          "description": "Rules chosen by a condition, as well as any entries. Each time the feed is built for publishing, the condition is evaluated against the generated rules of the feed's format (virtual patches for a block-lane format, countermeasures for a detect-lane one), once for each vulnerability a rule was written for, and a rule is included when it holds for any of them. The third-party catalogue (SNORT_YARA) carries no vulnerability data, so it takes entries only. A published feed holds at most 500 rules, explicit entries first.",
           "type": "object",
           "required": ["when"],
           "additionalProperties": false,

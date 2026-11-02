@@ -20,7 +20,8 @@ spec:
   hold: 15m
   feeds:
     - feedRef: edge-waf
-    - https://vulnetix.com/feeds/0b6f2c1e-4d3a-4e5f-8a9b-7c6d5e4f3a2b/9c8b7a6f-5e4d-4c3b-8a2f-1e0d9c8b7a6f/rules.json
+    - https://vulnetix.com/feeds/0b6f2c1e-4d3a-4e5f-8a9b-7c6d5e4f3a2b/9c8b7a6f-5e4d-4c3b-8a2f-1e0d9c8b7a6f
+    - sensorFeed: 7d6c5b4a-3f2e-4d1c-9b8a-7f6e5d4c3b2a
   feedKey: KymtMlKOJvj2IkhUbMpXRl/JBmmOwu/LIj8BekwmQXk=
   egressListen: 127.0.0.1:8181
   dnsListen: 127.0.0.1:5353
