@@ -1,0 +1,7 @@
+# scanners custom needs a custom list
+apiVersion: vulnetix.com/v1
+kind: ScannerProfile
+metadata:
+  name: default
+spec:
+  scanners: custom

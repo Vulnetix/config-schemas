@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/RepositorySettings.schema.json",
+  "title": "RepositorySettings",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[]},
+  "description": "The Software Factory's controls for one repository: the settings panel of the Factory repositories page. The repository must be one the factory can see, through a managed organisation or another signal. metadata.name is the repository lower-cased, with every run of characters other than a to z and 0 to 9 replaced by one hyphen: acme-payments-api for acme/payments-api. A field left out means its default. Deleting the document removes the repository's own settings, so it runs at the tenant's autonomy.default again, and removes its monthly token cap; the record of the change is kept in the audit trail.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "RepositorySettings" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["repository", "autonomy"],
+      "additionalProperties": false,
+      "properties": {
+        "repository": {
+          "description": "The repository: owner/name on github.com, or host/owner/name on another forge (codeberg.org/acme/api). Matched without regard to case.",
+          "$ref": "common.schema.json#/$defs/repository"
+        },
+        "autonomy": {
+          "description": "How far the factory goes on its own in this repository, from observe (the least) through suggest and draft_pr to auto_merge_low_risk (the most, shown as approve when ready). It may not be above the tenant's autonomy.max setting; the plan is refused when it is.",
+          "type": "string",
+          "enum": ["observe", "suggest", "draft_pr", "auto_merge_low_risk"]
+        },
+        "kanbanMode": {
+          "description": "Which kanban cards are mirrored to issues in this repository. all: every card. skip_review: a card waits until it leaves Review. off: none. It also sets the mode of the repository's existing kanban bindings.",
+          "type": "string",
+          "enum": ["all", "skip_review", "off"],
+          "default": "off"
+        },
+        "monthlyTokenCap": {
+          "description": "The most tokens the factory may spend on this repository in a month. Left out, there is no cap of its own. Setting it creates the repository's budget on the Budgets page; removing it removes that budget.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000000000000
+        },
+        "protectedBranches": {
+          "description": "Never push to the default branch or a protected branch. Only an owner or an admin may set it to false.",
+          "type": "boolean",
+          "default": true
+        },
+        "teaPublish": {
+          "description": "Publish the repository's releases to TEA.",
+          "type": "boolean",
+          "default": false
+        },
+        "defaultsOff": {
+          "description": "The default workflows this repository opts out of, by key. Every default the tenant has on applies to the rest.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["pr-review", "ci-fix", "test-sweep", "lint-sweep", "issue-to-pr", "approve-ready", "conflict-fix"]
+          },
+          "default": []
+        }
+      }
+    }
+  }
+}

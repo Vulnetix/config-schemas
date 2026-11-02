@@ -45,6 +45,10 @@ Reference documentation for every kind is at https://docs.vulnetix.com (the Plat
 | `MessagingConnection` | v1.5.0 | A messaging destination: Slack (authorized in a browser), Teams, Discord, Google Chat, Jira or a signed webhook. Its credential is kept in the secrets vault. |
 | `MessagingRoute` | v1.5.0 | Which events go to which messaging connections, with filters, mentions, template, digest and rate limit. |
 | `MessagingTemplate` | v1.5.0 | An organisation's own message template, compiled at plan and versioned on every change. |
+| `FactorySettings` | v1.5.0 | The Software Factory settings document: autonomy, System One, crews, forge, Pix, budgets, schedules, defaults and delivery settings. One per tenant. |
+| `ScannerProfile` | v1.5.0 | The factory's scanners, minimum SLSA level and build evidence. One per tenant. |
+| `FactoryManagedOrg` | v1.5.0 | An organisation or account the Software Factory manages. Which repositories the GitHub App reaches stays on GitHub. |
+| `RepositorySettings` | v1.5.0 | The factory's autonomy, kanban mode, token cap, branch protection, TEA publishing and default workflow opt-outs for one repository. |
 
 A field or kind whose description says "Not stored yet" (`CloudSensors` for one account), and the whole of `VexSource`, is ahead of the server: it validates today, and applying it needs the backend change the description names.
 

@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/ScannerProfile.schema.json
+apiVersion: vulnetix.com/v1
+kind: ScannerProfile
+metadata:
+  name: default
+  labels:
+    team: security
+  annotations:
+    ticket: https://tracker.example.com/SEC-210
+spec:
+  scanners: custom
+  custom:
+    - sca
+    - malscan
+    - secrets
+    - sast
+  slsaMin: L2
+  evidence: sbom_only

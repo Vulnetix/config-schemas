@@ -1,0 +1,6 @@
+# account is required
+apiVersion: vulnetix.com/v1
+kind: FactoryManagedOrg
+metadata:
+  name: acme
+spec: {}

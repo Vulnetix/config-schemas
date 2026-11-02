@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/ScannerProfile.schema.json",
+  "title": "ScannerProfile",
+  "x-vulnetix": {"validateOnly":false,"singleton":true,"dependsOn":[],"secrets":[],"celFields":[]},
+  "description": "Which scanners the Software Factory runs, the SLSA level its builds must reach, and the evidence it keeps. One per tenant. These are the security.scanners, security.scanners.custom, security.slsa_min and security.evidence settings of the factory settings document: applying saves a new revision of that document, with one audit entry per changed setting, and a FactorySettings document never carries them, so the two kinds never write the same setting. A field left out means its default. Deleting the document puts all four settings back to their defaults.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "ScannerProfile" },
+    "metadata": { "$ref": "common.schema.json#/$defs/singletonMetadata" },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "scanners": {
+          "description": "The scanners a factory scan runs. minimum: software composition analysis, malware and secrets. all: every scanner. custom: the scanners listed in custom. The security.scanners setting.",
+          "type": "string",
+          "enum": ["minimum", "all", "custom"],
+          "default": "minimum"
+        },
+        "custom": {
+          "description": "The scanner ids to run when scanners is custom; required then, and kept but unused otherwise. The security.scanners.custom setting.",
+          "type": "array",
+          "maxItems": 100,
+          "items": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "default": []
+        },
+        "slsaMin": {
+          "description": "The lowest SLSA build level the factory accepts for what it builds. The security.slsa_min setting.",
+          "type": "string",
+          "enum": ["L1", "L2", "L3"],
+          "default": "L3"
+        },
+        "evidence": {
+          "description": "The evidence kept for a build. cdx_slsa: a CycloneDX SBOM and SLSA provenance. sbom_only: the SBOM alone. The security.evidence setting.",
+          "type": "string",
+          "enum": ["cdx_slsa", "sbom_only"],
+          "default": "cdx_slsa"
+        }
+      },
+      "if": { "properties": { "scanners": { "const": "custom" } }, "required": ["scanners"] },
+      "then": { "required": ["custom"], "properties": { "custom": { "minItems": 1 } } }
+    }
+  }
+}

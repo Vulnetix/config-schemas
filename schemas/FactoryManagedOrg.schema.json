@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/FactoryManagedOrg.schema.json",
+  "title": "FactoryManagedOrg",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[]},
+  "description": "An organisation or user account the Software Factory manages: the switch on the Factory organisations page. The account must already be connected, through the Vulnetix GitHub App or a forge connection, and active. Which of its repositories the App can reach is chosen on GitHub when the App is installed; this document does not change that, and status reports it (installationId, repositorySelection, repoCount). metadata.name is the account lower-cased, with every run of characters other than a to z and 0 to 9 replaced by one hyphen: acme-platform for acme-platform, codeberg-org-acme for codeberg.org/acme. Applying also keeps the scope.orgs setting of the factory settings document in step. Deleting the document stops managing the account; the record is kept, so managing it again restores it.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "FactoryManagedOrg" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["account"],
+      "additionalProperties": false,
+      "properties": {
+        "account": {
+          "description": "The account's login as the forge shows it: a GitHub organisation or user (acme-platform), or host/account for an account on another forge (codeberg.org/acme). Matched without regard to case.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300,
+          "pattern": "^[^\\s/]+(/[^\\s/]+)*$"
+        }
+      }
+    }
+  }
+}

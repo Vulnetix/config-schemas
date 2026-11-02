@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/RepositorySettings.schema.json
+apiVersion: vulnetix.com/v1
+kind: RepositorySettings
+metadata:
+  name: acme-payments-api
+spec:
+  repository: acme/payments-api
+  autonomy: draft_pr

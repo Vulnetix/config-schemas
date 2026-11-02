@@ -1,0 +1,246 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/FactorySettings.schema.json
+apiVersion: vulnetix.com/v1
+kind: FactorySettings
+metadata:
+  name: default
+  labels:
+    team: platform
+  annotations:
+    vulnetix.com/owner: platform@acme.example
+spec:
+  scope:
+    interest: scanned_or_pix
+    archived: true
+    dependencies: false
+    sync: 1h
+  autonomy:
+    max: auto_merge_low_risk
+    default: suggest
+    concurrency: 8
+    claim_ttl_minutes: 60
+    max_attempts: 3
+    no_host_ttl_hours: 6
+    parked_concurrency: 50
+    plan_approval: true
+  belai:
+    mode: goal
+    ask_permission: false
+    guardrails: "on"
+    tests:
+      post_end: goal
+      on_fail: fix
+    show_internal_work: decisions
+    auto_commit_per_task: true
+    a2a:
+      show: true
+  factory:
+    fanoutCap: 6
+  systemone:
+    model: clef-flash
+    min_confidence: 0.85
+    below_threshold: escalate_human
+    on_abstain: escalate_human
+    fallback: jev
+    retention: full_400d
+    override: true
+  pix:
+    classifier: clef
+    jevDailyCap: 2000
+    extensionMode: packs_only
+    size: medium
+    egressMode: deny_except_allow
+    versionPolicy: safest
+    maintenance:
+      - days:
+          - sun
+        start: "02:00"
+        end: "04:00"
+        tz: Australia/Melbourne
+    reservePercent: 20
+  crews:
+    lease: 30m
+  agents:
+    max_cost_usd_per_item: 12.5
+    finalize_at: 0.8
+    max_attempts: 0
+    max_continuations: 0
+    max_passes_per_item: 0
+    max_wall_minutes: 0
+    max_iterations: 0
+  forge:
+    branch_prefix: factory/
+    pr_state: ready
+    protected: true
+    check_runs: false
+    read:
+      default: posture_mirror
+    stale:
+      repo: 12h
+      pulls: 10m
+      checks: 2m
+      alerts: 1h
+    poll:
+      fallback: conditional_poll_10m
+    etag: true
+    quota:
+      factory_share: 15
+      reserve: 20
+      on_exhausted: pause_live_reads
+      proactive_writes_per_hour: 60
+    calls_per_hour: 5000
+  kanban:
+    mode: all
+    opt_out_label: no-factory
+    conflict_comment: true
+  signing:
+    mode: required
+    auto_add: true
+    email: primary
+    rotate_days: "180"
+    retire_days: "30"
+    on_missing: readd
+  hosts:
+    runOn: label:linux-large
+    runOnFallback: none
+  approve:
+    sensitive_paths:
+      - .github/workflows/**
+      - infra/**
+  tea:
+    publish: on_release_tag
+  jail:
+    enforcementMode: enforce
+  budget:
+    factory_share: 75
+    month: 50000000
+    on_exceed: switch_to_pix_allocation
+    alerts:
+      - 50
+      - 75
+      - 90
+      - 100
+  providers:
+    code: pix-smart
+  vault:
+    grant:
+      mode: specific
+      entries:
+        - ve_ci_token
+    on_error: pause_affected_workflows
+  persistence:
+    retention: 400d
+    postgres: "on"
+    export: manual
+  schedules:
+    tz: Australia/Melbourne
+    blackout:
+      - from:
+          day: fri
+          time: "17:00"
+        to:
+          day: mon
+          time: "08:00"
+        label: weekend
+    missed: run_once
+  audit:
+    calls: true
+    sign: true
+    weekly_report: true
+  notify:
+    events: escalations_holds_budget
+    connector: teams
+  defaults:
+    enabled: true
+    pr-review:
+      enabled: true
+    ci-fix:
+      enabled: true
+    test-sweep:
+      enabled: true
+    lint-sweep:
+      enabled: false
+    issue-to-pr:
+      enabled: true
+    approve-ready:
+      enabled: true
+    conflict-fix:
+      enabled: true
+  delivery:
+    enabled: true
+    value: true
+    decisions: true
+    compare: true
+    people: true
+    multiplier: 2.4
+    rate: 120
+    peopleRate: 110
+    overheadPct: 20
+    overheadRate: 105
+    hoursPerMonth: 150
+    manualDecisionWait: 6
+    manualCycleDays: 4.5
+    manualIssueDays: 3
+    manualCardDays: 5
+    roles:
+      sse:
+        enabled: true
+        rate: 95
+        mult: 2.4
+      security:
+        enabled: true
+        rate: 110
+        mult: 2
+      qa:
+        enabled: true
+        rate: 70
+        mult: 2.2
+      devops:
+        enabled: true
+        rate: 90
+        mult: 2
+      reviewer:
+        enabled: true
+        rate: 95
+        mult: 1.5
+      planner:
+        enabled: true
+        rate: 120
+        mult: 1.6
+      writer:
+        enabled: true
+        rate: 60
+        mult: 1.8
+    kinds:
+      toolcall:
+        enabled: false
+        minutes: 0
+      mode:
+        enabled: true
+        minutes: 0.5
+      goal:
+        enabled: true
+        minutes: 3
+      plan:
+        enabled: true
+        minutes: 4
+      triage:
+        enabled: true
+        minutes: 6
+      merge:
+        enabled: true
+        minutes: 8
+      other:
+        enabled: true
+        minutes: 2
+    sources:
+      checkpoint: true
+      commit: true
+      comment: true
+      review: true
+      chat: true
+      notification: true
+      admin: true
+      pixcall: true
+    companyDomain: acme.example
+    idleGapMin: 5
+    reviewMinPer100: 4

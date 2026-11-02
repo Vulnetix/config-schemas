@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/FactoryManagedOrg.schema.json
+apiVersion: vulnetix.com/v1
+kind: FactoryManagedOrg
+metadata:
+  name: acme-platform
+  labels:
+    team: platform
+  annotations:
+    ticket: https://tracker.example.com/PLAT-77
+spec:
+  account: Acme-Platform
+---
+apiVersion: vulnetix.com/v1
+kind: FactoryManagedOrg
+metadata:
+  name: codeberg-org-acme
+spec:
+  account: codeberg.org/acme

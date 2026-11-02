@@ -1,0 +1,9 @@
+# forge.stale.repo must be a duration
+apiVersion: vulnetix.com/v1
+kind: FactorySettings
+metadata:
+  name: default
+spec:
+  forge:
+    stale:
+      repo: soon

@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/RepositorySettings.schema.json
+apiVersion: vulnetix.com/v1
+kind: RepositorySettings
+metadata:
+  name: acme-payments-api
+  labels:
+    team: payments
+  annotations:
+    ticket: https://tracker.example.com/PAY-1501
+spec:
+  repository: acme/payments-api
+  autonomy: suggest
+  kanbanMode: skip_review
+  monthlyTokenCap: 2000000
+  protectedBranches: true
+  teaPublish: true
+  defaultsOff:
+    - lint-sweep
+    - test-sweep

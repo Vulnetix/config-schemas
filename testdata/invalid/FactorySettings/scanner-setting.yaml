@@ -1,0 +1,8 @@
+# the scanner settings belong to ScannerProfile, not FactorySettings
+apiVersion: vulnetix.com/v1
+kind: FactorySettings
+metadata:
+  name: default
+spec:
+  security:
+    scanners: all

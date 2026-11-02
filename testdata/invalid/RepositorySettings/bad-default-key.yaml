@@ -1,0 +1,9 @@
+# defaultsOff names only default workflow keys
+apiVersion: vulnetix.com/v1
+kind: RepositorySettings
+metadata:
+  name: acme-api
+spec:
+  repository: acme/api
+  autonomy: observe
+  defaultsOff: [nightly]

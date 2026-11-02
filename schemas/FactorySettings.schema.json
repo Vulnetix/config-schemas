@@ -1,0 +1,1683 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/FactorySettings.schema.json",
+  "title": "FactorySettings",
+  "x-vulnetix": {
+    "validateOnly": false,
+    "singleton": true,
+    "dependsOn": [],
+    "secrets": [],
+    "celFields": []
+  },
+  "description": "The Software Factory settings document: the tenant-wide factory settings the console's Settings page edits. One per tenant. Each field is one setting, and its dotted path (autonomy.max) is the key the console, the API and the audit trail name it by. A field left out means the setting's default, so applying a document resets every setting it does not name, and an export lists only the settings that differ from their defaults. Applying saves a new revision of the document through the console's own writer, with one audit entry per changed setting; status.revision is the revision saved. The security scanner settings are the ScannerProfile document, the managed organisations are FactoryManagedOrg documents and the web push defaults (notify.push.defaults) are the NotificationDefaults document, so none of them appears here. Read-only settings (forge.polling.forbidden, firewall_enabled, systemone.min_confidence.adapter) are not part of the document.",
+  "type": "object",
+  "required": [
+    "apiVersion",
+    "kind",
+    "metadata",
+    "spec"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "apiVersion": {
+      "$ref": "common.schema.json#/$defs/apiVersion"
+    },
+    "kind": {
+      "const": "FactorySettings"
+    },
+    "metadata": {
+      "$ref": "common.schema.json#/$defs/singletonMetadata"
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "scope": {
+          "description": "Which repositories of the managed organisations the factory looks at. The organisations themselves are FactoryManagedOrg documents.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "interest": {
+              "description": "Which repositories of a managed organisation count as of interest: any_signal (any signal at all), scanned_or_pix (scanned by Vulnetix or cloned in a Pix Sandbox) or watched_only (watched by a member).",
+              "type": "string",
+              "enum": [
+                "any_signal",
+                "scanned_or_pix",
+                "watched_only"
+              ],
+              "default": "any_signal"
+            },
+            "archived": {
+              "description": "Include archived repositories.",
+              "type": "boolean",
+              "default": false
+            },
+            "dependencies": {
+              "description": "Include public dependency repositories that only appear through SBOM uploads.",
+              "type": "boolean",
+              "default": false
+            },
+            "sync": {
+              "description": "How often the installation metadata sweep runs: every 6h, every 1h, or webhook_only (no sweep).",
+              "type": "string",
+              "enum": [
+                "6h",
+                "1h",
+                "webhook_only"
+              ],
+              "default": "6h"
+            }
+          }
+        },
+        "autonomy": {
+          "description": "How far the factory goes on its own, and how many runs it keeps going.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max": {
+              "description": "The most autonomy any repository may run at. A repository's own autonomy above it is lowered to it; the stored value is kept.",
+              "type": "string",
+              "enum": [
+                "observe",
+                "suggest",
+                "draft_pr",
+                "auto_merge_low_risk"
+              ],
+              "default": "draft_pr"
+            },
+            "default": {
+              "description": "The autonomy of a repository of a managed organisation that has no RepositorySettings of its own. auto_merge_low_risk is shown as approve when ready.",
+              "type": "string",
+              "enum": [
+                "observe",
+                "suggest",
+                "draft_pr",
+                "auto_merge_low_risk"
+              ],
+              "default": "draft_pr"
+            },
+            "concurrency": {
+              "description": "Runs of the tenant that may run at once.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 64,
+              "default": 4
+            },
+            "claim_ttl_minutes": {
+              "description": "Minutes a started crew or worker dispatch may go without a session before the attempt fails card_unclaimed and is retried.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1440,
+              "default": 60
+            },
+            "max_attempts": {
+              "description": "Attempts at one workflow step before the run fails.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10,
+              "default": 3
+            },
+            "no_host_ttl_hours": {
+              "description": "Hours a crew step may wait for a machine before the run ends no_host_timeout.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 168,
+              "default": 6
+            },
+            "parked_concurrency": {
+              "description": "Runs of the tenant that may wait for a machine at once. They do not count against autonomy.concurrency.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 50
+            },
+            "plan_approval": {
+              "description": "Whether a belai:feature plan waits for a person to approve it.",
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "belai": {
+          "description": "How crews the factory starts behave.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "description": "The mode crews the factory starts run in.",
+              "type": "string",
+              "enum": [
+                "goal",
+                "agent",
+                "plan",
+                "auto"
+              ],
+              "default": "goal"
+            },
+            "ask_permission": {
+              "description": "Whether the workers and crews a workflow or schedule starts stop at permission asks.",
+              "type": "boolean",
+              "default": false
+            },
+            "guardrails": {
+              "description": "Belai guardrails for crews the factory starts. off is refused for worker crews.",
+              "type": "string",
+              "enum": [
+                "on",
+                "strict",
+                "off"
+              ],
+              "default": "on"
+            },
+            "tests": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "post_end": {
+                  "description": "When tests run after a crew ends: after the goal, after the goal and its plan, after the session, or never.",
+                  "type": "string",
+                  "enum": [
+                    "goal",
+                    "goal_plan",
+                    "session",
+                    "off"
+                  ],
+                  "default": "goal"
+                },
+                "on_fail": {
+                  "description": "What a crew does when those tests fail: fix them, diagnose only, or nothing.",
+                  "type": "string",
+                  "enum": [
+                    "fix",
+                    "diagnose",
+                    "off"
+                  ],
+                  "default": "fix"
+                }
+              }
+            },
+            "show_internal_work": {
+              "description": "Which internal work a transcript shows.",
+              "type": "string",
+              "enum": [
+                "decisions",
+                "security",
+                "all",
+                "hidden"
+              ],
+              "default": "decisions"
+            },
+            "auto_commit_per_task": {
+              "description": "Commit after each task a crew finishes.",
+              "type": "boolean",
+              "default": true
+            },
+            "a2a": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "show": {
+                  "description": "Whether transcripts show agent-to-agent rows (broadcasts, messages, replies, acknowledgements) by default. A viewer can override it.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            }
+          }
+        },
+        "factory": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "fanoutCap": {
+              "description": "Runs one delivery or sighting may start. Triggers past it, by priority, are skipped as fanout_cap.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 6
+            }
+          }
+        },
+        "systemone": {
+          "description": "System One, which scores the factory's decisions.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "model": {
+              "description": "The System One adapter that scores decisions. Confidences are not comparable across adapters, so changing it records systemone.min_confidence against the new adapter.",
+              "type": "string",
+              "enum": [
+                "clef-flash",
+                "clef",
+                "jev",
+                "tev1"
+              ],
+              "default": "clef-flash"
+            },
+            "min_confidence": {
+              "description": "The confidence below which a System One decision is not taken on its own.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.8
+            },
+            "below_threshold": {
+              "description": "What happens to a decision scored below systemone.min_confidence.",
+              "type": "string",
+              "enum": [
+                "escalate_human",
+                "route_to_fallback_model",
+                "take_safest_outcome",
+                "end_run"
+              ],
+              "default": "escalate_human"
+            },
+            "on_abstain": {
+              "description": "What happens when System One abstains.",
+              "type": "string",
+              "enum": [
+                "escalate_human",
+                "retry_once_then_escalate",
+                "end_run"
+              ],
+              "default": "escalate_human"
+            },
+            "fallback": {
+              "description": "The model a decision is routed to under route_to_fallback_model.",
+              "type": "string",
+              "enum": [
+                "jev",
+                "pix-fast",
+                "none"
+              ],
+              "default": "jev"
+            },
+            "retention": {
+              "description": "How System One decisions are kept: in full for 400 days, as hashes only, or for 30 days.",
+              "type": "string",
+              "enum": [
+                "full_400d",
+                "hash_only",
+                "days_30"
+              ],
+              "default": "full_400d"
+            },
+            "override": {
+              "description": "Whether a person may override any System One decision.",
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "pix": {
+          "description": "The Pix Sandbox the factory works in.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "classifier": {
+              "description": "The Pix Sandbox's own classifier.",
+              "type": "string",
+              "enum": [
+                "clef",
+                "jev",
+                "tev1"
+              ],
+              "default": "clef"
+            },
+            "jevDailyCap": {
+              "description": "Calls per day to the jev classifier, shared with the Pix Sandbox.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000000,
+              "default": 2000
+            },
+            "extensionMode": {
+              "description": "Which editor extensions a Pix Sandbox may install: curated packs only, or any indexed extension.",
+              "type": "string",
+              "enum": [
+                "packs_only",
+                "any_indexed"
+              ],
+              "default": "packs_only"
+            },
+            "size": {
+              "description": "The Pix Sandbox size. Takes effect at the sandbox's next launch.",
+              "type": "string",
+              "enum": [
+                "small",
+                "medium",
+                "large"
+              ],
+              "default": "medium"
+            },
+            "egressMode": {
+              "description": "The Pix Sandbox egress mode. Takes effect at the sandbox's next launch.",
+              "type": "string",
+              "enum": [
+                "deny_except_allow",
+                "allow_all_logged"
+              ],
+              "default": "deny_except_allow"
+            },
+            "versionPolicy": {
+              "description": "How a Pix Sandbox picks package versions. safest, stable, latest and rolling are the Safe Harbour picks. Takes effect at the sandbox's next launch.",
+              "type": "string",
+              "enum": [
+                "safest",
+                "stable",
+                "latest",
+                "rolling",
+                "pinned"
+              ],
+              "default": "safest"
+            },
+            "maintenance": {
+              "description": "Weekly Pix Sandbox maintenance windows.",
+              "type": "array",
+              "maxItems": 100,
+              "items": {
+                "type": "object",
+                "required": [
+                  "days",
+                  "start",
+                  "end",
+                  "tz"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "days": {
+                    "description": "The days the window starts on.",
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "sun",
+                        "mon",
+                        "tue",
+                        "wed",
+                        "thu",
+                        "fri",
+                        "sat"
+                      ]
+                    }
+                  },
+                  "start": {
+                    "description": "Start time, HH:MM, in tz.",
+                    "type": "string",
+                    "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                  },
+                  "end": {
+                    "description": "End time, HH:MM, in tz. An end before the start runs past midnight.",
+                    "type": "string",
+                    "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                  },
+                  "tz": {
+                    "description": "The IANA time zone of start and end.",
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "default": []
+            },
+            "reservePercent": {
+              "description": "Percent of the Pix allowance kept for interactive use.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        },
+        "crews": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "lease": {
+              "description": "How long a crew holds a handoff lease.",
+              "type": "string",
+              "enum": [
+                "15m",
+                "30m",
+                "2h"
+              ],
+              "default": "30m"
+            }
+          }
+        },
+        "agents": {
+          "description": "Per-card limits for workers.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_cost_usd_per_item": {
+              "description": "Estimated cost in US dollars at which a worker's claim on one card ends. 0 keeps each agent's own limit.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            },
+            "finalize_at": {
+              "description": "Share of any per-card limit at which the worker is told to wrap up. A value under 0.5 is raised to 0.5; 0 keeps the agent's own.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.95,
+              "default": 0
+            },
+            "max_attempts": {
+              "description": "Failed attempts at one stage before Belai blocks the card. 0 keeps the agent's own. Not autonomy.max_attempts, which retries a workflow step.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 0
+            },
+            "max_continuations": {
+              "description": "Times a card may be resumed after its budget ran out with progress made, before it is blocked for a person. 0 keeps the agent's own.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50,
+              "default": 0
+            },
+            "max_passes_per_item": {
+              "description": "Goal passes per card. 0 keeps the agent's own.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000,
+              "default": 0
+            },
+            "max_wall_minutes": {
+              "description": "Minutes per card. 0 keeps the agent's own.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10080,
+              "default": 0
+            },
+            "max_iterations": {
+              "description": "Tool rounds per pass. 0 keeps the agent's own.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 400,
+              "default": 0
+            }
+          }
+        },
+        "forge": {
+          "description": "How the factory reads and writes GitHub and the other forges.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "branch_prefix": {
+              "description": "The prefix of branches the factory pushes.",
+              "type": "string",
+              "pattern": "^[A-Za-z0-9/_.-]{1,40}$",
+              "default": "belai/K-"
+            },
+            "pr_state": {
+              "description": "Whether the factory opens pull requests as drafts or ready for review.",
+              "type": "string",
+              "enum": [
+                "draft",
+                "ready"
+              ],
+              "default": "draft"
+            },
+            "protected": {
+              "description": "Never push to protected branches.",
+              "type": "boolean",
+              "default": true
+            },
+            "check_runs": {
+              "description": "Publish gate results as check runs. Needs the App permission checks: write on every managed installation.",
+              "type": "boolean",
+              "default": false
+            },
+            "read": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "default": {
+                  "description": "Where forge reads come from by default.",
+                  "type": "string",
+                  "enum": [
+                    "posture_mirror",
+                    "s3_raw",
+                    "live_api"
+                  ],
+                  "default": "posture_mirror"
+                }
+              }
+            },
+            "stale": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "repo": {
+                  "description": "How old repository data may be before it is read again. A duration from 30s to 7d, such as 30s, 5m, 6h or 2d.",
+                  "type": "string",
+                  "pattern": "^([0-9]+d|([0-9]+(\\.[0-9]+)?(ms|s|m|h))+)$",
+                  "default": "6h"
+                },
+                "pulls": {
+                  "description": "How old pull request data may be before it is read again. A duration from 30s to 7d, such as 30s, 5m, 6h or 2d.",
+                  "type": "string",
+                  "pattern": "^([0-9]+d|([0-9]+(\\.[0-9]+)?(ms|s|m|h))+)$",
+                  "default": "5m"
+                },
+                "checks": {
+                  "description": "How old check data may be before it is read again. A duration from 30s to 7d, such as 30s, 5m, 6h or 2d.",
+                  "type": "string",
+                  "pattern": "^([0-9]+d|([0-9]+(\\.[0-9]+)?(ms|s|m|h))+)$",
+                  "default": "2m"
+                },
+                "alerts": {
+                  "description": "How old alert data may be before it is read again. A duration from 30s to 7d, such as 30s, 5m, 6h or 2d.",
+                  "type": "string",
+                  "pattern": "^([0-9]+d|([0-9]+(\\.[0-9]+)?(ms|s|m|h))+)$",
+                  "default": "1h"
+                }
+              }
+            },
+            "poll": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "fallback": {
+                  "description": "What a binding with no webhook does.",
+                  "type": "string",
+                  "enum": [
+                    "conditional_poll_10m",
+                    "none"
+                  ],
+                  "default": "conditional_poll_10m"
+                }
+              }
+            },
+            "etag": {
+              "description": "Send If-None-Match on every live read.",
+              "type": "boolean",
+              "default": true
+            },
+            "quota": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "factory_share": {
+                  "description": "Percent of the forge call budget the factory may use.",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "default": 10
+                },
+                "reserve": {
+                  "description": "Percent of the forge call budget kept in reserve. At most 90, and with forge.quota.factory_share at most 100.",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "default": 20
+                },
+                "on_exhausted": {
+                  "description": "What the factory does when its share is used up.",
+                  "type": "string",
+                  "enum": [
+                    "pause_live_reads",
+                    "defer_to_next_window",
+                    "escalate"
+                  ],
+                  "default": "pause_live_reads"
+                },
+                "proactive_writes_per_hour": {
+                  "description": "Most calls an installation makes in a clock hour for default workflows.",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 5000,
+                  "default": 60
+                }
+              }
+            },
+            "calls_per_hour": {
+              "description": "The hourly call budget of a forge that sends no rate-limit headers, such as Gitea or Forgejo.",
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 100000,
+              "default": 5000
+            }
+          }
+        },
+        "kanban": {
+          "description": "How kanban cards are mirrored to forge issues.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "description": "The default mode of a kanban binding: which cards are mirrored to forge issues. all: every card. skip_review: a card waits until it leaves Review. off: none.",
+              "type": "string",
+              "enum": [
+                "all",
+                "skip_review",
+                "off"
+              ],
+              "default": "all"
+            },
+            "opt_out_label": {
+              "description": "A card with this label is never mirrored to an issue.",
+              "type": "string",
+              "pattern": "^.{1,50}$",
+              "default": "no-github"
+            },
+            "conflict_comment": {
+              "description": "Post a comment when the kanban sync finds a conflict.",
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "signing": {
+          "description": "Commits a person makes from factory pages.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "description": "Whether commits a person makes from factory pages must be signed.",
+              "type": "string",
+              "enum": [
+                "required",
+                "preferred",
+                "off"
+              ],
+              "default": "preferred"
+            },
+            "auto_add": {
+              "description": "Add a new signing key's public key to the person's GitHub account.",
+              "type": "boolean",
+              "default": true
+            },
+            "email": {
+              "description": "The address on a signed commit: the person's primary address, their noreply address, or ask each time.",
+              "type": "string",
+              "enum": [
+                "primary",
+                "noreply",
+                "ask"
+              ],
+              "default": "primary"
+            },
+            "rotate_days": {
+              "description": "Days before a signing key is rotated. 0 never rotates.",
+              "type": "string",
+              "enum": [
+                "365",
+                "180",
+                "90",
+                "0"
+              ],
+              "default": "365"
+            },
+            "retire_days": {
+              "description": "Days a replaced key stays on GitHub. 0 removes it right away; -1 leaves it there.",
+              "type": "string",
+              "enum": [
+                "30",
+                "7",
+                "0",
+                "-1"
+              ],
+              "default": "30"
+            },
+            "on_missing": {
+              "description": "What happens when GitHub no longer lists a key: add it again, or ask.",
+              "type": "string",
+              "enum": [
+                "readd",
+                "ask"
+              ],
+              "default": "readd"
+            }
+          }
+        },
+        "hosts": {
+          "description": "Where crew steps run.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "runOn": {
+              "description": "Where a crew node, a default or a scan that names no runOn runs: auto, pix_sandbox, self_hosted, host:<uuid> or label:<name>. It also orders the hosts a node's own runOn admits.",
+              "type": "string",
+              "pattern": "^(auto|pix_sandbox|self_hosted|host:.+|label:.+)$",
+              "default": "auto"
+            },
+            "runOnFallback": {
+              "description": "The fallback that goes with hosts.runOn. A node that sets its own runOnFallback keeps it.",
+              "type": "string",
+              "enum": [
+                "none",
+                "auto"
+              ],
+              "default": "auto"
+            }
+          }
+        },
+        "approve": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "sensitive_paths": {
+              "description": "Path globs that stop an approval, besides the built-in list.",
+              "type": "array",
+              "maxItems": 100,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "default": []
+            }
+          }
+        },
+        "tea": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "publish": {
+              "description": "When releases are published to TEA.",
+              "type": "string",
+              "enum": [
+                "on_release_tag",
+                "on_merge_main",
+                "never"
+              ],
+              "default": "on_release_tag"
+            }
+          }
+        },
+        "jail": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enforcementMode": {
+              "description": "Whether release jails block (enforce) or only report (warn).",
+              "type": "string",
+              "enum": [
+                "enforce",
+                "warn"
+              ],
+              "default": "enforce"
+            }
+          }
+        },
+        "budget": {
+          "description": "The factory's token budget.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "factory_share": {
+              "description": "Percent of the Pix allowance the factory may use.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100,
+              "default": 75
+            },
+            "month": {
+              "description": "Tokens per month, all providers. This, budget.on_exceed and budget.alerts are the tenant's Factory budget on the Budgets page.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000000000,
+              "default": 30000000
+            },
+            "on_exceed": {
+              "description": "What happens when the monthly budget is used up.",
+              "type": "string",
+              "enum": [
+                "pause_run",
+                "downgrade_to_fast",
+                "switch_to_pix_allocation",
+                "escalate_human",
+                "hard_stop"
+              ],
+              "default": "switch_to_pix_allocation"
+            },
+            "alerts": {
+              "description": "Percents of the monthly budget at which an alert is sent, ascending.",
+              "type": "array",
+              "maxItems": 100,
+              "items": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "default": [
+                50,
+                80,
+                100
+              ]
+            }
+          }
+        },
+        "providers": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "description": "The model for code work: pix-smart, pix-fast, or vault:<entry id> for a model in the vault.",
+              "type": "string",
+              "pattern": "^(pix-smart|pix-fast|vault:[A-Za-z0-9._-]{1,64})$",
+              "default": "pix-smart"
+            }
+          }
+        },
+        "vault": {
+          "description": "Vault access from the Pix Sandbox.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "grant": {
+              "description": "Which vault entries the Pix Sandbox may use.",
+              "type": "object",
+              "required": [
+                "mode"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "mode": {
+                  "description": "all: every entry. specific: only those in entries. all_except: every entry except those in entries.",
+                  "type": "string",
+                  "enum": [
+                    "specific",
+                    "all",
+                    "all_except"
+                  ]
+                },
+                "entries": {
+                  "description": "Vault entry ids, for specific and all_except.",
+                  "type": "array",
+                  "maxItems": 100,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  }
+                }
+              },
+              "default": {
+                "mode": "all"
+              }
+            },
+            "on_error": {
+              "description": "What happens when a vault entry cannot be read.",
+              "type": "string",
+              "enum": [
+                "pause_affected_workflows",
+                "fall_back_to_pix"
+              ],
+              "default": "pause_affected_workflows"
+            }
+          }
+        },
+        "persistence": {
+          "description": "Where factory records are kept and for how long.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "retention": {
+              "description": "How long factory records are kept.",
+              "type": "string",
+              "enum": [
+                "400d",
+                "90d",
+                "30d",
+                "forever"
+              ],
+              "default": "400d"
+            },
+            "postgres": {
+              "description": "Keep factory records in Postgres. off is accepted only while no workflow is published.",
+              "type": "string",
+              "enum": [
+                "on",
+                "off"
+              ],
+              "default": "on"
+            },
+            "export": {
+              "description": "How factory records are exported.",
+              "type": "string",
+              "enum": [
+                "daily_jsonl_s3",
+                "manual"
+              ],
+              "default": "manual"
+            }
+          }
+        },
+        "schedules": {
+          "description": "Schedules and blackout windows.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tz": {
+              "description": "The IANA time zone of schedules and blackout windows.",
+              "type": "string",
+              "minLength": 1,
+              "default": "UTC"
+            },
+            "blackout": {
+              "description": "Weekly windows in which no scheduled run starts, in schedules.tz.",
+              "type": "array",
+              "maxItems": 100,
+              "items": {
+                "type": "object",
+                "required": [
+                  "from",
+                  "to"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "from": {
+                    "description": "When the window starts each week.",
+                    "type": "object",
+                    "required": [
+                      "day",
+                      "time"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "day": {
+                        "type": "string",
+                        "enum": [
+                          "sun",
+                          "mon",
+                          "tue",
+                          "wed",
+                          "thu",
+                          "fri",
+                          "sat"
+                        ]
+                      },
+                      "time": {
+                        "description": "HH:MM.",
+                        "type": "string",
+                        "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                      }
+                    }
+                  },
+                  "to": {
+                    "description": "When it ends.",
+                    "type": "object",
+                    "required": [
+                      "day",
+                      "time"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "day": {
+                        "type": "string",
+                        "enum": [
+                          "sun",
+                          "mon",
+                          "tue",
+                          "wed",
+                          "thu",
+                          "fri",
+                          "sat"
+                        ]
+                      },
+                      "time": {
+                        "description": "HH:MM.",
+                        "type": "string",
+                        "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+                      }
+                    }
+                  },
+                  "label": {
+                    "description": "A name for the window.",
+                    "type": "string",
+                    "maxLength": 200
+                  }
+                }
+              },
+              "default": []
+            },
+            "missed": {
+              "description": "What happens to runs a schedule missed while the factory was paused or in a blackout.",
+              "type": "string",
+              "enum": [
+                "run_once",
+                "skip",
+                "run_all"
+              ],
+              "default": "run_once"
+            }
+          }
+        },
+        "audit": {
+          "description": "The audit trail.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "calls": {
+              "description": "Log every model call with its input hash.",
+              "type": "boolean",
+              "default": true
+            },
+            "sign": {
+              "description": "Sign the decision ledger.",
+              "type": "boolean",
+              "default": true
+            },
+            "weekly_report": {
+              "description": "Send the weekly report.",
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "notify": {
+          "description": "Notifications.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "events": {
+              "description": "Which events are sent to notify.connector.",
+              "type": "string",
+              "enum": [
+                "escalations_holds_budget",
+                "everything",
+                "escalations_only"
+              ],
+              "default": "escalations_holds_budget"
+            },
+            "connector": {
+              "description": "Where factory notifications go.",
+              "type": "string",
+              "enum": [
+                "slack",
+                "teams",
+                "discord",
+                "google_chat",
+                "webhook",
+                "jira"
+              ],
+              "default": "slack"
+            }
+          }
+        },
+        "defaults": {
+          "description": "The default workflows. One switch per default, plus the master switch.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "description": "The master switch of the default workflows. Off, no default is seeded and none starts.",
+              "type": "boolean",
+              "default": true
+            },
+            "pr-review": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the pull request review default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "ci-fix": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the CI fix default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "test-sweep": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the test sweep default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "lint-sweep": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the lint sweep default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "issue-to-pr": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the issue to pull request default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "approve-ready": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the approve when ready default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "conflict-fix": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the merge conflict fix default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            }
+          }
+        },
+        "delivery": {
+          "description": "The Delivery pages: how outcomes, value, decisions and people are measured and priced.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "description": "The master switch of the Delivery pages. Off, nothing is computed.",
+              "type": "boolean",
+              "default": true
+            },
+            "value": {
+              "description": "Price agent work by role.",
+              "type": "boolean",
+              "default": true
+            },
+            "decisions": {
+              "description": "Price the decisions System One scored.",
+              "type": "boolean",
+              "default": true
+            },
+            "compare": {
+              "description": "Show the hand-worked comparison, which adds the refinement and hand-off overhead.",
+              "type": "boolean",
+              "default": true
+            },
+            "people": {
+              "description": "Show the People and Contributors pages.",
+              "type": "boolean",
+              "default": true
+            },
+            "multiplier": {
+              "description": "Engineer hours per agent hour for agent work no role covers.",
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 10,
+              "default": 2.4
+            },
+            "rate": {
+              "description": "US dollars per hour for agent work no role covers.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 95
+            },
+            "peopleRate": {
+              "description": "US dollars per hour for the hours people spent in the factory.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 110
+            },
+            "overheadPct": {
+              "description": "Refinement and hand-off overhead, as a percent of build and decision hours.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100,
+              "default": 20
+            },
+            "overheadRate": {
+              "description": "US dollars per hour for the overhead.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 105
+            },
+            "hoursPerMonth": {
+              "description": "Productive hours per person-month.",
+              "type": "number",
+              "minimum": 1,
+              "maximum": 400,
+              "default": 150
+            },
+            "manualDecisionWait": {
+              "description": "Hours a team waits to decide, compared with the measured time.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 720,
+              "default": 6
+            },
+            "manualCycleDays": {
+              "description": "Days a team takes per pull request.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 365,
+              "default": 4.5
+            },
+            "manualIssueDays": {
+              "description": "Days a team takes per issue.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 365,
+              "default": 3
+            },
+            "manualCardDays": {
+              "description": "Days a team takes per card.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 365,
+              "default": 5
+            },
+            "roles": {
+              "description": "Pricing per role.",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "sse": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "enabled": {
+                      "description": "Price agent work in the software engineer role.",
+                      "type": "boolean",
+                      "default": true
+                    },
+                    "rate": {
+                      "description": "US dollars per hour for the software engineer role.",
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000,
+                      "default": 95
+                    },
+                    "mult": {
+                      "description": "Engineer hours per agent hour for the software engineer role.",
+                      "type": "number",
+                      "minimum": 0.5,
+                      "maximum": 10,
+                      "default": 2.4
+                    }
+                  }
+                },
+                "security": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "enabled": {
+                      "description": "Price agent work in the security engineer role.",
+                      "type": "boolean",
+                      "default": true
+                    },
+                    "rate": {
+                      "description": "US dollars per hour for the security engineer role.",
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000,
+                      "default": 110
+                    },
+                    "mult": {
+                      "description": "Engineer hours per agent hour for the security engineer role.",
+                      "type": "number",
+                      "minimum": 0.5,
+                      "maximum": 10,
+                      "default": 2
+                    }
+                  }
+                },
+                "qa": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "enabled": {
+                      "description": "Price agent work in the QA engineer role.",
+                      "type": "boolean",
+                      "default": true
+                    },
+                    "rate": {
+                      "description": "US dollars per hour for the QA engineer role.",
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000,
+                      "default": 70
+                    },
+                    "mult": {
+                      "description": "Engineer hours per agent hour for the QA engineer role.",
+                      "type": "number",
+                      "minimum": 0.5,
+                      "maximum": 10,
+                      "default": 2.2
+                    }
+                  }
+                },
+                "devops": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "enabled": {
+                      "description": "Price agent work in the DevOps engineer role.",
+                      "type": "boolean",
+                      "default": true
+                    },
+                    "rate": {
+                      "description": "US dollars per hour for the DevOps engineer role.",
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000,
+                      "default": 90
+                    },
+                    "mult": {
+                      "description": "Engineer hours per agent hour for the DevOps engineer role.",
+                      "type": "number",
+                      "minimum": 0.5,
+                      "maximum": 10,
+                      "default": 2
+                    }
+                  }
+                },
+                "reviewer": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "enabled": {
+                      "description": "Price agent work in the code reviewer role.",
+                      "type": "boolean",
+                      "default": true
+                    },
+                    "rate": {
+                      "description": "US dollars per hour for the code reviewer role.",
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000,
+                      "default": 95
+                    },
+                    "mult": {
+                      "description": "Engineer hours per agent hour for the code reviewer role.",
+                      "type": "number",
+                      "minimum": 0.5,
+                      "maximum": 10,
+                      "default": 1.5
+                    }
+                  }
+                },
+                "planner": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "enabled": {
+                      "description": "Price agent work in the planner role.",
+                      "type": "boolean",
+                      "default": true
+                    },
+                    "rate": {
+                      "description": "US dollars per hour for the planner role.",
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000,
+                      "default": 120
+                    },
+                    "mult": {
+                      "description": "Engineer hours per agent hour for the planner role.",
+                      "type": "number",
+                      "minimum": 0.5,
+                      "maximum": 10,
+                      "default": 1.6
+                    }
+                  }
+                },
+                "writer": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "enabled": {
+                      "description": "Price agent work in the technical writer role.",
+                      "type": "boolean",
+                      "default": true
+                    },
+                    "rate": {
+                      "description": "US dollars per hour for the technical writer role.",
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000,
+                      "default": 60
+                    },
+                    "mult": {
+                      "description": "Engineer hours per agent hour for the technical writer role.",
+                      "type": "number",
+                      "minimum": 0.5,
+                      "maximum": 10,
+                      "default": 1.8
+                    }
+                  }
+                }
+              }
+            },
+            "kinds": {
+              "description": "Pricing per decision kind.",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "toolcall": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "enabled": {
+                      "description": "Count tool call guard rail decisions in the estimate. Tool calls are never in the estimate, whatever this switch says.",
+                      "type": "boolean",
+                      "default": false
+                    },
+                    "minutes": {
+                      "description": "Minutes a person would take over one tool call guard rail decision.",
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 480,
+                      "default": 0
+                    }
+                  }
+                },
+                "mode": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "enabled": {
+                      "description": "Count mode change decisions in the estimate.",
+                      "type": "boolean",
+                      "default": true
+                    },
+                    "minutes": {
+                      "description": "Minutes a person would take over one mode change decision.",
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 480,
+                      "default": 0.5
+                    }
+                  }
+                },
+                "goal": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "enabled": {
+                      "description": "Count goal decisions in the estimate.",
+                      "type": "boolean",
+                      "default": true
+                    },
+                    "minutes": {
+                      "description": "Minutes a person would take over one goal decision.",
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 480,
+                      "default": 3
+                    }
+                  }
+                },
+                "plan": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "enabled": {
+                      "description": "Count plan decisions in the estimate.",
+                      "type": "boolean",
+                      "default": true
+                    },
+                    "minutes": {
+                      "description": "Minutes a person would take over one plan decision.",
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 480,
+                      "default": 4
+                    }
+                  }
+                },
+                "triage": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "enabled": {
+                      "description": "Count triage decisions in the estimate.",
+                      "type": "boolean",
+                      "default": true
+                    },
+                    "minutes": {
+                      "description": "Minutes a person would take over one triage decision.",
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 480,
+                      "default": 6
+                    }
+                  }
+                },
+                "merge": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "enabled": {
+                      "description": "Count merge decisions in the estimate.",
+                      "type": "boolean",
+                      "default": true
+                    },
+                    "minutes": {
+                      "description": "Minutes a person would take over one merge decision.",
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 480,
+                      "default": 8
+                    }
+                  }
+                },
+                "other": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "enabled": {
+                      "description": "Count other decisions in the estimate.",
+                      "type": "boolean",
+                      "default": true
+                    },
+                    "minutes": {
+                      "description": "Minutes a person would take over one other decision.",
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 480,
+                      "default": 2
+                    }
+                  }
+                }
+              }
+            },
+            "sources": {
+              "description": "Where to look for people.",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "checkpoint": {
+                  "description": "Look for people in checkpoints.",
+                  "type": "boolean",
+                  "default": true
+                },
+                "commit": {
+                  "description": "Look for people in commits.",
+                  "type": "boolean",
+                  "default": true
+                },
+                "comment": {
+                  "description": "Look for people in comments.",
+                  "type": "boolean",
+                  "default": true
+                },
+                "review": {
+                  "description": "Look for people in reviews.",
+                  "type": "boolean",
+                  "default": true
+                },
+                "chat": {
+                  "description": "Look for people in chat messages.",
+                  "type": "boolean",
+                  "default": true
+                },
+                "notification": {
+                  "description": "Look for people in notification actions.",
+                  "type": "boolean",
+                  "default": true
+                },
+                "admin": {
+                  "description": "Look for people in board and admin actions.",
+                  "type": "boolean",
+                  "default": true
+                },
+                "pixcall": {
+                  "description": "Look for people in Pix calls.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "companyDomain": {
+              "description": "An email domain such as acme.example. A contributor on it, or on a subdomain, counts as internal. Empty for none.",
+              "type": "string",
+              "maxLength": 253,
+              "default": ""
+            },
+            "idleGapMin": {
+              "description": "Minutes without an action that end a sitting.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 120,
+              "default": 5
+            },
+            "reviewMinPer100": {
+              "description": "Minutes of reading per 100 changed lines of a review.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 60,
+              "default": 4
+            }
+          }
+        }
+      }
+    }
+  }
+}
