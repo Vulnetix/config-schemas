@@ -1,0 +1,7 @@
+# breaks: schedule is not in the enum
+apiVersion: vulnetix.com/v1
+kind: ApiSpecSource
+metadata: {name: bad}
+spec:
+  source: {host: {host: "api.acme.com"}}
+  schedule: every-minute

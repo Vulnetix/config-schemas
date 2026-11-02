@@ -1,0 +1,10 @@
+apiVersion: vulnetix.com/v1
+kind: ApiSpecSource
+metadata:
+  name: edge-gateway
+spec:
+  source:
+    connector:
+      kind: aws_apigw
+      ref: abcdef1234
+  schedule: 6h

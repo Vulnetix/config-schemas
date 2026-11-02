@@ -1,0 +1,8 @@
+# breaks: source must have exactly one form
+apiVersion: vulnetix.com/v1
+kind: ApiSpecSource
+metadata: {name: bad}
+spec:
+  source:
+    url: {url: "https://api.acme.com/openapi.json"}
+    host: {host: "api.acme.com"}

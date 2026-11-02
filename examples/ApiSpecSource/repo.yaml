@@ -1,0 +1,14 @@
+apiVersion: vulnetix.com/v1
+kind: ApiSpecSource
+metadata:
+  name: payments-openapi
+  labels:
+    team: payments
+spec:
+  source:
+    repo:
+      repository: acme/payments
+      path: api/openapi.yaml
+  schedule: daily
+  owner: payments-team
+  tags: [payments, public]

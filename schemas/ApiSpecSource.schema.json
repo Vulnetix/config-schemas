@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/ApiSpecSource.schema.json",
+  "title": "ApiSpecSource",
+  "description": "Where Vulnetix finds an organisation's OpenAPI and Swagger descriptions. Each source is one place to read specs from: a file in a repository, a URL, a host to probe for well-known paths, or a connected API gateway or catalogue. A tenant may declare many, each named.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "ApiSpecSource" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["source"],
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "description": "The one place this reads specs from. Exactly one of its forms is set.",
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 1,
+          "additionalProperties": false,
+          "properties": {
+            "repo": {
+              "description": "A spec file committed in a repository.",
+              "type": "object",
+              "required": ["repository", "path"],
+              "additionalProperties": false,
+              "properties": {
+                "repository": { "description": "owner/name on the connected forge.", "type": "string", "pattern": "^[^/]+/[^/]+$" },
+                "path": { "description": "Path to the file within the repository.", "type": "string", "minLength": 1 }
+              }
+            },
+            "url": {
+              "description": "A spec served at a URL. By default the URL is fetched exactly as given; set probe to look for well-known paths under a host instead.",
+              "type": "object",
+              "required": ["url"],
+              "additionalProperties": false,
+              "properties": {
+                "url": { "type": "string", "format": "uri", "pattern": "^https?://" }
+              }
+            },
+            "host": {
+              "description": "A host probed for the well-known paths that serve a spec. Needs an ownership proof or an authorization, set in probe.",
+              "type": "object",
+              "required": ["host"],
+              "additionalProperties": false,
+              "properties": {
+                "host": { "description": "A hostname, optionally with a port.", "type": "string", "pattern": "^[a-zA-Z0-9.-]+(:[0-9]{1,5})?$" }
+              }
+            },
+            "connector": {
+              "description": "A connected API gateway or catalogue the organisation already set up on the integrations page.",
+              "type": "object",
+              "required": ["kind", "ref"],
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": ["aws_apigw", "cloudflare_api_shield", "swaggerhub", "postman", "azure_apim", "gcp_apigee", "kong", "stoplight", "readme", "backstage"]
+                },
+                "ref": { "description": "The gateway, API or collection id within the connector.", "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        },
+        "probe": {
+          "description": "How a url or host source is reached. owned probes well-known paths once an ownership proof is verified; authorized probes after the organisation asserts it is allowed to test the host; exact fetches only the given url and never guesses a path. A url source defaults to exact; a host source must be owned or authorized.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mode": { "type": "string", "enum": ["owned", "authorized", "exact"] },
+            "authorize": {
+              "description": "Required true when mode is authorized: the organisation asserts it may probe this host. Recorded with who applied the document.",
+              "const": true
+            }
+          }
+        },
+        "schedule": {
+          "description": "How often the source is read. off reads only on request.",
+          "type": "string",
+          "enum": ["off", "hourly", "6h", "daily", "weekly"],
+          "default": "daily"
+        },
+        "owner": {
+          "description": "The team or person who owns the APIs this source finds. Stored and shown, never interpreted.",
+          "type": "string",
+          "maxLength": 256
+        },
+        "tags": {
+          "description": "Free labels applied to every spec this source finds.",
+          "type": "array",
+          "items": { "type": "string", "maxLength": 64 },
+          "maxItems": 32
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+apiVersion: vulnetix.com/v1
+kind: ApiSpecSource
+metadata:
+  name: staging-host
+spec:
+  source:
+    host:
+      host: staging.acme.com
+  probe:
+    mode: authorized
+    authorize: true
