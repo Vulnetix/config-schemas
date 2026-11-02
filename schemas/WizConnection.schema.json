@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/WizConnection.schema.json",
+  "title": "WizConnection",
+  "x-vulnetix": {"validateOnly":false,"singleton":true,"dependsOn":[],"secrets":["spec.clientSecret"],"celFields":[]},
+  "description": "The Wiz service account the tenant authorised. One per tenant. Wiz is connected as an addition to AWS: each claim Wiz makes is checked from inside the AWS account, so a plan is refused until AWS is connected, and on a plan without cloud integrations. Apply checks the credential against Wiz before it is stored, including that the service account can read audit data (admin:audit). The client secret is kept in the tenant's vault and is never exported, shown in a plan or returned by any endpoint. A connection is created and deleted, never edited: any change replaces it (the old connection is deleted and its stored secret revoked, then the new one is created and checked). Deleting the document disconnects Wiz and stops the sync; findings already ingested from Wiz, and their triage history, are kept.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "WizConnection" },
+    "metadata": { "$ref": "common.schema.json#/$defs/singletonMetadata" },
+    "spec": {
+      "type": "object",
+      "required": ["clientId", "tenantDatacenter"],
+      "additionalProperties": false,
+      "properties": {
+        "clientId": {
+          "description": "The service account's client id, from Settings, Service Accounts in the Wiz console.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S+$"
+        },
+        "tenantDatacenter": {
+          "description": "The datacenter segment of the tenant's API host: us17 for api.us17.wiz.io. It is the part of the Wiz console URL before .wiz.io.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32,
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "clientSecret": {
+          "description": "Where the client reads the service account's client secret. Required when the connection is created; left out afterwards, the stored secret is kept, including when another change replaces the connection.",
+          "$ref": "common.schema.json#/$defs/valueFrom"
+        }
+      }
+    }
+  }
+}

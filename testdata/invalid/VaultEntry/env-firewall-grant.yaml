@@ -1,0 +1,11 @@
+# an environment variable is granted to Pix sandboxes and Belai hosts only
+apiVersion: vulnetix.com/v1
+kind: VaultEntry
+metadata:
+  name: npm-token
+spec:
+  type: env
+  name: NPM_TOKEN
+  grants:
+    - surface: ai_firewall
+      all: true

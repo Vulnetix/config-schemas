@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/VaultEntry.schema.json",
+  "title": "VaultEntry",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":["spec.value"],"celFields":[]},
+  "description": "One secret in the tenant's vault: an AI provider key, an environment variable for Pix sandboxes and Belai hosts, or a provider management key, with the grants that say where it may be used. The value is encrypted with KMS before it is stored, is sent once by the client, and is never exported, shown in a plan or returned by any endpoint. No grant means no access, and inside one entry a deny beats an allow. Two active entries that fill the same slot (a provider for provider keys, a variable name for environment variables) may not cover the same subject: a plan that would create such an overlap is refused. Deleting the document revokes the entry: its value is destroyed and it covers nothing, and the vault keeps a stub with its history. Connector secrets (forge tokens, the Wiz client secret) are not VaultEntry documents: they are created through their integration kinds. Automatic rotation is set up in the console and an apply leaves it as it is.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "VaultEntry" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["type", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "provider_key: an AI provider's API key, handed to the AI Firewall gateway, Pix sandboxes and Belai hosts that hold a grant. env: an environment variable set in Pix sandboxes and on Belai hosts that hold a grant. management: a provider admin key that the vault uses to rotate provider keys; it is never granted to a surface. The type cannot change: declare a new entry instead.",
+          "type": "string",
+          "enum": ["provider_key", "env", "management"]
+        },
+        "provider": {
+          "description": "The AI Firewall provider slug the key is for, a built-in provider or one of the tenant's AiProvider objects. Required for provider_key and management, and not allowed for env. The provider must exist and be enabled when the plan runs. It cannot change: declare a new entry instead.",
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+        },
+        "name": {
+          "description": "For env, the variable name: upper case letters, digits and underscore, starting with a letter or underscore. Names such as PATH, HOME and LD_PRELOAD, and names starting LD_, BELAI_, VULNETIX_, VX_, BASH_ or SSH_, are reserved and refused at plan. A variable's name cannot change: declare a new entry instead. For provider_key and management, the label the console shows: 1 to 64 letters, digits, spaces or . _ : / @ + -.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "value": {
+          "description": "Where the client reads the secret value. Required when the entry is created; left out, the stored value is kept. Supplying the value the entry already holds is no change; a different value makes a new version and keeps the old one's fingerprint in the entry's history. An env value is at least 8 characters, so that it can be scrubbed from output reliably, and at most 4096; a key has no line breaks.",
+          "$ref": "common.schema.json#/$defs/valueFrom"
+        },
+        "grants": {
+          "description": "Where the value may be used. Each grant names a surface and either every subject on it or a list of subject ids. Left out or empty, the entry is stored but nothing may use it. At most 12 grants.",
+          "type": "array",
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "required": ["surface"],
+            "additionalProperties": false,
+            "properties": {
+              "surface": {
+                "description": "pix_sandbox: Pix sandboxes, by their canonical sandbox id, which survives relaunches. belai_host: self-hosted Belai hosts, by host id. ai_firewall: AI Firewall callers, by the id of the principal that owns the Vulnetix API key making the request.",
+                "type": "string",
+                "enum": ["pix_sandbox", "belai_host", "ai_firewall"]
+              },
+              "effect": {
+                "description": "allow lets the subjects use the value; deny takes subjects away from an allow, and wins over it.",
+                "type": "string",
+                "enum": ["allow", "deny"],
+                "default": "allow"
+              },
+              "all": {
+                "description": "true covers every subject on the surface, now and later. A grant is all or a list of ids, not both.",
+                "type": "boolean"
+              },
+              "ids": {
+                "description": "The subjects covered, as UUIDs. 1 to 100 ids; duplicates are dropped and the list is kept sorted.",
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 100,
+                "items": { "type": "string", "format": "uuid" }
+              }
+            },
+            "oneOf": [
+              { "required": ["all"], "properties": { "all": { "const": true } } },
+              { "required": ["ids"] }
+            ]
+          }
+        },
+        "expiresAt": {
+          "description": "When the value stops being handed out. Left out, it never expires. A new expiry must be at least a minute and at most 10 years away; an expired entry is refused with vault_key_expired rather than decrypted.",
+          "$ref": "common.schema.json#/$defs/timestamp"
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "env" } }, "required": ["type"] },
+          "then": {
+            "not": { "required": ["provider"] },
+            "properties": {
+              "name": { "pattern": "^[A-Z_][A-Z0-9_]{0,63}$" },
+              "grants": { "items": { "properties": { "surface": { "enum": ["pix_sandbox", "belai_host"] } } } }
+            }
+          },
+          "else": {
+            "required": ["provider"],
+            "properties": { "name": { "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._:/@+-]{0,63}$" } }
+          }
+        },
+        {
+          "if": { "properties": { "type": { "const": "management" } }, "required": ["type"] },
+          "then": { "properties": { "grants": { "maxItems": 0 } } }
+        }
+      ]
+    }
+  }
+}

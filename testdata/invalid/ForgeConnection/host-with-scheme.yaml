@@ -1,0 +1,8 @@
+# the host is a host name, without a scheme
+apiVersion: vulnetix.com/v1
+kind: ForgeConnection
+metadata:
+  name: codeberg
+spec:
+  type: forgejo
+  host: https://codeberg.org

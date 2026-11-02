@@ -1,0 +1,11 @@
+# a GitHub App connection is for GitHub Enterprise Server only
+apiVersion: vulnetix.com/v1
+kind: ForgeConnection
+metadata:
+  name: gitlab
+spec:
+  type: gitlab
+  host: gitlab.example.com
+  app:
+    appId: 12
+    installationId: 3

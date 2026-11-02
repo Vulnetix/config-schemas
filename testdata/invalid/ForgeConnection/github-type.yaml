@@ -1,0 +1,8 @@
+# github is not a forge connection type
+apiVersion: vulnetix.com/v1
+kind: ForgeConnection
+metadata:
+  name: github
+spec:
+  type: github
+  host: git.example.com

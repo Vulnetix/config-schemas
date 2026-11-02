@@ -38,6 +38,10 @@ Reference documentation for every kind is at https://docs.vulnetix.com (the Plat
 | `Member` | v1.4.0 | A person in the organisation by email, with their role. A new member is invited and reports `Pending` until they accept. |
 | `ServiceAccount` | v1.4.0 | A CI credential that is not a person. Its API key is returned once, by the apply that creates it. |
 | `NotificationDefaults` | v1.4.0 | Which events are pushed to people who have not chosen for themselves. One per tenant. |
+| `VaultEntry` | v1.4.0 | A secret in the tenant's vault (provider key, environment variable or management key) with its grants per surface. The value is sent once and never exported. |
+| `GitHubInstallation` | v1.4.0 | Adopts an installation of the Vulnetix GitHub App by its installation id. The App is installed on GitHub; deleting the document does not uninstall it. |
+| `ForgeConnection` | v1.4.0 | How the Software Factory reaches GitLab, Gitea, Forgejo or GitHub Enterprise Server: a bot token or a GHES App, and an optional OAuth application for members' own sign-in. |
+| `WizConnection` | v1.4.0 | The Wiz service account, verified from inside the connected AWS account. One per tenant; a change replaces it. |
 
 A field or kind whose description says "Not stored yet" (`CloudSensors` for one account), and the whole of `VexSource`, is ahead of the server: it validates today, and applying it needs the backend change the description names.
 

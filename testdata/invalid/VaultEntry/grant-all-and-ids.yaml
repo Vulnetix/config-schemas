@@ -1,0 +1,13 @@
+# a grant is all or a list of ids, not both
+apiVersion: vulnetix.com/v1
+kind: VaultEntry
+metadata:
+  name: anthropic-production
+spec:
+  type: provider_key
+  provider: anthropic
+  name: Anthropic production
+  grants:
+    - surface: pix_sandbox
+      all: true
+      ids: [3f1c2a9e-8b4d-4c7a-9e21-5d6f7a8b9c01]

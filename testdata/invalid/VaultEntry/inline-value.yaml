@@ -1,0 +1,9 @@
+# the value is read by the client from valueFrom, never written in the document
+apiVersion: vulnetix.com/v1
+kind: VaultEntry
+metadata:
+  name: npm-token
+spec:
+  type: env
+  name: NPM_TOKEN
+  value: npm_abcdefghijklmnop

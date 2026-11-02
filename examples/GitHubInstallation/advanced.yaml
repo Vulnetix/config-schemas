@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/GitHubInstallation.schema.json
+# Install the Vulnetix GitHub App on the acme organisation first; this
+# document adopts that installation.
+apiVersion: vulnetix.com/v1
+kind: GitHubInstallation
+metadata:
+  name: acme
+  labels:
+    owner: platform
+  annotations:
+    note: Repository selection is managed on GitHub.
+spec:
+  installationId: 51234567

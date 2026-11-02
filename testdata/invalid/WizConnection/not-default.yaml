@@ -1,0 +1,8 @@
+# a tenant has one Wiz connection, named default
+apiVersion: vulnetix.com/v1
+kind: WizConnection
+metadata:
+  name: wiz
+spec:
+  clientId: 4ba3c9f2d7e14a6b8c0d1e2f3a4b5c6d
+  tenantDatacenter: us17

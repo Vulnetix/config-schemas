@@ -1,0 +1,12 @@
+# a connection uses a bot token or a GitHub App, not both
+apiVersion: vulnetix.com/v1
+kind: ForgeConnection
+metadata:
+  name: ghes
+spec:
+  type: ghes
+  host: github.acme.example
+  token: { env: GHES_TOKEN }
+  app:
+    appId: 12
+    installationId: 3

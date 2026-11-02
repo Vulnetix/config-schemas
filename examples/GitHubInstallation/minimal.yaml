@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/GitHubInstallation.schema.json
+apiVersion: vulnetix.com/v1
+kind: GitHubInstallation
+metadata:
+  name: acme
+spec:
+  installationId: 51234567

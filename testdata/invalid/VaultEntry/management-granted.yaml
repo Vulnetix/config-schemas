@@ -1,0 +1,12 @@
+# a management key is never granted to a surface
+apiVersion: vulnetix.com/v1
+kind: VaultEntry
+metadata:
+  name: openai-admin
+spec:
+  type: management
+  provider: openai
+  name: OpenAI admin
+  grants:
+    - surface: ai_firewall
+      all: true

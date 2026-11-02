@@ -1,0 +1,7 @@
+# the installation id is a number
+apiVersion: vulnetix.com/v1
+kind: GitHubInstallation
+metadata:
+  name: acme
+spec:
+  installationId: "51234567"

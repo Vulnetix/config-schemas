@@ -1,0 +1,8 @@
+# the datacenter is one host segment, not a host name
+apiVersion: vulnetix.com/v1
+kind: WizConnection
+metadata:
+  name: default
+spec:
+  clientId: 4ba3c9f2d7e14a6b8c0d1e2f3a4b5c6d
+  tenantDatacenter: api.us17.wiz.io

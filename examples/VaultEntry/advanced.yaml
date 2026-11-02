@@ -1,0 +1,53 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/VaultEntry.schema.json
+# An Anthropic key for the AI Firewall and two sandboxes, an environment
+# variable for every Belai host but one, and the OpenAI admin key the vault
+# rotates provider keys with.
+apiVersion: vulnetix.com/v1
+kind: VaultEntry
+metadata:
+  name: anthropic-production
+  labels:
+    team: platform
+  annotations:
+    ticket: https://tracker.example.com/SEC-218
+spec:
+  type: provider_key
+  provider: anthropic
+  name: Anthropic production
+  value: { env: VULNETIX_ANTHROPIC_KEY }
+  grants:
+    - surface: ai_firewall
+      effect: allow
+      all: true
+    - surface: pix_sandbox
+      effect: allow
+      ids:
+        - 3f1c2a9e-8b4d-4c7a-9e21-5d6f7a8b9c01
+        - 7a2e4b6c-1d3f-4e5a-8b7c-9d0e1f2a3b4c
+  expiresAt: 2027-06-30T00:00:00Z
+---
+apiVersion: vulnetix.com/v1
+kind: VaultEntry
+metadata:
+  name: npm-token
+spec:
+  type: env
+  name: NPM_TOKEN
+  value: { env: VULNETIX_NPM_TOKEN }
+  grants:
+    - surface: belai_host
+      all: true
+    - surface: belai_host
+      effect: deny
+      ids:
+        - 0b1c2d3e-4f5a-4b6c-8d7e-9f0a1b2c3d4e
+---
+apiVersion: vulnetix.com/v1
+kind: VaultEntry
+metadata:
+  name: openai-admin
+spec:
+  type: management
+  provider: openai
+  name: OpenAI admin
+  value: { env: VULNETIX_OPENAI_ADMIN_KEY }

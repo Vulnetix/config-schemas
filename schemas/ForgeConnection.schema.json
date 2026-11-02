@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/ForgeConnection.schema.json",
+  "title": "ForgeConnection",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":["spec.token","spec.app.privateKey","spec.oauth.clientSecret"],"celFields":[]},
+  "description": "How the Software Factory reaches a git forge other than github.com: a bot account's access token on Gitea, Forgejo or GitLab (or GitHub Enterprise Server), or a GitHub App registered on a GitHub Enterprise Server. github.com is reached through the Vulnetix GitHub App instead (GitHubInstallation). Apply asks the forge what it is and checks the credential can list repositories before anything is stored; the credential and the webhook secret are kept in the tenant's vault as a connector secret, never in the document, an export or a plan. The type, host and account identify the connection and cannot change: declare a new connection instead. Deleting the document removes the webhooks the factory created, revokes the stored credential and marks the connection deleted; managed scope and repository settings rows are kept, read-only, as for an uninstalled App.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "ForgeConnection" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["type", "host"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "The forge software. Gitea and Forgejo speak one API, so the server keeps whichever of the two the host answers as, and a plan does not count the other spelling as a change.",
+          "type": "string",
+          "enum": ["ghes", "gitea", "forgejo", "gitlab"]
+        },
+        "host": {
+          "description": "The forge's host name, with a port when it is not 443: git.example.com, codeberg.org, gitlab.example.com:8443. No scheme or path. It is stored lower case.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 253,
+          "pattern": "^[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?(:[0-9]{1,5})?$",
+          "not": { "enum": ["github.com", "www.github.com", "api.github.com"] }
+        },
+        "apiBase": {
+          "description": "The REST base, when it is not the forge's default (https://<host>/api/v4 for GitLab, /api/v1 for Gitea and Forgejo, /api/v3 for GitHub Enterprise Server). It must be https on the same host.",
+          "type": "string",
+          "format": "uri",
+          "maxLength": 1024,
+          "pattern": "^https://"
+        },
+        "account": {
+          "description": "The organisation, group or user the connection is for. Left out, the connection covers every repository the credential reaches.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "token": {
+          "description": "Where the client reads the bot account's access token. Required when the connection is created, unless app is set; left out afterwards, the stored token is kept. The token is checked against the forge at apply.",
+          "$ref": "common.schema.json#/$defs/valueFrom"
+        },
+        "app": {
+          "description": "A GitHub App registered on the GitHub Enterprise Server, instead of a bot token. ghes only.",
+          "type": "object",
+          "required": ["appId", "installationId"],
+          "additionalProperties": false,
+          "properties": {
+            "appId": { "description": "The App's id on the server.", "type": "integer", "minimum": 1 },
+            "appSlug": {
+              "description": "The App's slug, which names the bot that commits (<slug>[bot]).",
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]{0,99}$"
+            },
+            "installationId": { "description": "The App's installation on the account.", "type": "integer", "minimum": 1 },
+            "privateKey": {
+              "description": "Where the client reads the App's private key (PEM). Required when the connection is created; left out afterwards, the stored key is kept.",
+              "$ref": "common.schema.json#/$defs/valueFrom"
+            }
+          }
+        },
+        "oauth": {
+          "description": "An OAuth application made on the forge, so that members can link their own forge account to the connection: their commits from a factory page then carry an email the forge verifies, and their signing key can be added to their forge account. Each member signs in for themselves from the console. Register the redirect URI the object's status reports (status.oauthRedirectUri) on the application. Left out, the application stored on the connection is removed.",
+          "type": "object",
+          "required": ["clientId"],
+          "additionalProperties": false,
+          "properties": {
+            "clientId": { "description": "The application's client id.", "type": "string", "minLength": 1, "maxLength": 200 },
+            "clientSecret": {
+              "description": "Where the client reads the application's client secret. Required when sign-in is first set up; left out afterwards, the stored secret is kept.",
+              "$ref": "common.schema.json#/$defs/valueFrom"
+            }
+          }
+        }
+      },
+      "not": { "required": ["token", "app"] },
+      "if": { "properties": { "type": { "not": { "const": "ghes" } } }, "required": ["type"] },
+      "then": { "not": { "required": ["app"] } }
+    }
+  }
+}

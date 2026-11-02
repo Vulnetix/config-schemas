@@ -1,0 +1,8 @@
+# github.com connects through the Vulnetix GitHub App, not a forge connection
+apiVersion: vulnetix.com/v1
+kind: ForgeConnection
+metadata:
+  name: github
+spec:
+  type: ghes
+  host: github.com

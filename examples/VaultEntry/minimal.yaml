@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/VaultEntry.schema.json
+apiVersion: vulnetix.com/v1
+kind: VaultEntry
+metadata:
+  name: npm-token
+spec:
+  type: env
+  name: NPM_TOKEN

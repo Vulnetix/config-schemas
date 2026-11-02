@@ -1,0 +1,8 @@
+# a provider key names its provider
+apiVersion: vulnetix.com/v1
+kind: VaultEntry
+metadata:
+  name: anthropic-production
+spec:
+  type: provider_key
+  name: Anthropic production

@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/ForgeConnection.schema.json
+# A self-managed GitLab group reached with a bot token, with an OAuth
+# application so members can link their own GitLab accounts, and a GitHub
+# Enterprise Server reached through a GitHub App registered on it.
+apiVersion: vulnetix.com/v1
+kind: ForgeConnection
+metadata:
+  name: gitlab-platform
+  labels:
+    team: platform
+  annotations:
+    note: The bot account is vulnetix-bot, a Developer in the platform group.
+spec:
+  type: gitlab
+  host: gitlab.example.com
+  apiBase: https://gitlab.example.com/api/v4
+  account: platform
+  token: { env: VULNETIX_GITLAB_TOKEN }
+  oauth:
+    clientId: 6f1e2d3c4b5a69788796a5b4c3d2e1f0
+    clientSecret: { env: VULNETIX_GITLAB_OAUTH_SECRET }
+---
+apiVersion: vulnetix.com/v1
+kind: ForgeConnection
+metadata:
+  name: ghes-acme
+spec:
+  type: ghes
+  host: github.acme.example
+  account: acme
+  app:
+    appId: 12
+    appSlug: vulnetix
+    installationId: 3
+    privateKey: { env: VULNETIX_GHES_APP_KEY }

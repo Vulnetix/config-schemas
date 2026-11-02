@@ -1,0 +1,9 @@
+# an environment variable has no provider
+apiVersion: vulnetix.com/v1
+kind: VaultEntry
+metadata:
+  name: npm-token
+spec:
+  type: env
+  provider: openai
+  name: NPM_TOKEN

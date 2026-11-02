@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/WizConnection.schema.json
+# Connect AWS first: Wiz findings are verified from inside the account.
+apiVersion: vulnetix.com/v1
+kind: WizConnection
+metadata:
+  name: default
+  labels:
+    owner: cloud-security
+  annotations:
+    note: The service account needs the admin:audit permission.
+spec:
+  clientId: 4ba3c9f2d7e14a6b8c0d1e2f3a4b5c6d
+  tenantDatacenter: us17
+  clientSecret: { env: VULNETIX_WIZ_CLIENT_SECRET }

@@ -1,0 +1,8 @@
+# an environment variable name is upper case
+apiVersion: vulnetix.com/v1
+kind: VaultEntry
+metadata:
+  name: npm-token
+spec:
+  type: env
+  name: npm_token

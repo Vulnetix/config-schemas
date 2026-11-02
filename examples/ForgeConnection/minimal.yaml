@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/ForgeConnection.schema.json
+apiVersion: vulnetix.com/v1
+kind: ForgeConnection
+metadata:
+  name: codeberg
+spec:
+  type: forgejo
+  host: codeberg.org

@@ -1,0 +1,6 @@
+# the installation id is required
+apiVersion: vulnetix.com/v1
+kind: GitHubInstallation
+metadata:
+  name: acme
+spec: {}
