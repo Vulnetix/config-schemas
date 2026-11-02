@@ -1,0 +1,7 @@
+# expires is a YYYY-MM-DD date
+apiVersion: vulnetix.com/v1
+kind: LicenseExceptions
+blanket:
+  - license: MPL-2.0
+    reason: unmodified
+    expires: next year

@@ -1,0 +1,6 @@
+# a package exception names a purl or a name
+apiVersion: vulnetix.com/v1
+kind: LicenseExceptions
+packages:
+  - license: GPL-3.0-only
+    reason: build tool only

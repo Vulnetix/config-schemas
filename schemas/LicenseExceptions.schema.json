@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/LicenseExceptions.schema.json",
+  "title": "LicenseExceptions",
+  "description": "Recorded, attributed exceptions to the licence policy: a licence exempted everywhere (blanket) or one package exempted, each with who approved it, why, and until when. An exempted finding is kept and badged, never dropped, and an expired exception stops applying and says so; the expiry date is inclusive. Two forms are valid. The repository file .vulnetix/license-exceptions.yaml, read by vulnetix license and scan --evaluate-licenses, keeps blanket and packages at the top level with no metadata. The config form puts them under spec, with metadata. The server does not store exceptions yet: the CLI validates the document and plan notes it, but apply sends nothing.",
+  "type": "object",
+  "required": ["apiVersion", "kind"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "LicenseExceptions" },
+    "metadata": { "$ref": "common.schema.json#/$defs/legacySingletonMetadata" },
+    "spec": { "$ref": "#/$defs/exceptions" },
+    "blanket": { "$ref": "#/$defs/exceptions/properties/blanket" },
+    "packages": { "$ref": "#/$defs/exceptions/properties/packages" }
+  },
+  "oneOf": [
+    {
+      "description": "The config form.",
+      "required": ["metadata", "spec"],
+      "properties": { "blanket": false, "packages": false }
+    },
+    {
+      "description": "The repository file form.",
+      "properties": { "spec": false }
+    }
+  ],
+  "$defs": {
+    "exceptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "blanket": {
+          "description": "Licences exempted wherever they appear. The first unexpired match wins.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/blanket" }
+        },
+        "packages": {
+          "description": "Packages exempted, optionally under one licence. Checked after blanket exceptions.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/package" }
+        }
+      }
+    },
+    "blanket": {
+      "type": "object",
+      "required": ["license", "reason"],
+      "additionalProperties": false,
+      "properties": {
+        "license": {
+          "description": "The SPDX licence id. Matching is by prefix, so MPL-2.0 also covers MPL-2.0-no-copyleft-exception.",
+          "type": "string",
+          "minLength": 1
+        },
+        "id": { "$ref": "#/$defs/id" },
+        "reason": { "$ref": "#/$defs/reason" },
+        "scope": { "$ref": "#/$defs/scope" },
+        "approver": { "$ref": "#/$defs/approver" },
+        "approvedDate": { "$ref": "#/$defs/approvedDate" },
+        "expires": { "$ref": "#/$defs/expires" },
+        "projects": { "$ref": "#/$defs/projects" }
+      }
+    },
+    "package": {
+      "type": "object",
+      "required": ["reason"],
+      "additionalProperties": false,
+      "anyOf": [{ "required": ["purl"] }, { "required": ["name"] }],
+      "properties": {
+        "purl": {
+          "description": "The package, as a purl with * as a wildcard segment, such as pkg:golang/github.com/hashicorp/*.",
+          "type": "string",
+          "pattern": "^pkg:[a-zA-Z.+-]+/",
+          "minLength": 5
+        },
+        "name": {
+          "description": "The package name, matched as a substring, for ecosystems where the short name and the full module path are both in use.",
+          "type": "string",
+          "minLength": 1
+        },
+        "license": {
+          "description": "Exempt the package only under this SPDX licence. Left out, the package is exempt whatever licence it carries, which is the broader claim.",
+          "type": "string",
+          "minLength": 1
+        },
+        "id": { "$ref": "#/$defs/id" },
+        "reason": { "$ref": "#/$defs/reason" },
+        "scope": { "$ref": "#/$defs/scope" },
+        "approver": { "$ref": "#/$defs/approver" },
+        "approvedDate": { "$ref": "#/$defs/approvedDate" },
+        "expires": { "$ref": "#/$defs/expires" },
+        "projects": { "$ref": "#/$defs/projects" }
+      }
+    },
+    "id": { "description": "A stable id to refer to the exception by in reports.", "type": "string", "minLength": 1 },
+    "reason": {
+      "description": "Why the exception exists. Required: an exception nobody can explain cannot be told apart from a mistake.",
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "scope": { "description": "What the claim is limited to, such as vendored, unmodified, dynamically linked.", "type": "string" },
+    "approver": { "description": "Who signed the exception off.", "type": "string" },
+    "date": {
+      "description": "A calendar date, YYYY-MM-DD. An unquoted date in YAML is read as midnight UTC, which is accepted too.",
+      "type": "string",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])(T00:00:00Z)?$"
+    },
+    "approvedDate": { "description": "When it was approved, as YYYY-MM-DD.", "$ref": "#/$defs/date" },
+    "expires": { "description": "The last day the exception applies, as YYYY-MM-DD. Left out, it never expires.", "$ref": "#/$defs/date" },
+    "projects": {
+      "description": "Only these projects, matched without case; * is every project. Left out, every project.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

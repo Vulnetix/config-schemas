@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/LicenseExceptions.schema.json
+apiVersion: vulnetix.com/v1
+kind: LicenseExceptions
+metadata:
+  name: default
+  labels:
+    team: legal
+  annotations:
+    ticket: https://tracker.example.com/LEGAL-102
+spec:
+  blanket:
+    - license: MPL-2.0
+      id: LEX-001
+      reason: File-level copyleft; we ship MPL files unmodified and publish their source.
+      scope: unmodified
+      approver: legal@acme.com
+      approvedDate: "2026-03-02"
+      expires: "2027-03-01"
+      projects: ["*"]
+  packages:
+    - purl: pkg:golang/github.com/hashicorp/*
+      license: BUSL-1.1
+      id: LEX-002
+      reason: Internal tooling only; not offered as a competing hosted service.
+      scope: dynamically linked
+      approver: legal@acme.com
+      approvedDate: "2026-04-15"
+      expires: "2026-12-31"
+      projects: [infra-tools]
+    - name: ghostscript
+      license: AGPL-3.0-only
+      id: LEX-003
+      reason: Used in the batch PDF renderer, which is never exposed over a network.
+      scope: vendored
+      approver: cto@acme.com
+      approvedDate: "2026-05-20"
+      projects: [pdf-batch]
+---
+# The repository file form, .vulnetix/license-exceptions.yaml: blanket and packages at the top level, no metadata.
+apiVersion: vulnetix.com/v1
+kind: LicenseExceptions
+blanket:
+  - license: EPL-2.0
+    reason: Eclipse libraries are used unmodified as build-time dependencies.
+packages:
+  - purl: pkg:npm/%40acme/internal-fonts
+    reason: Proprietary fonts licensed to ACME under contract C-2291.

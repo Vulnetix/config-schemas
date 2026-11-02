@@ -22,16 +22,18 @@ Reference documentation for every kind is at https://docs.vulnetix.com (the Plat
 | `Suppression` | v1.1.0 | A suppression rule with its scope, OpenVEX justification and expiry. |
 | `VexSource` | v1.1.0 | VEX documents read back as suppression rules, from TEA, S3, git, a path or URLs. |
 | `MalwareIoc` | v1.1.0 | An indicator of compromise the tenant manages. |
-| `SavedSearch` | v1.2.0 | A Guardian saved search, in the Guardian search language or Sigma. |
-| `DetectionRule` | v1.2.0 | A Guardian alert rule: your own Sigma, a saved search, a countermeasure, a SigmaHQ rule or a built-in indicator rule, with its tuning. |
-| `AlertTrigger` | v1.2.0 | Run a saved search or rule on a schedule and start a workflow, post a message or send an email when it returns rows. |
-| `ScheduledReport` | v1.2.0 | Send a saved search's rows on a calendar, to messaging connections or email. |
-| `LogSource` | v1.2.0 | A way logs reach Guardian: the AWS stack's token, Cloudflare Logpush jobs, or the events API. |
-| `AwsConnection` | v1.2.0 | How Vulnetix reaches the AWS estate: IAM Identity Center or an access key. One per tenant. |
-| `AwsAccount` | v1.2.0 | One connected AWS account, whether it is swept, and its stack deploy. |
-| `CloudSensors` | v1.2.0 | Which AWS-native sources and Vulnetix passes are read, for every account or one. |
-| `DetectionRuleFeed` | v1.2.0 | A published feed of virtual patches, countermeasures and catalogue rules in one format. |
-| `RuntimeSensorPolicy` | v1.2.0 | The configuration runtime sensors enroll with: mode, hold, feeds, forwarding and tamper protection. |
+| `ApiSpecSource` | v1.2.0 | Where Vulnetix finds an organisation's OpenAPI and Swagger descriptions. |
+| `LicenseExceptions` | v1.3.0 | Attributed, expiring exceptions to the licence policy, blanket or per package. Also valid as the flat `.vulnetix/license-exceptions.yaml`. Validate only: the server does not store it yet. |
+| `SavedSearch` | v1.3.0 | A Guardian saved search, in the Guardian search language or Sigma. |
+| `DetectionRule` | v1.3.0 | A Guardian alert rule: your own Sigma, a saved search, a countermeasure, a SigmaHQ rule or a built-in indicator rule, with its tuning. |
+| `AlertTrigger` | v1.3.0 | Run a saved search or rule on a schedule and start a workflow, post a message or send an email when it returns rows. |
+| `ScheduledReport` | v1.3.0 | Send a saved search's rows on a calendar, to messaging connections or email. |
+| `LogSource` | v1.3.0 | A way logs reach Guardian: the AWS stack's token, Cloudflare Logpush jobs, or the events API. |
+| `AwsConnection` | v1.3.0 | How Vulnetix reaches the AWS estate: IAM Identity Center or an access key. One per tenant. |
+| `AwsAccount` | v1.3.0 | One connected AWS account, whether it is swept, and its stack deploy. |
+| `CloudSensors` | v1.3.0 | Which AWS-native sources and Vulnetix passes are read, for every account or one. |
+| `DetectionRuleFeed` | v1.3.0 | A published feed of virtual patches, countermeasures and catalogue rules in one format. |
+| `RuntimeSensorPolicy` | v1.3.0 | The configuration runtime sensors enroll with: mode, hold, feeds, forwarding and tamper protection. |
 
 A field or kind whose description says "Not stored yet" (`DetectionRuleFeed.spec.selector`, `CloudSensors` for one account), and the whole of `VexSource`, is ahead of the server: it validates today, and applying it needs the backend change the description names.
 

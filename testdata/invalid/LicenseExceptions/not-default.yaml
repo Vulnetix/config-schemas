@@ -1,0 +1,5 @@
+# the tenant has one exception set, named default
+apiVersion: vulnetix.com/v1
+kind: LicenseExceptions
+metadata: {name: legal}
+spec: {}

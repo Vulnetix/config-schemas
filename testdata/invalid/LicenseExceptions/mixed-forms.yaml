@@ -1,0 +1,8 @@
+# the config form and the repository file form do not mix
+apiVersion: vulnetix.com/v1
+kind: LicenseExceptions
+metadata: {name: default}
+spec: {}
+blanket:
+  - license: MPL-2.0
+    reason: unmodified
