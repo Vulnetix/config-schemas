@@ -1,0 +1,107 @@
+# Golden vectors for the package context. See finding.yaml for the format.
+context: package
+vectors:
+  - name: malware is blocked
+    expr: malware
+    input: {malware: true}
+    want: true
+
+  - name: cooldown blocks a version published two days ago
+    expr: ageDays >= 0 && ageDays < 7
+    input: {published: "2026-10-30T00:00:00Z", now: "2026-11-01T12:00:00Z"}
+    want: true
+
+  - name: an unknown publish time is not new
+    expr: ageDays >= 0 && ageDays < 7
+    input: {now: "2026-11-01T12:00:00Z"}
+    want: false
+
+  - name: unknown age reads as -1
+    expr: ageDays == -1
+    input: {}
+    want: true
+
+  - name: published compares with a duration
+    expr: now - published < duration('72h')
+    input: {published: "2026-10-31T00:00:00Z", now: "2026-11-01T00:00:00Z"}
+    want: true
+
+  - name: more than three releases behind
+    expr: versionLag > 3
+    input: {versionLag: 5}
+    want: true
+
+  - name: our own namespace bypasses the cooldown
+    expr: purl.matchesPurl('pkg:golang/github.com/acme/*') || ageDays > 7
+    input: {purl: "pkg:golang/github.com/acme/tool/v2@v2.0.1", published: "2026-11-01T00:00:00Z", now: "2026-11-01T01:00:00Z"}
+    want: true
+
+  - name: an exact version pattern does not match another version
+    expr: purl.matchesPurl('pkg:npm/lodash@4.17.20')
+    input: {purl: "pkg:npm/lodash@4.17.21"}
+    want: false
+
+  - name: a versionless pattern matches every version
+    expr: purl.matchesPurl('pkg:npm/lodash')
+    input: {purl: "pkg:npm/lodash@4.17.21?arch=x86"}
+    want: true
+
+  - name: maven namespace with a colon
+    expr: purl.matchesPurl('pkg:maven/com.acme/*') && ecosystem == 'maven'
+    input: {purl: "pkg:maven/com.acme/lib@1.0.0", ecosystem: maven}
+    want: true
+
+  - name: semver orders 1.10 above 1.9
+    expr: semverCompare(version, '1.9.0') > 0
+    input: {version: 1.10.0}
+    want: true
+
+  - name: a pre-release ranks below its release
+    expr: semverCompare(version, 'v2.0.0') < 0
+    input: {version: v2.0.0-rc.1}
+    want: true
+
+  - name: isSemver guards a non-semver version
+    expr: isSemver(version) && semverCompare(version, '1.0.0') < 0
+    input: {version: "2024.1"}
+    want: false
+
+  - name: semverCompare refuses a non-semver version
+    expr: semverCompare(version, '1.0.0') < 0
+    input: {version: "2024.1"}
+    error: eval
+
+  - name: thresholds over the version's signals
+    expr: (cvss >= 9 && epss > 0.5) || kev || badActor || (eol && cess > 0.3)
+    input: {cvss: 9.8, epss: 0.1, eol: true, cess: 0.4}
+    want: true
+
+  - name: weaponised exploit
+    expr: exploitMaturity == 'weaponized'
+    input: {exploitMaturity: poc}
+    want: false
+
+  - name: ageDays is an int, not a double
+    expr: ageDays > 'seven'
+    error: type
+
+  - name: a finding variable is not in this context
+    expr: reachable
+    error: type
+
+  - name: a string result is refused
+    expr: name
+    error: result_type
+
+  - name: dangling operator is a syntax error
+    expr: malware ||
+    error: syntax
+
+  - name: a regex over concatenated purls exceeds the estimated cost
+    expr: (purl + purl + purl + purl).matches(purl + purl + purl + purl)
+    error: cost
+
+  - name: an input past a string bound is refused
+    expr: ecosystem == 'npm'
+    input: {ecosystem: npmnpmnpmnpmnpmnpmnpmnpmnpmnpmnpmnpmnpmnpmnpmnpmnpmnpmnpmnpmnpmnpm}
+    error: input

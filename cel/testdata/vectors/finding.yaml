@@ -1,0 +1,116 @@
+# Golden vectors for the finding context. Each vector is an expression, an
+# input, and either the boolean it must return (want) or the error code it must
+# fail with (error). `at` pins the line and column of the first issue.
+# Variables an input leaves out take their zero value.
+context: finding
+vectors:
+  - name: critical and on a KEV list
+    expr: severity == 'critical' && kev
+    input: {severity: critical, kev: true}
+    want: true
+
+  - name: critical but not exploited
+    expr: severity == 'critical' && kev
+    input: {severity: critical, kev: false}
+    want: false
+
+  - name: an int literal compares with a double score
+    expr: cvss >= 7
+    input: {cvss: 7.5}
+    want: true
+
+  - name: epss below the threshold
+    expr: epss > 0.1 || epssPercentile >= 0.95
+    input: {epss: 0.02, epssPercentile: 0.5}
+    want: false
+
+  - name: semantic reachability counts as reachable
+    expr: reachable && reachability == 'semantic'
+    input: {reachability: semantic}
+    want: true
+
+  - name: unreachable is not reachable
+    expr: reachable
+    input: {reachability: unreachable}
+    want: false
+
+  - name: exposed weaponised exploit
+    expr: internetExposed && exploitMaturity in ['active', 'weaponized']
+    input: {internetExposed: true, exploitMaturity: weaponized}
+    want: true
+
+  - name: CWE membership
+    expr: "'CWE-79' in cwe"
+    input: {cwe: [CWE-89, CWE-79]}
+    want: true
+
+  - name: absent list is empty
+    expr: size(cwe) == 0 && size(aliases) == 0
+    input: {}
+    want: true
+
+  - name: suppress test fixtures by path glob
+    expr: path.glob('**/testdata/**') && !direct
+    input: {path: internal/scan/testdata/go.sum}
+    want: true
+
+  - name: glob star stops at a slash
+    expr: path.glob('*.lock')
+    input: {path: frontend/yarn.lock}
+    want: false
+
+  - name: namespace purl match
+    expr: purl.matchesPurl('pkg:npm/@acme/*')
+    input: {purl: "pkg:npm/%40acme/tool@1.2.3"}
+    want: true
+
+  - name: namespace never matches a longer sibling
+    expr: purl.matchesPurl('pkg:npm/@acme/*')
+    input: {purl: "pkg:npm/@acme-evil/tool@1.2.3"}
+    want: false
+
+  - name: invalid purl pattern fails at evaluation
+    expr: purl.matchesPurl('npm/lodash')
+    input: {purl: "pkg:npm/lodash@4.17.21"}
+    error: eval
+
+  - name: alias lookup
+    expr: id == 'CVE-2021-44228' || aliases.exists(a, a == 'CVE-2021-44228')
+    input: {id: GHSA-jfh8-c2jp-5v3q, aliases: [CVE-2021-44228]}
+    want: true
+
+  - name: fix available on the default branch only
+    expr: fixAvailability == 'available' && branch == 'main' && repo.startsWith('vulnetix/')
+    input: {fixAvailability: available, branch: main, repo: vulnetix/cli}
+    want: true
+
+  - name: comparing a score with a string is a type error
+    expr: cvss == 'high'
+    error: type
+    at: {line: 1, column: 6}
+
+  - name: unknown variable is a type error
+    expr: score > 7
+    error: type
+    at: {line: 1, column: 1}
+
+  - name: a variable from another context is a type error
+    expr: malware
+    error: type
+
+  - name: a non-bool result is refused
+    expr: cvss * 2.0
+    error: result_type
+
+  - name: unbalanced parenthesis is a syntax error
+    expr: (severity == 'high'
+    error: syntax
+
+  - name: nested comprehensions exceed the estimated cost
+    expr: aliases.exists(a, aliases.exists(b, aliases.exists(c, a + b == c)))
+    error: cost
+
+  - name: an input past a string bound is refused
+    expr: severity == 'critical'
+    input: {severity: criticalcriticalcriticalcriticalcriticalcriticalcriticalcriticalx}
+    error: input

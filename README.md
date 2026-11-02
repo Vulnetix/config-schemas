@@ -86,6 +86,8 @@ Validation never fetches anything: `$ref`s resolve against the embedded copy.
 | `examples/<Kind>/*.yaml` | Valid documents. Every kind needs at least one. |
 | `testdata/invalid/<Kind>/*.yaml` | Documents that must be rejected; the first line says why. |
 | `cmd/schemacheck` | `release` builds the release files; `compat` fails a release that breaks the previous one without a major bump. |
+| `cel/` | The CEL environments for rule expressions, with golden vectors. See [cel/README.md](cel/README.md). |
+| `cmd/celdoc` | Prints the CEL variable reference as Markdown for the docs site. |
 
 ## Develop
 

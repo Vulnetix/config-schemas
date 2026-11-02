@@ -1,0 +1,88 @@
+# Golden vectors for the request context. See finding.yaml for the format.
+context: request
+vectors:
+  - name: provider and model allowlist
+    expr: provider == 'anthropic' && model.startsWith('claude-')
+    input: {provider: anthropic, model: claude-sonnet-4-5}
+    want: true
+
+  - name: model outside the allowlist
+    expr: model in ['gpt-5', 'gpt-5-mini']
+    input: {provider: openai, model: gpt-4o}
+    want: false
+
+  - name: any MCP tool from a server
+    expr: tools.exists(t, t.glob('mcp__github__*'))
+    input: {tools: [Read, Edit, mcp__github__create_issue]}
+    want: true
+
+  - name: no MCP tool from that server
+    expr: tools.exists(t, t.glob('mcp__github__*'))
+    input: {tools: [Read, Edit, mcp__gitlab__create_issue]}
+    want: false
+
+  - name: shell tool from an unapproved client
+    expr: "'Bash' in tools && !(client in ['claude-code', 'codex'])"
+    input: {client: cursor, tools: [Bash]}
+    want: true
+
+  - name: remote MCP server by label
+    expr: mcpServers.exists(s, s == 'linear')
+    input: {mcpServers: [linear, sentry]}
+    want: true
+
+  - name: absent lists are empty
+    expr: size(tools) == 0 && size(mcpServers) == 0 && size(skills) == 0
+    input: {provider: anthropic}
+    want: true
+
+  - name: skill offered
+    expr: skills.exists(s, s.startsWith('deploy'))
+    input: {skills: [deploy-prod]}
+    want: true
+
+  - name: every tool is read-only
+    expr: tools.all(t, t in ['Read', 'Grep', 'Glob'])
+    input: {tools: [Read, Grep, Write]}
+    want: false
+
+  - name: question mark matches one character
+    expr: model.glob('gpt-?')
+    input: {model: gpt-5}
+    want: true
+
+  - name: regex over the model name
+    expr: model.matches('^claude-(opus|sonnet)-[0-9]')
+    input: {model: claude-haiku-4-5}
+    want: false
+
+  - name: now is fixed by the input
+    expr: now > timestamp('2026-01-01T00:00:00Z')
+    input: {now: "2026-11-02T00:00:00Z"}
+    want: true
+
+  - name: tools is a list, not a string
+    expr: tools.startsWith('mcp__')
+    error: type
+
+  - name: a package variable is not in this context
+    expr: malware
+    error: type
+
+  - name: a list result is refused
+    expr: tools
+    error: result_type
+
+  - name: unterminated string is a syntax error
+    expr: "provider == 'anthropic"
+    error: syntax
+
+  - name: nested comprehensions over tools exceed the estimated cost
+    expr: tools.exists(a, tools.exists(b, a + b == 'x'))
+    error: cost
+
+  - name: an input past a list bound is refused
+    expr: size(mcpServers) > 0
+    input:
+      mcpServers: [s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16, s17, s18, s19, s20, s21, s22, s23, s24, s25, s26, s27, s28, s29, s30, s31, s32, s33, s34, s35, s36, s37, s38, s39, s40, s41, s42, s43, s44, s45, s46, s47, s48, s49, s50, s51, s52, s53, s54, s55, s56, s57, s58, s59, s60, s61, s62, s63, s64, s65, s66, s67, s68, s69, s70, s71, s72, s73, s74, s75, s76, s77, s78, s79, s80, s81, s82, s83, s84, s85, s86, s87, s88, s89, s90, s91, s92, s93, s94, s95, s96, s97, s98, s99, s100, s101, s102, s103, s104, s105, s106, s107, s108, s109, s110, s111, s112, s113, s114, s115, s116, s117, s118, s119, s120, s121, s122, s123, s124, s125, s126, s127, s128]
+    error: input

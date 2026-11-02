@@ -1,0 +1,108 @@
+# Golden vectors for the event context. See finding.yaml for the format.
+context: event
+vectors:
+  - name: base and action are derived from the event name
+    expr: base == 'pull_request' && action == 'opened'
+    input: {event: pull_request.opened}
+    want: true
+
+  - name: push has no action
+    expr: base == 'push' && action == ''
+    input: {event: push, ref: refs/heads/main}
+    want: true
+
+  - name: empty origin reads as same_repo
+    expr: origin == 'same_repo'
+    input: {event: pull_request.synchronize}
+    want: true
+
+  - name: fork pull requests are skipped
+    expr: origin != 'fork'
+    input: {event: pull_request.opened, origin: fork}
+    want: false
+
+  - name: push to the default branch touching Go files
+    expr: headBranch == defaultBranch && paths.exists(p, p.glob('**/*.go'))
+    input: {event: push, headBranch: main, defaultBranch: main, paths: [README.md, cmd/scan.go]}
+    want: true
+
+  - name: double star slash matches zero directories
+    expr: paths.exists(p, p.glob('**/*.go'))
+    input: {event: push, paths: [main.go]}
+    want: true
+
+  - name: docs-only push
+    expr: paths.all(p, p.glob('docs/**') || p.endsWith('.md'))
+    input: {event: push, paths: [docs/a/b.md, CHANGELOG.md]}
+    want: true
+
+  - name: release branch glob
+    expr: baseBranch.glob('release/*')
+    input: {event: pull_request.opened, baseBranch: release/2026.11}
+    want: true
+
+  - name: the cel-go string extensions are not loaded, so lowerAscii is unknown
+    expr: labels.exists(l, l.lowerAscii() == 'sf:fix-tests')
+    input: {event: issues.labeled, labels: [SF:Fix-Tests]}
+    error: type
+
+  - name: label present
+    expr: "'sf:fix-tests' in labels && senderType == 'user'"
+    input: {event: issues.labeled, labels: [sf:fix-tests], senderType: user}
+    want: true
+
+  - name: ready, non-draft pull request by a person
+    expr: "!draft && authorType == 'user' && subject.startsWith('pr:')"
+    input: {event: pull_request.ready_for_review, authorType: user, subject: "pr:42", number: 42}
+    want: true
+
+  - name: failed workflow run
+    expr: base == 'workflow_run' && conclusion in ['failure', 'timed_out']
+    input: {event: workflow_run.completed, conclusion: success}
+    want: false
+
+  - name: critical dependabot alert
+    expr: base == 'dependabot_alert' && severity == 'critical'
+    input: {event: dependabot_alert.created, severity: critical}
+    want: true
+
+  - name: custom property value
+    expr: "'tier' in properties && 'prod' in properties['tier']"
+    input: {event: push, properties: {tier: [prod, pci]}}
+    want: true
+
+  - name: absent property key
+    expr: "'tier' in properties && 'prod' in properties['tier']"
+    input: {event: push}
+    want: false
+
+  - name: production deployment
+    expr: environment.glob('prod*') && conclusion == 'success'
+    input: {event: deployment_status.created, environment: production, conclusion: success}
+    want: true
+
+  - name: number is an int
+    expr: number == '42'
+    error: type
+    at: {line: 1, column: 8}
+
+  - name: a request variable is not in this context
+    expr: "'Bash' in tools"
+    error: type
+
+  - name: an int result is refused
+    expr: number
+    error: result_type
+
+  - name: missing operand is a syntax error
+    expr: draft && && deleted
+    error: syntax
+
+  - name: nested comprehensions over paths exceed the estimated cost
+    expr: paths.exists(p, paths.exists(q, p != q && p.glob(q)))
+    error: cost
+
+  - name: an input past a string bound is refused
+    expr: authorType == 'bot'
+    input: {authorType: botbotbotbotbotbotbotbotbotbotbotbotbotbotbotbotbotbotbotbotbotbot}
+    error: input
