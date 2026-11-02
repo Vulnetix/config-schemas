@@ -38,17 +38,17 @@
           "minimum": 0
         },
         "versionLag": {
-          "description": "Fail on a dependency more than this many releases behind the newest. Overrides --version-lag.",
+          "description": "Fail on a dependency whose installed version is among this many most recently published versions of its package: 1 fails on the newest release, 3 on any of the three newest. It holds back releases too fresh to trust, and is not a check for being out of date. 0 turns it off. Overrides --version-lag.",
           "type": "integer",
           "minimum": 0
         },
         "eol": {
-          "description": "End-of-life policy. A dependency whose product reaches end of life inside a horizon is reported at that horizon's severity, and blocks when it meets the gate.",
+          "description": "End-of-life policy. A dependency whose product reaches end of life inside a horizon is reported at that horizon's severity; skip reports nothing for that horizon.",
           "type": "object",
           "additionalProperties": false,
           "properties": {
             "block": {
-              "description": "Fail on end-of-life dependencies at all. Overrides --block-eol. The horizon severities are only read when this is true.",
+              "description": "Fail the scan on end-of-life dependencies. Overrides --block-eol. It decides only whether the CLI fails: once a tenant has any stored quality gate, the server writes an end-of-life finding at the horizon severity for every scanned dependency that reaches end of life inside a horizon not set to skip, whatever this says. The CLI reads the horizon severities only when this, or --block-eol, is true.",
               "type": "boolean"
             },
             "severities": {
@@ -75,7 +75,7 @@
               "enum": ["latest", "safest", "stable", "rolling"]
             },
             "maxMajorBump": {
-              "description": "The most major versions a fix may jump. 0 keeps fixes within the current major.",
+              "description": "The most major versions a fix may cross: 0 keeps fixes within the current major, N allows up to N. Any whole number from 0 up, with no upper limit. The --sca-autofix-max-major-bump flag also takes a negative number for no limit, but the gate cannot store one, and a value set here overrides the flag, so a tenant that wants no limit leaves this out.",
               "type": "integer",
               "minimum": 0
             }
