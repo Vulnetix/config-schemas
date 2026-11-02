@@ -1,0 +1,7 @@
+# an expression guardrail blocks or flags; it has nothing to redact
+apiVersion: vulnetix.com/v1
+kind: AiFirewallPolicy
+metadata: {name: default}
+spec:
+  guardrails:
+    - {name: no-gpt3, ruleType: expression, action: redact, when: "model.startsWith('gpt-3')"}

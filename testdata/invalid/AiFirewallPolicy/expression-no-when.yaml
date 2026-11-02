@@ -1,0 +1,7 @@
+# an expression guardrail needs its when
+apiVersion: vulnetix.com/v1
+kind: AiFirewallPolicy
+metadata: {name: default}
+spec:
+  guardrails:
+    - {name: no-gpt3, ruleType: expression, action: block}
