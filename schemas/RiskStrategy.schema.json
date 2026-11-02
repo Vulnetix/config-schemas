@@ -80,7 +80,7 @@
           "format": "uuid"
         },
         "when": {
-          "description": "The condition of a CEL rule, over the finding variables. Not stored yet: the CEL metric and the nullable expr column on RiskPrioritizationRule do not exist until the CEL work adds them.",
+          "description": "The condition of a CEL rule, over the finding variables.",
           "$ref": "common.schema.json#/$defs/celExpression"
         }
       },

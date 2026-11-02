@@ -26,7 +26,7 @@
           "type": "string"
         },
         "justification": {
-          "description": "Why the product is not affected, in the OpenVEX vocabulary, for VEX documents minted from this rule. Not stored yet: the Suppression table has no justification column.",
+          "description": "Why the product is not affected, in the OpenVEX vocabulary, for VEX documents minted from this rule.",
           "$ref": "common.schema.json#/$defs/vexJustification"
         },
         "scope": {
@@ -70,7 +70,7 @@
           "$ref": "common.schema.json#/$defs/timestamp"
         },
         "when": {
-          "description": "An extra condition a finding must meet, over the finding variables. Not stored yet: the Suppression table has no expr column until the CEL work adds it.",
+          "description": "An extra condition a finding must meet, over the finding variables.",
           "$ref": "common.schema.json#/$defs/celExpression"
         }
       }

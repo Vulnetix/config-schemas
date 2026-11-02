@@ -13,4 +13,4 @@ spec:
     purl: pkg:npm/lodash
     repository: acme/payments-api
   expires: 2027-06-30
-  when: '!finding.internetExposed'
+  when: '!internetExposed'

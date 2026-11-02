@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/VexSource.schema.json",
   "title": "VexSource",
-  "description": "VEX documents read back as suppression rules. A not_affected statement (CycloneDX not_affected or false_positive) becomes a suppression with the document's justification, timestamp and author; fixed or resolved marks the finding remediated; affected, in_triage and exploitable are recorded as triage context; under_investigation is an annotation. Products are matched to findings by purl. A later statement wins. Suppressions a source creates are owned by it: they go when the statement leaves the document, and cannot be deleted by hand. Name exactly one of tea, s3, git, path or urls. Not stored yet: the VexSource and VexSourceSnapshot tables do not exist.",
+  "description": "VEX documents read back as suppression rules. A not_affected statement (CycloneDX not_affected or false_positive) becomes a suppression with the document's justification, timestamp and author; fixed or resolved marks the finding remediated; affected, in_triage and exploitable are recorded as triage context; under_investigation is an annotation. Products are matched to findings by purl. A later statement wins. Suppressions a source creates are owned by it: they go when the statement leaves the document, and cannot be deleted by hand. Name exactly one of tea, s3, git, path or urls.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],
   "additionalProperties": false,

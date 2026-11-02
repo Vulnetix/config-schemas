@@ -21,7 +21,7 @@ spec:
       aggregate: COUNT
       operator: GT
       thresholdLow: 0
-      when: finding.epss >= 0.1
+      when: epss >= 0.1
     - kind: EOL
       label: Retired runtimes
       aggregate: MAX_AGE_DAYS

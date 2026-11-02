@@ -145,7 +145,7 @@
           "$ref": "#/$defs/onStale"
         },
         "when": {
-          "description": "An extra condition each fact must meet to be counted, over the finding variables. Not stored yet: JailRule needs the nullable expr column the CEL work adds, and until it exists the engine cannot apply a rule that sets when.",
+          "description": "An extra condition each fact must meet to be counted, over the finding variables.",
           "$ref": "common.schema.json#/$defs/celExpression"
         }
       },
