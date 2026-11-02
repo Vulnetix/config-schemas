@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/DetectionRuleFeed.schema.json",
   "title": "DetectionRuleFeed",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[{"path":"spec.selector.when","env":"cve"}]},
   "description": "A curated feed of virtual patches, countermeasures and catalogue rules, published to a public URL for IDS, IPS, WAF, SIEM and YARA engines and the Vulnetix runtime sensor to fetch. A feed has one output format, because its consumers each read one. The plan sets how many feeds of each format a tenant may have, and a feed holds at most 500 rules. Name entries, a selector, or both. The format cannot be changed on the server, so a changed format is applied as delete and create, which moves the feed's URL.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],

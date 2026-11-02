@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/CloudSensors.schema.json",
   "title": "CloudSensors",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":["AwsConnection","AwsAccount"],"secrets":[],"celFields":[]},
   "description": "Which AWS-native sources and Vulnetix passes are read, for one account or for every account. The sources listed are turned on; every other source is turned off for that scope. Once a source is on, everything it reports is ingested: granularity stops at the source. Turning one off stops reading it and keeps the findings already ingested, with their triage history. Each source's consent record is a named inline policy on the execution role, attached by redeploying the stack, so set deploy to attach it in the same apply. Turning a source on needs a connected AWS account. Not stored yet for one account: CloudNativeSource.accountId exists and is keyed, but no route writes an account id and the stack deploy reads the sources for the whole tenant, so only account \"*\" applies today. A document naming an account validates, and applying it needs that write path and a per-account read in the deploy.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],

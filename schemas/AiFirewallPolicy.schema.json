@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/AiFirewallPolicy.schema.json",
   "title": "AiFirewallPolicy",
+  "x-vulnetix": {"validateOnly":false,"singleton":true,"dependsOn":["AiProvider"],"secrets":[],"celFields":[{"path":"spec.guardrails[].when","env":"request"}]},
   "description": "The tenant's AI Firewall policy: which providers and models its agents may use, the guardrails the gateway applies to every request, the hold for review setting, and capability allow and deny lists. One per tenant. This is the document vulnetix ai-firewall apply reads from .vulnetix/ai-firewall.yaml, and every file that command accepts is valid here; metadata, and metadata.name, may be left out.",
   "type": "object",
   "required": ["apiVersion", "kind"],

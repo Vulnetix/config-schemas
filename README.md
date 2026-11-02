@@ -77,6 +77,20 @@ spec:
 
 `apiVersion` is the document format and stays `vulnetix.com/v1`. The release version moves on its own: additive changes are a minor release, and anything that could reject a document an earlier release accepted needs a major release.
 
+## Kind metadata (`x-vulnetix`)
+
+Every schema carries an `x-vulnetix` object at its root. Validators ignore it; generators and clients read it instead of keeping their own tables. Each release's `index.json` repeats it per kind as `meta`, and Go code reads it with `configschemas.KindMeta(kind)`.
+
+| Field | Meaning |
+|---|---|
+| `validateOnly` | The CLI validates the kind and never sends it: nothing on the server stores it yet. Plan notes it; apply skips it. |
+| `singleton` | One per tenant, named `default`. |
+| `dependsOn` | Kinds this kind refers to by `metadata.name`, which apply creates first. A kind listed may be newer than the release. |
+| `secrets` | Field paths that take a `valueFrom`. The value is read on the client, sent once, and never exported or shown. |
+| `celFields` | Field paths that take a CEL expression, each with the `env` (the [cel](cel/README.md) context) it is compiled and evaluated in. |
+
+Paths are dotted from the document root, and `[]` means every item of an array: `spec.rules[].when`. A test derives `singleton`, `secrets` and `celFields` from the schema itself and fails when the annotation disagrees.
+
 ## Use from Go
 
 ```go

@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/RemediationPolicy.schema.json",
   "title": "RemediationPolicy",
+  "x-vulnetix": {"validateOnly":false,"singleton":true,"dependsOn":[],"secrets":[],"celFields":[]},
   "description": "The tenant's remediation policy (triage policy in the console): the remediation window per severity band, the triage threshold, and the CVSS scores that separate the bands. Exposure reports grade against it, compliance reports cite it, and jail COUNT_PAST_SLA rules read its windows. One per tenant. Either adopt a published standard as it is, so reports cite the standard, or declare your own windows. Saving your own never edits the policy earlier snapshots and reports cite: it saves a new revision and points the tenant at it.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],

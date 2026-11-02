@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/AlertTrigger.schema.json",
   "title": "AlertTrigger",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":["SavedSearch","DetectionRule","MessagingConnection"],"secrets":[],"celFields":[]},
   "description": "A Guardian trigger: run a SavedSearch or a DetectionRule on a schedule and, when its rows pass the levers, start a Software Factory workflow, post to messaging connections or send an email, with the rows as context. No rows, nothing starts. Name exactly one of searchRef or ruleRef. The plan caps how many triggers are enabled at once.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],

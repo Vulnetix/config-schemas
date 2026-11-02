@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/LogSource.schema.json",
   "title": "LogSource",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":["spec.cloudflare.apiToken"],"celFields":[]},
   "description": "A way logs reach Guardian, backed by a Guardian ingest token of the same type. The token is minted on create and shown once, by the apply that creates it; it is never exported or shown in a plan. aws: the token for the vulnetix-siem CloudFormation stack you deploy (IngestToken), which sends VPC flow logs, Route 53 Resolver logs and CloudTrail events by Firehose. cloudflare: Guardian creates Logpush jobs with your Cloudflare API token, which is used for those calls only and never stored. events: the token for POST /v1/ingest/events, used by your own scripts and the Vulnetix runtime sensor. Guardian has no update for a token or a Logpush job, so a changed spec is applied as delete and create: the old token is revoked and a new one minted. Managing sources needs the Guardian manager role.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],

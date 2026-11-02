@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/PackageList.schema.json",
   "title": "PackageList",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":["PackageFirewallPolicy"],"secrets":[],"celFields":[{"path":"spec.entries[].when","env":"package"}]},
   "description": "Entries for the tenant's package firewall allow list or deny list. The tenant has one of each; every PackageList contributes its entries to one of them, and owns only the entries it declares. A deny entry always blocks, in every mode, ahead of every other check. An allow entry waives every policy block (thresholds, KEV, exploits, bad actors, end of life, cooldown, version lag) but never an exact-version malware match, a known-bad artifact hash or a malware scan verdict.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],

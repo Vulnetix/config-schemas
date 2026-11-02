@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/JailPolicy.schema.json",
   "title": "JailPolicy",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[{"path":"spec.rules[].when","env":"finding"}]},
   "description": "A jail policy: the ordered rules vulnetix jail evaluates for a repository over everything ever reported for it (vulnerabilities past their SLA, dependencies past end of life, migrations that have not landed, hygiene categories that regressed). A policy without repository is the tenant's default; a policy with one is a per-repository override that replaces the default outright. Separate from QualityGate, which judges a single scan.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],

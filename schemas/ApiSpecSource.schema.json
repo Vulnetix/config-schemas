@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/ApiSpecSource.schema.json",
   "title": "ApiSpecSource",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[]},
   "description": "Where Vulnetix finds an organisation's OpenAPI and Swagger descriptions. Each source is one place to read specs from: a file in a repository, a URL, a host to probe for well-known paths, or a connected API gateway or catalogue. A tenant may declare many, each named.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],

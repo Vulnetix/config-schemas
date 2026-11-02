@@ -101,6 +101,9 @@ func release(args []string) error {
 		Kind   string `json:"kind"`
 		File   string `json:"file"`
 		Schema string `json:"schema"`
+		// Meta is the kind's x-vulnetix annotation, so a consumer of the
+		// release can read it without fetching every schema.
+		Meta configschemas.Meta `json:"meta"`
 	}
 	idx := struct {
 		Version    string      `json:"version"`
@@ -110,7 +113,11 @@ func release(args []string) error {
 	var oneOf []map[string]any
 	for _, k := range configschemas.Kinds() {
 		f := k + ".schema.json"
-		idx.Kinds = append(idx.Kinds, kindEntry{Kind: k, File: f, Schema: rel + f})
+		meta, err := configschemas.KindMeta(k)
+		if err != nil {
+			return err
+		}
+		idx.Kinds = append(idx.Kinds, kindEntry{Kind: k, File: f, Schema: rel + f, Meta: meta})
 		oneOf = append(oneOf, map[string]any{
 			"if":   map[string]any{"properties": map[string]any{"kind": map[string]any{"const": k}}, "required": []string{"kind"}},
 			"then": map[string]any{"$ref": rel + f},

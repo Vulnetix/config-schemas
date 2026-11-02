@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/ScheduledReport.schema.json",
   "title": "ScheduledReport",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":["SavedSearch","MessagingConnection"],"secrets":[],"celFields":[]},
   "description": "A Guardian scheduled send: run a SavedSearch on a calendar and send its rows to messaging connections or email. Each send is charged to the daily query budget like any search, and the plan caps how many are enabled.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],

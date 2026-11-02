@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/RuntimeSensorPolicy.schema.json",
   "title": "RuntimeSensorPolicy",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":["DetectionRuleFeed"],"secrets":[],"celFields":[]},
   "description": "The configuration runtime sensors enroll with and keep pulling: mode, hold, rule feeds, forwarding and tamper protection, and which people or MDM systems it applies to. It is a sensor provisioning profile. A device takes the enabled profile with the highest priority that matches it, and picks up a change on its next config pull. Sensors configured by hand with an ApiKey do not read profiles; a person changes their mode from the console. A profile with enrolled devices cannot be deleted.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],

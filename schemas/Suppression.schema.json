@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/Suppression.schema.json",
   "title": "Suppression",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[{"path":"spec.when","env":"finding"}]},
   "description": "A suppression rule: findings that match its scope are suppressed, now and in every later scan, until it expires. Every apply writes the suppression audit. Rules created from a VexSource are owned by that source and cannot be declared here.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],

@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/AiGovernanceList.schema.json",
   "title": "AiGovernanceList",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[]},
   "description": "An allow or deny list of AI tools, MCP servers, skills or clients, stored as AI Firewall guardrails: one guardrail row per pattern, of rule type <family>_<list>. The list owns its rows, so removing a pattern removes its row. The same list can be written inline as AiFirewallPolicy spec.capabilities.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],

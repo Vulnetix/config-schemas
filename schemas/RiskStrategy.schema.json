@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/RiskStrategy.schema.json",
   "title": "RiskStrategy",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[{"path":"spec.rules[].when","env":"finding"}]},
   "description": "A risk prioritisation strategy: an ordered list of rules that puts every open finding in a priority tier. A finding's tier is the position of the first rule it matches, 0 being the highest priority. A tenant may keep several strategies; one is active, and a tenant with none active uses the system default.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],

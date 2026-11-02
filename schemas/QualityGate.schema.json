@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/QualityGate.schema.json",
   "title": "QualityGate",
+  "x-vulnetix": {"validateOnly":false,"singleton":true,"dependsOn":[],"secrets":[],"celFields":[]},
   "description": "The tenant's quality gate: the checks every vulnetix scan in CI must pass. When a check is set here it overrides the matching scan flag; a check left out leaves the flag in charge. One per tenant.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],

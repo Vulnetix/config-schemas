@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/LicenseExceptions.schema.json",
   "title": "LicenseExceptions",
+  "x-vulnetix": {"validateOnly": true, "singleton": true, "dependsOn": ["LicensePolicy"], "secrets": [], "celFields": []},
   "description": "Recorded, attributed exceptions to the licence policy: a licence exempted everywhere (blanket) or one package exempted, each with who approved it, why, and until when. An exempted finding is kept and badged, never dropped, and an expired exception stops applying and says so; the expiry date is inclusive. Two forms are valid. The repository file .vulnetix/license-exceptions.yaml, read by vulnetix license and scan --evaluate-licenses, keeps blanket and packages at the top level with no metadata. The config form puts them under spec, with metadata. The server does not store exceptions yet: the CLI validates the document and plan notes it, but apply sends nothing.",
   "type": "object",
   "required": ["apiVersion", "kind"],

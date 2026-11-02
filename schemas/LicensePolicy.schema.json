@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/LicensePolicy.schema.json",
   "title": "LicensePolicy",
+  "x-vulnetix": {"validateOnly":true,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[]},
   "description": "A licence policy: which licence categories produce findings and at what severity, how unresolved licences and dependency scopes are treated, and per-project overrides. Two forms are valid. The repository file .vulnetix/license-policy.yaml, read by vulnetix license and scan --evaluate-licenses, keeps the policy fields at the top level with no metadata; this is what vulnetix license policy init writes. The config form puts the same fields under spec, with metadata. Absent sections inherit the defaults: unknown is warn, no scope is ignored, and only strong-copyleft (high) and unknown (medium) carry a severity.",
   "type": "object",
   "required": ["apiVersion", "kind"],

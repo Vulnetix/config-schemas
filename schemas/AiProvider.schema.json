@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/AiProvider.schema.json",
   "title": "AiProvider",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":["spec.apiKey"],"celFields":[]},
   "description": "A custom AI Firewall provider owned by the tenant: a model server the gateway forwards to, beside the built-in catalogue. Only this tenant sees or uses it. metadata.name is the provider slug, which becomes the gateway path prefix (/<slug>/<org>/v1/...) and is what AiFirewallPolicy providers and models refer to. A tenant has at most 10 custom providers, and a slug that a built-in provider uses is refused at apply.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],

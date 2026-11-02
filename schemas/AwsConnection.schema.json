@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/AwsConnection.schema.json",
   "title": "AwsConnection",
+  "x-vulnetix": {"validateOnly":false,"singleton":true,"dependsOn":[],"secrets":["spec.iamUser.secretAccessKey"],"celFields":[]},
   "description": "How Vulnetix reaches the tenant's AWS estate. One per tenant. sso: IAM Identity Center, which can reach every account the operator's session can; the accounts are AwsAccount documents. iamUser: a long-lived access key, for an estate without Identity Center; the key's own account (from sts:GetCallerIdentity, never from the document) is the connected account. An sso connection starts a device authorization that a person approves in the AWS access portal, so its first apply, and any apply after the session expires, cannot finish unattended. Deleting it disconnects AWS; the stacks deployed in each account stay until removed there.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],

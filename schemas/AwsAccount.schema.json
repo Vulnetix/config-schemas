@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/AwsAccount.schema.json",
   "title": "AwsAccount",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":["AwsConnection"],"secrets":[],"celFields":[]},
   "description": "One AWS account the AwsConnection reaches, keyed on its account id within the tenant (two tenants may connect the same account). It takes the connection's connector kind. Deploying puts the Vulnetix pipeline stack in the account through the connection; the per-account advancedNetworking column is written only from AwsConnection.spec.advancedNetworking today. Deleting the document turns the account off rather than forgetting it, because the deployed stack outlives the row and has to stay findable.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],

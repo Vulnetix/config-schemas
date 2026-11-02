@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/JailExemption.schema.json",
   "title": "JailExemption",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":["JailPolicy"],"secrets":[],"celFields":[]},
   "description": "A time-boxed waiver of the jail policy that applies to one repository. It applies after aggregation: the verdict still reports the observed value, the threshold, that the rule would have breached, and which exemption suppressed it. Removing the document deactivates the exemption; the record of what was waived, by whom and why is kept.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],
