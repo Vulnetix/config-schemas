@@ -1,0 +1,8 @@
+# a push key must be an event type, a family, * or a tier
+apiVersion: vulnetix.com/v1
+kind: NotificationDefaults
+metadata:
+  name: default
+spec:
+  push:
+    "factory.*.failed": true

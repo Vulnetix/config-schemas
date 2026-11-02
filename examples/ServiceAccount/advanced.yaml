@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/ServiceAccount.schema.json
+apiVersion: vulnetix.com/v1
+kind: ServiceAccount
+metadata:
+  name: ci-scanner
+  labels:
+    pipeline: github-actions
+  annotations:
+    owner: platform-team
+spec: {}
+---
+apiVersion: vulnetix.com/v1
+kind: ServiceAccount
+metadata:
+  name: release-signer
+spec: {}

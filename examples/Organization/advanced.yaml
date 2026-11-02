@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/Organization.schema.json
+apiVersion: vulnetix.com/v1
+kind: Organization
+metadata:
+  name: default
+  labels:
+    team: platform
+  annotations:
+    ticket: https://tracker.example.com/ORG-12
+spec:
+  displayName: Acme Corporation
+  companyEmailDomains:
+    - acme.com
+    - acme.co.uk

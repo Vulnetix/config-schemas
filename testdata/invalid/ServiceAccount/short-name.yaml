@@ -1,0 +1,6 @@
+# metadata.name must be 3 to 40 characters
+apiVersion: vulnetix.com/v1
+kind: ServiceAccount
+metadata:
+  name: ci
+spec: {}

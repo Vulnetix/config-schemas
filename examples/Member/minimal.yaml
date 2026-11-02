@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/Member.schema.json
+apiVersion: vulnetix.com/v1
+kind: Member
+metadata:
+  name: alice
+spec:
+  email: alice@acme.com

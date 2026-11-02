@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/Member.schema.json",
+  "title": "Member",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[]},
+  "description": "A person in the organisation, by email address, with their role. Applying a Member for someone who is not yet in the organisation sends them an invitation, the same one the members page sends; the object then reports phase Pending, with the invitation's expiry, until they sign in and accept it. A role change on a member takes effect at once; on a pending invitation it replaces the invitation. Deleting the document revokes an outstanding invitation, or removes the member: their account is deactivated and kept for the audit trail, and they lose access to the organisation. Applying needs an owner or admin. An apply that would leave the organisation without an owner, or remove the person applying, is refused.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "Member" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["email"],
+      "additionalProperties": false,
+      "properties": {
+        "email": {
+          "description": "The person's email address, in lower case. It identifies the member and cannot change: to replace one person with another, delete this document and declare a new one. A document for someone who is already a member, or already invited, takes them over under this name.",
+          "type": "string",
+          "format": "email",
+          "maxLength": 254,
+          "pattern": "^[^A-Z\\s]+@[^A-Z\\s]+$"
+        },
+        "role": {
+          "description": "owner or member. Only an owner may grant owner. admin is the retired role: a member who already holds it keeps it while the document says admin, but no apply grants it.",
+          "type": "string",
+          "enum": ["owner", "admin", "member"],
+          "default": "member"
+        }
+      }
+    }
+  }
+}

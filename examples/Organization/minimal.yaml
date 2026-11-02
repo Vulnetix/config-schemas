@@ -1,0 +1,6 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/Organization.schema.json
+apiVersion: vulnetix.com/v1
+kind: Organization
+metadata:
+  name: default
+spec: {}

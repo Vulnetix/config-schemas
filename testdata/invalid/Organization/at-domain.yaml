@@ -1,0 +1,7 @@
+# a company email domain has no leading @
+apiVersion: vulnetix.com/v1
+kind: Organization
+metadata:
+  name: default
+spec:
+  companyEmailDomains: ["@acme.com"]

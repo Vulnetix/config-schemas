@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/NotificationDefaults.schema.json",
+  "title": "NotificationDefaults",
+  "x-vulnetix": {"validateOnly":false,"singleton":true,"dependsOn":[],"secrets":[],"celFields":[]},
+  "description": "The organisation's default browser push notifications: which events are pushed to a person who has not chosen for themselves. A person's own choices on the notifications page still win. One per tenant, named default. The document replaces the defaults whole, as the console's tenant defaults form does. Deleting it removes the organisation's defaults, so the catalogue defaults apply again.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "NotificationDefaults" },
+    "metadata": { "$ref": "common.schema.json#/$defs/singletonMetadata" },
+    "spec": {
+      "type": "object",
+      "required": ["push"],
+      "additionalProperties": false,
+      "properties": {
+        "push": {
+          "description": "Whether each event is pushed, keyed by an event type (factory.run.failed), a family (factory.run.*, or * for every event) or a tier (tier:needs_you, tier:error, tier:warning, tier:info). The most specific key wins: a type over its families, and a family over *. An empty object sets no defaults of the organisation's own.",
+          "type": "object",
+          "maxProperties": 500,
+          "propertyNames": {
+            "maxLength": 120,
+            "pattern": "^(\\*|tier:(needs_you|error|warning|info)|[a-z0-9_]+(\\.[a-z0-9_]+)*(\\.\\*)?)$"
+          },
+          "additionalProperties": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

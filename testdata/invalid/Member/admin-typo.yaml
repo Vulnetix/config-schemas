@@ -1,0 +1,8 @@
+# role must be owner, admin or member
+apiVersion: vulnetix.com/v1
+kind: Member
+metadata:
+  name: alice
+spec:
+  email: alice@acme.com
+  role: superuser

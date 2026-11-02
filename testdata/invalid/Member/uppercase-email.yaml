@@ -1,0 +1,7 @@
+# email must be in lower case
+apiVersion: vulnetix.com/v1
+kind: Member
+metadata:
+  name: alice
+spec:
+  email: Alice@Acme.com

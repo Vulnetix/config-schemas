@@ -34,6 +34,10 @@ Reference documentation for every kind is at https://docs.vulnetix.com (the Plat
 | `CloudSensors` | v1.3.0 | Which AWS-native sources and Vulnetix passes are read, for every account or one. |
 | `DetectionRuleFeed` | v1.3.0 | A published feed of virtual patches, countermeasures and catalogue rules in one format. |
 | `RuntimeSensorPolicy` | v1.3.0 | The configuration runtime sensors enroll with: mode, hold, feeds, forwarding and tamper protection. |
+| `Organization` | v1.4.0 | The organisation's display name and company email domains. One per tenant. |
+| `Member` | v1.4.0 | A person in the organisation by email, with their role. A new member is invited and reports `Pending` until they accept. |
+| `ServiceAccount` | v1.4.0 | A CI credential that is not a person. Its API key is returned once, by the apply that creates it. |
+| `NotificationDefaults` | v1.4.0 | Which events are pushed to people who have not chosen for themselves. One per tenant. |
 
 A field or kind whose description says "Not stored yet" (`CloudSensors` for one account), and the whole of `VexSource`, is ahead of the server: it validates today, and applying it needs the backend change the description names.
 

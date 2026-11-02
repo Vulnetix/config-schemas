@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/Organization.schema.json",
+  "title": "Organization",
+  "x-vulnetix": {"validateOnly":false,"singleton":true,"dependsOn":[],"secrets":[],"celFields":[]},
+  "description": "The organisation's own settings: its display name and its company email domains. One per tenant, named default. A field left out is left as it is. Applying needs an owner or admin. Deleting the document only stops managing these settings: the organisation itself is never deleted, and the settings keep their values.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "Organization" },
+    "metadata": { "$ref": "common.schema.json#/$defs/singletonMetadata" },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "displayName": {
+          "description": "The organisation's name as people see it, such as Acme Corporation. It is kept on the organisation's identity group, where it was set from the company name, or the email domain, when the organisation was created.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "\\S"
+        },
+        "companyEmailDomains": {
+          "description": "The organisation's own email domains, such as acme.com. The Contributors page classes a contributor whose commit email is at one of these domains as internal, and everyone else as external. An empty list clears them, which means not configured: no contributor is classed either way.",
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 32,
+          "items": {
+            "description": "A domain name in lower case, without a leading @.",
+            "type": "string",
+            "maxLength": 253,
+            "pattern": "^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$"
+          }
+        }
+      }
+    }
+  }
+}

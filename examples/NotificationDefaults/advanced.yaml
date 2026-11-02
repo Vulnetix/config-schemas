@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/NotificationDefaults.schema.json
+apiVersion: vulnetix.com/v1
+kind: NotificationDefaults
+metadata:
+  name: default
+  annotations:
+    ticket: https://tracker.example.com/OPS-77
+spec:
+  push:
+    "*": false
+    tier:needs_you: true
+    tier:error: true
+    factory.run.*: true
+    factory.run.succeeded: false
