@@ -119,3 +119,28 @@ func TestDecodeSkipsEmptyDocuments(t *testing.T) {
 		t.Fatalf("got %+v", docs)
 	}
 }
+
+// The embedded examples are the files under examples/, so a consumer testing
+// against Example reads exactly what the docs render.
+func TestEmbeddedExamples(t *testing.T) {
+	for _, k := range Kinds() {
+		names := Examples(k)
+		if len(names) < 2 {
+			t.Errorf("%s: embedded examples %v", k, names)
+		}
+		for _, n := range []string{"minimal", "advanced"} {
+			b, err := Example(k, n)
+			if err != nil {
+				t.Error(err)
+				continue
+			}
+			disk, _ := os.ReadFile(filepath.Join("examples", k, n+".yaml"))
+			if string(b) != string(disk) {
+				t.Errorf("%s/%s: embedded copy differs from the file", k, n)
+			}
+		}
+	}
+	if _, err := Example("NoSuchKind", "minimal"); err == nil {
+		t.Error("an unknown kind's example was found")
+	}
+}
