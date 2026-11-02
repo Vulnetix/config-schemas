@@ -8,6 +8,10 @@ name: Release schemas
 # A tag whose release job failed is recovered by running this workflow by hand
 # with that tag. Every step is safe to repeat: assets are uploaded with
 # --clobber onto an existing release.
+#
+# The release is built from the tag's tree. When a tag was cut with a checker
+# that has since been fixed, pass schemacheck-ref (a branch or sha, e.g. main)
+# to run that ref's cmd/schemacheck against the tag's schemas.
 on:
   push:
     tags: ['v*.*.*']
@@ -16,6 +20,10 @@ on:
       tag:
         description: Existing tag to (re)publish, e.g. v1.2.0
         required: true
+      schemacheck-ref:
+        description: Branch or sha whose cmd/schemacheck checks and builds the release (default, the tag's own)
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -40,6 +48,17 @@ jobs:
         with:
           ref: ${{ github.event.inputs.tag || github.ref }}
           fetch-depth: 0
+
+      # Swap in another ref's checker; the schemas stay the tag's.
+      - name: Use the checker from schemacheck-ref
+        if: github.event.inputs.schemacheck-ref != ''
+        env:
+          CHECKER_REF: ${{ github.event.inputs.schemacheck-ref }}
+        run: |
+          git fetch --no-tags origin "$CHECKER_REF"
+          rm -rf cmd/schemacheck
+          git checkout FETCH_HEAD -- cmd/schemacheck
+          echo "schemacheck from $(git rev-parse --short FETCH_HEAD)"
 
       - uses: actions/setup-go@v6
         with:
