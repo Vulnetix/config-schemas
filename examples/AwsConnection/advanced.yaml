@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/AwsConnection.schema.json
+# A tenant has one AwsConnection. These are the two forms it can take:
+# IAM Identity Center (sso) or a long-lived IAM user key (iamUser).
+apiVersion: vulnetix.com/v1
+kind: AwsConnection
+metadata:
+  name: default
+  labels:
+    owner: platform
+  annotations:
+    note: Approve the device authorization in the AWS access portal on first apply.
+spec:
+  region: ap-southeast-2
+  sso:
+    startUrl: https://acme.awsapps.com/start
+  advancedNetworking: true
+---
+apiVersion: vulnetix.com/v1
+kind: AwsConnection
+metadata:
+  name: default
+spec:
+  region: us-east-1
+  iamUser:
+    accessKeyId: AKIAIOSFODNN7EXAMPLE
+    secretAccessKey: { env: VULNETIX_AWS_SECRET_ACCESS_KEY }
+  advancedNetworking: false

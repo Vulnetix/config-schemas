@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/SavedSearch.schema.json
+apiVersion: vulnetix.com/v1
+kind: SavedSearch
+metadata:
+  name: dynamic-dns-lookups
+  labels:
+    team: secops
+  annotations:
+    ticket: https://jira.example.com/browse/SEC-2215
+spec:
+  displayName: Dynamic DNS lookups
+  mode: dsl
+  text: |
+    dns_events
+    | where qname endswith ('.duckdns.org', '.no-ip.org', '.ddns.net')
+  rangeMs: 86400000
+---
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/SavedSearch.schema.json
+apiVersion: vulnetix.com/v1
+kind: SavedSearch
+metadata:
+  name: console-sign-ins
+spec:
+  displayName: AWS console sign-ins
+  mode: sigma
+  text: |
+    logsource:
+      product: aws
+      service: cloudtrail
+    detection:
+      selection:
+        eventName: ConsoleLogin
+      condition: selection
+  rangeMs: 604800000

@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/ScheduledReport.schema.json
+apiVersion: vulnetix.com/v1
+kind: ScheduledReport
+metadata:
+  name: weekly-console-sign-ins
+  labels:
+    team: secops
+  annotations:
+    ticket: https://jira.example.com/browse/SEC-2216
+spec:
+  displayName: Weekly console sign-ins
+  searchRef: console-sign-ins
+  repeat: weekly
+  weekday: 1
+  at: "08:00"
+  zone: Australia/Melbourne
+  rowsWindowMs: 604800000
+  whenEmpty: all_clear
+  enabled: true
+  destination:
+    kind: email
+    emails: [secops@acme.example, ciso@acme.example]
+    subject: Console sign-ins this week
+  format:
+    layout: table_chart
+    rows: 20
+    csv: true
+    link: true
+    query: true
+---
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/ScheduledReport.schema.json
+apiVersion: vulnetix.com/v1
+kind: ScheduledReport
+metadata:
+  name: monthly-dns-digest
+spec:
+  searchRef: dynamic-dns-lookups
+  repeat: monthly
+  monthday: 1
+  at: "09:30"
+  zone: UTC
+  sincePrevious: true
+  whenEmpty: skip
+  enabled: true
+  destination:
+    kind: messaging
+    connections: [secops-slack, soc-teams]
+    subject: Dynamic DNS lookups this month
+  format: { layout: summary, link: true }

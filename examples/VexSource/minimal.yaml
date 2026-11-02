@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/VexSource.schema.json
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata:
+  name: local-vex
+spec:
+  path:
+    path: .vulnetix/vex.openvex.json

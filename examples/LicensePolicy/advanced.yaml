@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/LicensePolicy.schema.json
+apiVersion: vulnetix.com/v1
+kind: LicensePolicy
+metadata:
+  name: default
+  labels:
+    team: legal
+  annotations:
+    approved-by: https://tracker.example.com/LEGAL-88
+spec:
+  categories:
+    strong-copyleft:
+      - AGPL-3.0-only
+      - AGPL-3.0-or-later
+      - SSPL-1.0
+    proprietary:
+      - BUSL-1.1
+  severity:
+    permissive: none
+    public-domain: none
+    weak-copyleft: low
+    strong-copyleft: critical
+    proprietary: high
+    unknown: medium
+  unknown: fail
+  scopes:
+    development: ignore
+    test: ignore
+    optional: evaluate
+  projects:
+    docs-site:
+      severity:
+        strong-copyleft: low
+      unknown: ignore
+      scopes:
+        dev: ignore
+---
+# The repository file form, .vulnetix/license-policy.yaml: the same fields at the top level, no metadata.
+apiVersion: vulnetix.com/v1
+kind: LicensePolicy
+severity:
+  strong-copyleft: high
+  unknown: medium
+unknown: warn
+scopes:
+  test: ignore

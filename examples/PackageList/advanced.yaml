@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/PackageList.schema.json
+apiVersion: vulnetix.com/v1
+kind: PackageList
+metadata:
+  name: first-party
+  labels:
+    team: platform-security
+  annotations:
+    ticket: https://jira.example.com/browse/SEC-2211
+spec:
+  list: allow
+  entries:
+    - purl: pkg:npm/@acme/*
+      reason: Our own npm scope; releases must not wait out the cooldown.
+      scope: full
+      when: "!malware && !badActor"
+    - purl: pkg:golang/github.com/acme/*
+      reason: Our own Go modules.
+    - purl: pkg:pypi/requests@2.32.3
+      reason: CVSS on this release is a false positive for our use.
+      when: cvss < 9.0 && !kev
+    - purl: pkg:npm/left-pad
+      scope: bad_actor
+      reason: Maintainer attribution reviewed and judged a false positive.
+---
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/PackageList.schema.json
+apiVersion: vulnetix.com/v1
+kind: PackageList
+metadata:
+  name: banned
+spec:
+  list: deny
+  entries:
+    - purl: pkg:npm/event-stream@3.3.6
+      reason: Compromised release.
+      scope: full
+    - purl: pkg:npm/ua-parser-js
+      reason: Hold back fresh releases after the 2021 hijack.
+      when: ageDays < 3 || versionLag > 5

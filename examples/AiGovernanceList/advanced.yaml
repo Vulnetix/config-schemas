@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/AiGovernanceList.schema.json
+apiVersion: vulnetix.com/v1
+kind: AiGovernanceList
+metadata:
+  name: unapproved-mcp
+  labels:
+    team: platform-security
+  annotations:
+    ticket: https://tracker.example.com/SEC-2214
+spec:
+  family: mcp
+  list: deny
+  action: strip
+  priority: 20
+  enabled: true
+  patterns:
+    - "*-shell"
+    - filesystem
+---
+apiVersion: vulnetix.com/v1
+kind: AiGovernanceList
+metadata:
+  name: approved-skills
+spec:
+  family: skill
+  list: allow
+  action: flag
+  priority: 100
+  enabled: false
+  patterns:
+    - code-review
+    - "acme-*"

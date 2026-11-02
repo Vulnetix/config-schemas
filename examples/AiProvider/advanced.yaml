@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/AiProvider.schema.json
+apiVersion: vulnetix.com/v1
+kind: AiProvider
+metadata:
+  name: acme-vllm
+  labels:
+    team: ml-platform
+  annotations:
+    runbook: https://wiki.example.com/ml-platform/vllm
+spec:
+  displayName: ACME vLLM cluster
+  serverKind: openai-compatible
+  protocol: openai-responses
+  baseUrl: https://llm.acme.example
+  auth: bearer
+  apiKey:
+    env: ACME_VLLM_KEY
+  models:
+    - id: qwen3-coder-30b
+      name: Qwen3 Coder 30B
+      contextWindow: 262144
+      maxTokens: 65536
+      images: false
+    - id: qwen2.5-vl-72b
+      name: Qwen2.5 VL 72B
+      contextWindow: 131072
+      maxTokens: 8192
+      images: true
+---
+apiVersion: vulnetix.com/v1
+kind: AiProvider
+metadata:
+  name: acme-ollama
+spec:
+  displayName: ACME Ollama
+  serverKind: ollama
+  protocol: openai-chat
+  baseUrl: https://ollama.acme.example:11434
+  auth: x-api-key
+  apiKey:
+    env: ACME_OLLAMA_KEY
+  models:
+    - id: llama3.1:70b
+      name: Llama 3.1 70B
+      contextWindow: 131072
+      maxTokens: 0

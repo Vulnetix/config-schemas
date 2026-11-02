@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/AiProvider.schema.json
+apiVersion: vulnetix.com/v1
+kind: AiProvider
+metadata:
+  name: acme-vllm
+spec:
+  protocol: openai-chat
+  baseUrl: https://llm.acme.example
+  auth: bearer

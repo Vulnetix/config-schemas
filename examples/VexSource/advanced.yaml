@@ -1,0 +1,119 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/VexSource.schema.json
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata:
+  name: vendor-tea-product
+  labels:
+    team: product-security
+  annotations:
+    ticket: https://jira.example.com/browse/SEC-2217
+spec:
+  format: auto
+  scope:
+    org: true
+  trust:
+    requireSignature: true
+    allowedAuthors: [security@acme.example]
+  refresh: { interval: 6h }
+  onError: keep-last
+  tea:
+    product: 7f3c1a52-1b8e-4d0e-9c3f-2a6b8e5d4c10
+    server: https://tea.acme.example
+---
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/VexSource.schema.json
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata:
+  name: vendor-tea-release
+spec:
+  format: cyclonedx
+  scope:
+    products: ["urn:tei:uuid:products.acme.example:7f3c1a52-1b8e-4d0e-9c3f-2a6b8e5d4c10"]
+  refresh: { interval: 1d }
+  tea:
+    productRelease: "urn:tei:uuid:products.acme.example:4b2e9d17-6a3c-4f81-b5d0-8e1c7a9f2d36"
+    server: https://tea.acme.example
+---
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/VexSource.schema.json
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata:
+  name: vendor-tea-collection
+spec:
+  scope:
+    repos: [acme/payments-api]
+  refresh: { webhook: true }
+  tea:
+    collection: 2c8f4e61-9d7a-4b35-a0e2-5f6c3b8d1e94
+    server: https://tea.vendor.example.com
+---
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/VexSource.schema.json
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata:
+  name: vex-bucket
+spec:
+  format: openvex
+  refresh: { webhook: true }
+  onError: keep-last
+  s3:
+    bucket: acme-vex-statements
+    prefix: openvex/
+    region: us-east-1
+    roleArn: arn:aws:iam::123456789012:role/VulnetixVexRead
+    externalId: acme-vex-read-7f3c1a52
+---
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/VexSource.schema.json
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata:
+  name: vex-r2-object
+spec:
+  format: openvex
+  refresh: { interval: 30m }
+  s3:
+    bucket: acme-vex-public
+    key: products/ledger/ledger.openvex.json
+    endpoint: https://0123456789abcdef0123456789abcdef.r2.cloudflarestorage.com
+    credentialRef: r2-vex-reader
+---
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/VexSource.schema.json
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata:
+  name: platform-repo
+spec:
+  scope:
+    repos: [acme/payments-api, acme/ledger]
+    products: [7f3c1a52-1b8e-4d0e-9c3f-2a6b8e5d4c10]
+  git:
+    url: https://github.com/acme/security-advisories.git
+    ref: main
+    paths: ["vex/**/*.openvex.json", "vex/**/*.cdx.json"]
+    credentialRef: github-advisories-token
+---
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/VexSource.schema.json
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata:
+  name: local-vex
+spec:
+  format: cyclonedx
+  path:
+    path: .vulnetix/vex.cdx.json
+---
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/VexSource.schema.json
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata:
+  name: upstream-urls
+spec:
+  refresh: { interval: 1d }
+  onError: clear
+  urls:
+    - https://downloads.example.org/vex/product.openvex.json
+    - url: https://vendor.example.com/vex/all.cdx.json
+      sha256: 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+      auth:
+        header: Authorization
+        credentialRef: vendor-vex-token

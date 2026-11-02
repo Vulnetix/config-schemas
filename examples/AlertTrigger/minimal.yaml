@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/AlertTrigger.schema.json
+apiVersion: vulnetix.com/v1
+kind: AlertTrigger
+metadata:
+  name: dns-investigate
+spec:
+  searchRef: dynamic-dns-lookups
+  destination:
+    kind: workflow

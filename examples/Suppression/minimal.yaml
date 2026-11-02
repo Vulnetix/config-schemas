@@ -1,0 +1,8 @@
+apiVersion: vulnetix.com/v1
+kind: Suppression
+metadata:
+  name: lodash-prototype-pollution
+spec:
+  type: risk_accepted
+  scope:
+    rule: CVE-2021-23337

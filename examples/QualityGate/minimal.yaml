@@ -1,0 +1,6 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/QualityGate.schema.json
+apiVersion: vulnetix.com/v1
+kind: QualityGate
+metadata:
+  name: default
+spec: {}

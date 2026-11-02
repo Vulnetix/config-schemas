@@ -1,0 +1,97 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/DetectionRule.schema.json
+# A rule names exactly one of body, file, searchRef, countermeasure, sigmahq
+# or ioc, so each form has its own document.
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata:
+  name: dynamic-dns
+  labels:
+    team: secops
+    mitre-tactic: command-and-control
+  annotations:
+    runbook: https://wiki.example.com/secops/dynamic-dns
+spec:
+  displayName: Dynamic DNS lookup
+  language: sigma
+  body: |
+    title: Dynamic DNS lookup
+    id: 6f3e0c52-0d4b-4c8e-9a51-2a6b9a0e7d10
+    level: medium
+    logsource:
+      category: dns_query
+    detection:
+      selection:
+        QueryName|endswith:
+          - .duckdns.org
+          - .no-ip.org
+      condition: selection
+  enabled: true
+  level: medium
+  severityOverride: warning
+  intervalSec: 120
+  latenessSec: 300
+  suppressSec: 1800
+  maxAlertsPerRun: 50
+  threshold:
+    count: 5
+    windowSec: 600
+    by: [src_ip]
+  suppressions:
+    - field: QueryName
+      value: updates.duckdns.org
+      until: "2026-12-31"
+    - field: src_ip
+      value: 10.20.0.15
+  target:
+    connections: [secops-slack]
+    emails: [secops@example.com]
+---
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata:
+  name: brute-force-file
+spec:
+  displayName: SSH brute force
+  language: sigma
+  file: siem/rules/brute-force.yml
+  enabled: false
+  level: high
+---
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata:
+  name: dns-search-rule
+spec:
+  searchRef: dynamic-dns-lookups
+  level: low
+  intervalSec: 600
+---
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata:
+  name: log4shell-countermeasure
+spec:
+  countermeasure: 3b1f8a62-7d2e-4c41-9a0b-5e6f7c8d9e01
+  severityOverride: critical
+  intervalSec: 300
+  target:
+    connections: [secops-slack]
+---
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata:
+  name: sigmahq-aws-root-login
+spec:
+  sigmahq: rules/cloud/aws/cloudtrail/aws_root_account_usage.yml
+  level: high
+  suppressSec: 3600
+---
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata:
+  name: indicator-domains
+spec:
+  displayName: Indicator domain resolved
+  ioc: ioc-dns
+  maxAlertsPerRun: 100
+  latenessSec: 120

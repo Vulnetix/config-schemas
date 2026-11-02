@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/AiGovernanceList.schema.json
+apiVersion: vulnetix.com/v1
+kind: AiGovernanceList
+metadata:
+  name: deny-shell-tools
+spec:
+  family: tool
+  list: deny
+  action: block
+  patterns:
+    - Bash

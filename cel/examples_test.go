@@ -6,71 +6,75 @@ import (
 	"strings"
 	"testing"
 
+	configschemas "github.com/vulnetix/config-schemas"
 	"gopkg.in/yaml.v3"
 )
 
-// whenContexts names the CEL context each kind's `when` is compiled in. A kind
-// that gains a `when` must be listed here, or its examples go unchecked.
-var whenContexts = map[string]Context{
-	"DetectionRuleFeed": ContextCVE,
-	"JailPolicy":        ContextFinding,
-	"RiskStrategy":      ContextFinding,
-	"Suppression":       ContextFinding,
-}
-
-// Every `when` in the published examples must compile in its kind's context.
-// v1.1.0 shipped `finding.epss >= 0.1`, which does not type-check: the
-// variables are top level, not under a `finding` object.
-func TestExampleWhenExpressionsCompile(t *testing.T) {
-	files, err := filepath.Glob("../examples/*/*.yaml")
-	if err != nil {
-		t.Fatal(err)
-	}
-	checked := 0
-	for _, f := range files {
-		kind := filepath.Base(filepath.Dir(f))
-		ctx, ok := whenContexts[kind]
-		if !ok {
-			continue
-		}
-		b, err := os.ReadFile(f)
+// Every CEL field in the published examples must compile in the env its
+// kind's x-vulnetix annotation names. v1.1.0 shipped `finding.epss >= 0.1`,
+// which does not type-check: the variables are top level, not under a
+// `finding` object.
+func TestExampleExpressionsCompile(t *testing.T) {
+	checked := map[Context]int{}
+	for _, kind := range configschemas.Kinds() {
+		meta, err := configschemas.KindMeta(kind)
 		if err != nil {
 			t.Fatal(err)
 		}
-		dec := yaml.NewDecoder(strings.NewReader(string(b)))
-		for {
-			var doc any
-			if err := dec.Decode(&doc); err != nil {
-				break
+		if len(meta.CELFields) == 0 {
+			continue
+		}
+		files, _ := filepath.Glob(filepath.Join("..", "examples", kind, "*.yaml"))
+		for _, f := range files {
+			b, err := os.ReadFile(f)
+			if err != nil {
+				t.Fatal(err)
 			}
-			for _, expr := range whens(doc) {
-				checked++
-				if _, err := Compile(ctx, expr); err != nil {
-					t.Errorf("%s: when %q: %v", f, expr, err)
+			dec := yaml.NewDecoder(strings.NewReader(string(b)))
+			for {
+				var doc any
+				if err := dec.Decode(&doc); err != nil {
+					break
+				}
+				for _, field := range meta.CELFields {
+					for _, expr := range valuesAt(doc, strings.Split(field.Path, ".")) {
+						checked[Context(field.Env)]++
+						if _, err := Compile(Context(field.Env), expr); err != nil {
+							t.Errorf("%s: %s %q: %v", f, field.Path, expr, err)
+						}
+					}
 				}
 			}
 		}
 	}
-	if checked == 0 {
-		t.Fatal("no `when` found in the examples; the walk is broken")
+	for _, c := range []Context{ContextFinding, ContextPackage, ContextRequest, ContextCVE} {
+		if checked[c] == 0 {
+			t.Errorf("no %s expression found in the examples; an advanced example should carry one", c)
+		}
 	}
 }
 
-func whens(v any) []string {
-	var out []string
-	switch n := v.(type) {
-	case map[string]any:
-		for k, c := range n {
-			if s, ok := c.(string); ok && k == "when" {
-				out = append(out, s)
-				continue
-			}
-			out = append(out, whens(c)...)
+// valuesAt returns the strings at a dotted path, where a segment ending in []
+// means every item of that array.
+func valuesAt(v any, path []string) []string {
+	if len(path) == 0 {
+		if s, ok := v.(string); ok {
+			return []string{s}
 		}
-	case []any:
-		for _, c := range n {
-			out = append(out, whens(c)...)
-		}
+		return nil
 	}
-	return out
+	m, ok := v.(map[string]any)
+	if !ok {
+		return nil
+	}
+	seg := path[0]
+	if strings.HasSuffix(seg, "[]") {
+		list, _ := m[strings.TrimSuffix(seg, "[]")].([]any)
+		var out []string
+		for _, item := range list {
+			out = append(out, valuesAt(item, path[1:])...)
+		}
+		return out
+	}
+	return valuesAt(m[seg], path[1:])
 }

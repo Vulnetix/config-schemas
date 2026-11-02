@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/DetectionRuleFeed.schema.json
+apiVersion: vulnetix.com/v1
+kind: DetectionRuleFeed
+metadata:
+  name: edge-suricata
+  labels:
+    team: netsec
+    engine: suricata
+  annotations:
+    consumer: Suricata sensors at the edge pull this feed every 15 minutes.
+spec:
+  displayName: Edge Suricata virtual patches
+  description: Block-lane Suricata rules for exploited edge appliance CVEs, fetched by the perimeter IPS.
+  format: SURICATA
+  schemaVersion: 1
+  entries:
+    - ruleTable: virtual_patch
+      ruleType: SURICATA
+      rule: 4d5e6f7a-8b9c-4d0e-9f1a-2b3c4d5e6f7a
+      cve: CVE-2024-3400
+    - ruleTable: virtual_patch
+      ruleType: SURICATA
+      rule: 5e6f7a8b-9c0d-4e1f-8a2b-3c4d5e6f7a8b
+      cve: CVE-2023-46805
+      disabled: true
+  selector:
+    when: kind == 'SURICATA' && (kev || epss >= 0.5) && cvss >= 7.0 && falsePositiveRisk != 'HIGH' && now - published < duration('8760h')
+  publish: true

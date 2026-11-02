@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/SavedSearch.schema.json
+apiVersion: vulnetix.com/v1
+kind: SavedSearch
+metadata:
+  name: dynamic-dns-lookups
+spec:
+  text: |
+    dns_events
+    | where qname endswith ('.duckdns.org', '.no-ip.org', '.ddns.net')

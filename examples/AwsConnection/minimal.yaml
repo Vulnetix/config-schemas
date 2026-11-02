@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/AwsConnection.schema.json
+apiVersion: vulnetix.com/v1
+kind: AwsConnection
+metadata:
+  name: default
+spec:
+  region: ap-southeast-2
+  sso:
+    startUrl: https://acme.awsapps.com/start

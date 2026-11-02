@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/CloudSensors.schema.json
+apiVersion: vulnetix.com/v1
+kind: CloudSensors
+metadata:
+  name: estate
+  labels:
+    scope: all-accounts
+  annotations:
+    note: Only account "*" applies today; a per-account document validates but is not stored yet.
+spec:
+  account: "*"
+  sources:
+    - inspector
+    - security-hub
+    - guardduty
+    - config
+    - macie
+    - access-analyzer
+    - waf
+    - compute
+    - compute-artifacts
+    - network-logs
+    - eks-workloads
+  deploy: true

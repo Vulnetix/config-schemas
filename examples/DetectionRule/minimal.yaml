@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/DetectionRule.schema.json
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata:
+  name: sigmahq-aws-root-login
+spec:
+  sigmahq: rules/cloud/aws/cloudtrail/aws_root_account_usage.yml

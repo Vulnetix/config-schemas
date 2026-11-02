@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/ApiSpecSource.schema.json
+apiVersion: vulnetix.com/v1
+kind: ApiSpecSource
+metadata:
+  name: payments-openapi
+spec:
+  source:
+    url:
+      url: https://api.acme.com/openapi.json

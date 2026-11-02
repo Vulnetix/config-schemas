@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/ScheduledReport.schema.json
+apiVersion: vulnetix.com/v1
+kind: ScheduledReport
+metadata:
+  name: daily-dns-digest
+spec:
+  searchRef: dynamic-dns-lookups
+  destination:
+    kind: messaging
+    connections: [secops-slack]

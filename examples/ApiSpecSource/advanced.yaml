@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/ApiSpecSource.schema.json
+apiVersion: vulnetix.com/v1
+kind: ApiSpecSource
+metadata:
+  name: payments-openapi
+  labels:
+    team: payments
+  annotations:
+    ticket: https://tracker.example.com/API-311
+spec:
+  source:
+    repo:
+      repository: acme/payments
+      path: api/openapi.yaml
+  schedule: daily
+  owner: payments-team
+  tags: [payments, public]
+---
+apiVersion: vulnetix.com/v1
+kind: ApiSpecSource
+metadata:
+  name: public-api-spec
+spec:
+  source:
+    url:
+      url: https://api.acme.com/openapi.json
+  probe:
+    mode: exact
+  schedule: hourly
+---
+apiVersion: vulnetix.com/v1
+kind: ApiSpecSource
+metadata:
+  name: staging-host
+spec:
+  source:
+    host:
+      host: staging.acme.com:8443
+  probe:
+    mode: authorized
+    authorize: true
+  schedule: weekly
+---
+apiVersion: vulnetix.com/v1
+kind: ApiSpecSource
+metadata:
+  name: edge-gateway
+spec:
+  source:
+    connector:
+      kind: aws_apigw
+      ref: a1b2c3d4e5
+  schedule: 6h
+  owner: platform-team
+  tags: [edge]

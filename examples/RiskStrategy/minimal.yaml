@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/RiskStrategy.schema.json
+apiVersion: vulnetix.com/v1
+kind: RiskStrategy
+metadata:
+  name: catch-all
+spec:
+  rules:
+    - metric: REMAINING
+      operator: ALWAYS

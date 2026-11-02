@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/RuntimeSensorPolicy.schema.json
+apiVersion: vulnetix.com/v1
+kind: RuntimeSensorPolicy
+metadata:
+  name: engineering-laptops
+  labels:
+    fleet: laptops
+  annotations:
+    ticket: https://jira.example.com/browse/SEC-2210
+spec:
+  description: Every engineer's laptop, in guard mode, plus the security team by address.
+  enabled: true
+  priority: 200
+  match:
+    emails: [alice@acme.example, bob@acme.example]
+    domains: [acme.example]
+    mdmIntegrations: [5e4d3c2b-1a09-4f8e-9d7c-6b5a4f3e2d1c]
+  credentialMode: device-key
+  mode: guard
+  hold: 15m
+  feeds:
+    - feedRef: edge-waf
+    - https://vulnetix.com/feeds/0b6f2c1e-4d3a-4e5f-8a9b-7c6d5e4f3a2b/9c8b7a6f-5e4d-4c3b-8a2f-1e0d9c8b7a6f/rules.json
+  feedKey: KymtMlKOJvj2IkhUbMpXRl/JBmmOwu/LIj8BekwmQXk=
+  egressListen: 127.0.0.1:8181
+  dnsListen: 127.0.0.1:5353
+  forward: [siem]
+  inventoryEvery: 6h
+  protection: hardened
+  allowUserStop: false
+  heartbeatAlertMinutes: 30
+---
+apiVersion: vulnetix.com/v1
+kind: RuntimeSensorPolicy
+metadata:
+  name: servers-locked
+spec:
+  description: Production servers enrolled by MDM, blocking every match on a block-mode rule.
+  priority: 10
+  match:
+    mdmIntegrations: [5e4d3c2b-1a09-4f8e-9d7c-6b5a4f3e2d1c]
+  credentialMode: org-key
+  mode: enforce
+  feeds:
+    - feedRef: edge-suricata
+  protection: locked
+  heartbeatAlertMinutes: 5

@@ -1,0 +1,92 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/AiFirewallPolicy.schema.json
+apiVersion: vulnetix.com/v1
+kind: AiFirewallPolicy
+metadata:
+  name: default
+  org: 6f2a1c3e-0000-0000-0000-000000000001
+  labels:
+    team: platform-security
+  annotations:
+    ticket: https://tracker.example.com/SEC-2210
+spec:
+  prune: true
+  settings:
+    logsEnabled: true
+  baseline:
+    enabled: true
+    ref: recommended
+    exclude:
+      - pii-phone
+  providers:
+    - slug: anthropic
+      action: allow
+      key:
+        fromEnv: ANTHROPIC_PROVIDER_KEY
+    - slug: acme-vllm
+      action: allow
+      key:
+        fromFile: ~/.config/acme/vllm.key
+    - slug: openrouter
+      action: deny
+    - slug: groq
+      action: default
+  models:
+    - slug: claude-sonnet-4-5
+      provider: anthropic
+      anyProvider: false
+      action: allow
+    - slug: qwen3-coder-30b
+      provider: acme-vllm
+      action: allow
+    - slug: gpt-4o-mini
+      anyProvider: true
+      action: deny
+  guardrails:
+    - name: block-aws-keys
+      baselineId: secrets-aws-access-key
+      ruleType: blocked_pattern
+      action: block
+      pattern: '(?i)AKIA[0-9A-Z]{16}'
+      priority: 10
+      enabled: true
+    - name: cap-conversation
+      ruleType: max_messages
+      action: block
+      pattern: 200
+      priority: 50
+    - name: redact-pii
+      ruleType: pii_redact
+      action: redact
+      priority: 20
+    - name: sealed-blocks
+      ruleType: delimiter_integrity
+      action: block
+      priority: 5
+    - name: strip-shell-for-codex
+      ruleType: tool_deny
+      action: strip
+      pattern: Bash
+      priority: 30
+      when: client == 'codex'
+    - name: flag-filesystem-writes
+      ruleType: expression
+      action: flag
+      priority: 40
+      enabled: false
+      when: "'filesystem' in mcpServers && tools.exists(t, t.startsWith('mcp__filesystem__write'))"
+  capabilities:
+    approved-mcp:
+      family: mcp
+      list: allow
+      action: block
+      patterns: [github, "linear*"]
+    banned-clients:
+      family: client
+      list: deny
+      action: block
+      priority: 10
+      patterns: [unknown]
+  holdPolicy:
+    holdUnknown: true
+    holdTimeoutMinutes: 240
+    holdTimeoutAction: deny

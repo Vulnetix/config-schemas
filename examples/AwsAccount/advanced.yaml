@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/AwsAccount.schema.json
+apiVersion: vulnetix.com/v1
+kind: AwsAccount
+metadata:
+  name: production
+  labels:
+    environment: production
+  annotations:
+    owner: platform-team@example.com
+spec:
+  accountId: "123456789012"
+  accountName: acme-production
+  roleName: AdministratorAccess
+  enabled: true
+  deploy: true

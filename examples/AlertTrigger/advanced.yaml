@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/AlertTrigger.schema.json
+apiVersion: vulnetix.com/v1
+kind: AlertTrigger
+metadata:
+  name: dns-investigate
+  labels:
+    team: secops
+  annotations:
+    runbook: https://wiki.example.com/secops/dynamic-dns
+spec:
+  displayName: Dynamic DNS lookups from one host
+  searchRef: dynamic-dns-lookups
+  everySec: 300
+  enabled: true
+  levers:
+    minRows: 3
+    windowSec: 900
+    countBy: src_ip
+    cooldownSec: 3600
+    maxPerHour: 4
+    hours: business
+    zone: Australia/Melbourne
+    rowsCap: 25
+    columns: [ts, src_ip, qname]
+    ask: always
+  destination:
+    kind: workflow
+    severity: warning
+---
+apiVersion: vulnetix.com/v1
+kind: AlertTrigger
+metadata:
+  name: root-login-page
+spec:
+  displayName: AWS root console login
+  ruleRef: sigmahq-aws-root-login
+  everySec: 60
+  levers:
+    windowSec: 300
+    cooldownSec: 900
+    hours: always
+  destination:
+    kind: messaging
+    connections: [secops-slack]
+    severity: critical
+---
+apiVersion: vulnetix.com/v1
+kind: AlertTrigger
+metadata:
+  name: failed-logins-digest
+spec:
+  displayName: Failed SSO logins outside business hours
+  searchRef: failed-sso-logins
+  everySec: 3600
+  enabled: false
+  levers:
+    minRows: 20
+    windowSec: 3600
+    countBy: user_name
+    hours: outside_business
+    zone: Europe/London
+    rowsCap: 50
+  destination:
+    kind: email
+    emails: [secops@example.com, oncall@example.com]
+    severity: notice

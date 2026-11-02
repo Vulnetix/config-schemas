@@ -109,7 +109,9 @@ Validation never fetches anything: `$ref`s resolve against the embedded copy.
 |---|---|
 | `schemas/<Kind>.schema.json` | One schema per kind. `$id` uses `v0.0.0-dev`; the release rewrites it to the tag. |
 | `schemas/common.schema.json` | Shared definitions: metadata, `valueFrom` secrets, CEL expressions, purl, severities, VEX justifications. |
-| `examples/<Kind>/*.yaml` | Valid documents. Every kind needs at least one. |
+| `examples/<Kind>/minimal.yaml` | One document with only the required fields. |
+| `examples/<Kind>/advanced.yaml` | Every field, a CEL rule where the kind takes one, and secrets as `valueFrom.env`. Several documents when the kind has mutually exclusive forms. The Terraform provider and the docs render both files; a test holds them to this shape. |
+| `examples/<Kind>/*.yaml` | Other valid documents. |
 | `testdata/invalid/<Kind>/*.yaml` | Documents that must be rejected; the first line says why. |
 | `cmd/schemacheck` | `release` builds the release files; `compat` fails a release that breaks the previous one without a major bump. |
 | `cel/` | The CEL environments for rule expressions, with golden vectors. See [cel/README.md](cel/README.md). |

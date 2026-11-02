@@ -1,0 +1,24 @@
+apiVersion: vulnetix.com/v1
+kind: Suppression
+metadata:
+  name: lodash-template-not-reachable
+  labels:
+    team: payments
+  annotations:
+    ticket: https://jira.example.com/browse/SEC-1234
+spec:
+  type: false_positive
+  reason: lodash.template is never called with user input; the build only renders static templates.
+  justification: vulnerable_code_not_in_execute_path
+  scope:
+    category: sca
+    rule: CVE-2021-23337
+    target: pkg:npm/lodash
+    purl: pkg:npm/lodash@4.17.20
+    path: web/package-lock.json
+    line: 1204
+    lineRange: 1204-1210
+    repository: acme/storefront
+    branch: main
+  expires: 2027-06-30T00:00:00Z
+  when: severity != 'critical' && !kev && repo == 'acme/storefront'
