@@ -6,7 +6,8 @@ import (
 )
 
 // Markdown renders the reference for every context: variables with types and
-// bounds, then the custom functions and the limits. cmd/celdoc prints it for
+// bounds, then the custom functions, what each runtime does with a rule it
+// cannot evaluate, and the limits. cmd/celdoc prints it for
 // the docs site, and README.md carries the same text between markers, which
 // TestREADMEIsCurrent holds to.
 func Markdown() string {
@@ -19,6 +20,11 @@ func Markdown() string {
 	b.WriteString("| Function | Description |\n|---|---|\n")
 	for _, f := range Functions() {
 		fmt.Fprintf(&b, "| %s | %s |\n", f.Signature, cell(f.Doc))
+	}
+	b.WriteString("\n### When a rule cannot be evaluated\n\nThe library reports a compile or evaluation error and nothing more. What a rule does with it differs by runtime, and only the factory gate fails closed.\n\n")
+	b.WriteString("| Runtime | Field | On an error |\n|---|---|---|\n")
+	for _, r := range Runtimes() {
+		fmt.Fprintf(&b, "| %s | %s | %s |\n", r.Name, r.Where, cell(r.OnError))
 	}
 	fmt.Fprintf(&b, "\n### Limits\n\n"+
 		"| Limit | Value |\n|---|---|\n"+

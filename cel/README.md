@@ -1,6 +1,6 @@
 # cel
 
-Package `github.com/vulnetix/config-schemas/cel` compiles and evaluates the [CEL](https://cel.dev) expressions in Vulnetix config documents: the `when` of quality gate, jail, prioritisation and suppression rules, package firewall and AI firewall rules, factory trigger conditions, and detection rule feed selectors. Every expression must return `bool`.
+Package `github.com/vulnetix/config-schemas/cel` compiles and evaluates the [CEL](https://cel.dev) expressions in Vulnetix config documents: the `when` of jail (and so factory gate), prioritisation and suppression rules, package firewall and AI firewall rules, factory trigger conditions, and detection rule feed selectors. Every expression must return `bool`.
 
 The vulnetix CLI and the config engine in vdb-site both use this package and both run the golden vectors in `testdata/vectors`, so a rule gives the same answer in CI as on the server.
 
@@ -25,7 +25,7 @@ ok, err := cel.EvalFinding(rule.When, cel.Finding{Severity: "high", KEV: true})
 
 They share one `cel.Cache` of up to 4096 programs. A compile error is cached too, so a stored rule that does not compile fails the same way, cheaply, every time; `cel.NewCache(n)` gives a caller its own.
 
-What a runtime does when a rule errors is its own business rule, and each one documents it: the jail and quality gate fail closed (the rule matches), a suppression or prioritisation rule fails open (it does not match), and the firewalls log and skip the rule.
+What a runtime does when a rule errors is its own business rule, and the reference below lists each one ("When a rule cannot be evaluated"). In short, only the factory gate fails closed (the rule breaches). The jail skips a rule whose `when` does not compile or uses a variable its facts lack, and reports `indeterminate` (CLI exit 3) when a fact errors. A suppression or prioritisation rule fails open (it does not match), and the package and AI firewalls skip the rule and log it.
 
 Each context has its own input struct (`Finding`, `Package`, `Request`, `Event`, `CVE`), and `Eval` refuses an input of another context. Every struct has a `Now` field; leave it zero to evaluate at the current time, or set it to get the same answer on every run. Derived variables (marked in the tables) are computed from the other fields and have no field of their own.
 
@@ -189,6 +189,19 @@ Available in every context, alongside the [CEL standard library](https://github.
 | `string.matchesPurl(pattern string) bool` | Package URL match. The pattern is a purl: without a version it matches every version, with one it matches that version only. A pattern whose name ends in `/*` or `:*` matches every package under that namespace, as package firewall allow entries do: `pkg:npm/@acme/*` covers `pkg:npm/@acme/tool@1.0.0` but not `pkg:npm/@acme-evil/tool`. Qualifiers and subpaths are ignored. Names compare as written. An invalid purl or pattern is an evaluation error. |
 | `semverCompare(a string, b string) int` | -1, 0 or 1 as `a` is lower than, equal to or higher than `b` in semantic version order. Precedence follows SemVer 2.0.0: pre-releases rank below the release and build metadata is ignored. A leading `v` is optional; the shorthands `1` and `1.2` are not versions. A value that is not a semantic version is an evaluation error; guard with `isSemver`. |
 | `isSemver(v string) bool` | Whether `v` is a semantic version, with or without a leading `v`. |
+
+### When a rule cannot be evaluated
+
+The library reports a compile or evaluation error and nothing more. What a rule does with it differs by runtime, and only the factory gate fails closed.
+
+| Runtime | Field | On an error |
+|---|---|---|
+| Jail (vdb-api) | `JailPolicy` rule `when` | Does not fail closed. A rule whose `when` does not compile, or uses a finding variable the facts of its rule kind do not carry yet, is skipped with a warning and does not run. A fact the expression fails on leaves the rule `indeterminate`, so the verdict is `indeterminate` and the CLI exits 3; a breached rule elsewhere still wins, with exit 1. |
+| Factory gate (vdb-site) | `JailPolicy` rule `when`, in a workflow gate node | The only runtime that fails closed. A `when` that does not compile or fails on a finding makes the rule breach, and its label says it could not be evaluated. So does a scan that kept fewer findings than it found, unless the count over the kept ones already breaches. A rule with `onBreach: WARN` does not fail the gate. |
+| Risk prioritisation (vdb-site) | `RiskStrategy` rule `when` | Fails open. A finding the expression fails on does not match. A rule that does not compile is logged and matches nothing. |
+| Suppression | `Suppression` `when` | Fails open. A finding the expression fails on is not suppressed. A rule whose expression cannot be evaluated covers nothing in that run and the error is logged; every other rule applies as usual. |
+| Package firewall | `PackageList` entry `when` | The entry is skipped and the error is logged: a deny entry does not block and an allow entry does not waive, so a broken condition neither blocks nor waives more than was declared. |
+| AI firewall | `AiFirewallPolicy` rule `when` | The rule is skipped and named in the decision's skipped list with the error. The gateway does not block or flag on a condition it could not evaluate. |
 
 ### Limits
 

@@ -71,7 +71,7 @@
           "$ref": "common.schema.json#/$defs/timestamp"
         },
         "when": {
-          "description": "An extra condition a finding must meet, over the finding variables.",
+          "description": "An extra condition a finding must meet, over the finding variables. It fails open: a finding the expression fails on is not suppressed, and a rule that cannot be evaluated covers nothing and is logged.",
           "$ref": "common.schema.json#/$defs/celExpression"
         }
       }

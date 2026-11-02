@@ -59,7 +59,7 @@
           "default": "full"
         },
         "when": {
-          "description": "A CEL condition over the package variables (purl, ecosystem, name, version, published, ageDays, versionLag, malware, cvss, epss, cess, kev, eol, exploitMaturity, badActor, now). The entry applies only to versions for which it is true: a deny entry blocks only those versions, an allow entry waives only for them. Left out, the entry applies to every version it names.",
+          "description": "A CEL condition over the package variables (purl, ecosystem, name, version, published, ageDays, versionLag, malware, cvss, epss, cess, kev, eol, exploitMaturity, badActor, now). The entry applies only to versions for which it is true: a deny entry blocks only those versions, an allow entry waives only for them. Left out, the entry applies to every version it names. An entry whose condition fails to evaluate is skipped and logged: a deny entry does not block and an allow entry does not waive.",
           "$ref": "common.schema.json#/$defs/celExpression"
         }
       }

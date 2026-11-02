@@ -81,7 +81,7 @@
           "format": "uuid"
         },
         "when": {
-          "description": "The condition of a CEL rule, over the finding variables.",
+          "description": "The condition of a CEL rule, over the finding variables. It fails open: a finding the expression fails on does not match, and a rule that does not compile matches nothing and is logged.",
           "$ref": "common.schema.json#/$defs/celExpression"
         }
       },

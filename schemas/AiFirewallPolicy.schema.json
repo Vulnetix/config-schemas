@@ -167,7 +167,7 @@
         },
         "enabled": { "type": "boolean", "default": true },
         "when": {
-          "description": "A CEL condition over the request variables (provider, model, client, tools, mcpServers, skills, now). The rule applies only to requests for which it is true; left out, it applies to every request. For an expression rule it is the match itself, and is required.",
+          "description": "A CEL condition over the request variables (provider, model, client, tools, mcpServers, skills, now). The rule applies only to requests for which it is true; left out, it applies to every request. For an expression rule it is the match itself, and is required. A rule whose condition fails to evaluate is skipped and named in the decision's skipped list.",
           "$ref": "common.schema.json#/$defs/celExpression"
         }
       },

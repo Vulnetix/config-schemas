@@ -146,7 +146,7 @@
           "$ref": "#/$defs/onStale"
         },
         "when": {
-          "description": "An extra condition each fact must meet to be counted, over the finding variables.",
+          "description": "An extra condition each fact must meet to be counted, over the finding variables. A when that does not compile, or that uses a finding variable the facts of the rule kind do not carry yet, skips the rule with a warning. A fact it fails on leaves the rule indeterminate (verdict indeterminate, CLI exit 3). The factory gate fails closed instead: the rule breaches.",
           "$ref": "common.schema.json#/$defs/celExpression"
         }
       },
