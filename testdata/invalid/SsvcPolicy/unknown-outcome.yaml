@@ -1,0 +1,7 @@
+# the outcomes are Track, Track*, Attend and Act (CISA's table), not the deployer tree's
+apiVersion: vulnetix.com/v1
+kind: SsvcPolicy
+metadata: {name: default}
+spec:
+  overrides:
+    - {when: kev, outcome: Immediate}

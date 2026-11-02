@@ -1,3 +1,5 @@
+| `ssvc/` | The CISA SSVC decision (Coordinator table 2.0.3) and the SsvcPolicy that configures it, shared by every runtime that decides. |
+| `SsvcPolicy` | v1.8.0 | How the tenant makes its CISA SSVC decision (Track, Track*, Attend, Act): how signals become the decision points, table cells read differently, rules that decide by finding or repository, and what each outcome asks. One per tenant. |
 # config-schemas
 
 JSON Schemas (draft 2020-12) for every Vulnetix config-as-code kind: the documents `vulnetix config apply` reads from `.vulnetix/config/`, the Terraform provider manages, and the console's "Download as code" writes. This repository is the source of truth; the config engine, the CLI and the provider import it pinned to a release.

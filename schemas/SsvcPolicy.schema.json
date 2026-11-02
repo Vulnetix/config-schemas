@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/SsvcPolicy.schema.json",
+  "title": "SsvcPolicy",
+  "x-vulnetix": {"validateOnly":false,"singleton":true,"dependsOn":[],"secrets":[],"celFields":[{"path":"spec.exploitation.active","env":"finding"},{"path":"spec.exploitation.poc","env":"finding"},{"path":"spec.automatable","env":"finding"},{"path":"spec.technicalImpact","env":"finding"},{"path":"spec.overrides[].when","env":"finding"}]},
+  "description": "How the tenant makes its CISA SSVC decision (https://www.cisa.gov/stakeholder-specific-vulnerability-categorization-ssvc) for a finding: Track, Track*, Attend or Act. The decision table is the CISA Coordinator table 2.0.3 and is fixed: four decision points (exploitation, automatable, technical impact, mission and well-being) go in. This document configures how Vulnetix's signals become those four values (CEL over the finding variables, and the repository's criticality for mission and well-being), which table cells the organisation reads differently (mapping), which findings it decides by rule instead (overrides), and what each outcome asks of it (outcomes). A field left out takes the default, which is the policy of a tenant with no document. One per tenant.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "SsvcPolicy" },
+    "metadata": { "$ref": "common.schema.json#/$defs/singletonMetadata" },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "exploitation": {
+          "description": "When a finding counts as exploited. Active wins when both conditions hold; when neither does, exploitation is none.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "active": {
+              "description": "Credible evidence of exploitation in the wild. CEL over the finding variables.",
+              "$ref": "common.schema.json#/$defs/celExpression",
+              "default": "kev || exploitMaturity in ['active', 'weaponized']"
+            },
+            "poc": {
+              "description": "A public proof of concept or a well-known method exists. CEL over the finding variables.",
+              "$ref": "common.schema.json#/$defs/celExpression",
+              "default": "exploitMaturity == 'poc' || exploitCount > 0"
+            }
+          }
+        },
+        "automatable": {
+          "description": "Holds when an attacker can reliably automate steps 1 to 4 of the kill chain (reconnaissance, weaponization, delivery, exploitation) for the finding. CEL over the finding variables.",
+          "$ref": "common.schema.json#/$defs/celExpression",
+          "default": "cvss >= 9.0 || epss >= 0.7"
+        },
+        "technicalImpact": {
+          "description": "Holds when exploiting the finding gives total control of the software or total disclosure of its information; otherwise the impact is partial. CEL over the finding variables.",
+          "$ref": "common.schema.json#/$defs/celExpression",
+          "default": "cvss >= 9.0 || malicious"
+        },
+        "missionWellBeing": {
+          "description": "The mission and well-being value of a finding in a repository, by the repository's criticality (RepositorySettings spec.criticality). unclassified is a repository with no criticality.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "low": { "$ref": "#/$defs/missionValue", "default": "low" },
+            "medium": { "$ref": "#/$defs/missionValue", "default": "medium" },
+            "high": { "$ref": "#/$defs/missionValue", "default": "high" },
+            "critical": { "$ref": "#/$defs/missionValue", "default": "high" },
+            "unclassified": { "$ref": "#/$defs/missionValue", "default": "medium" }
+          }
+        },
+        "mapping": {
+          "description": "Reads cells of the decision table differently. A rule matches every cell whose decision points are among the values it lists; a decision point it leaves out matches any value. When several rules match a cell, the last one wins. A rule changes a cell for the whole tenant: to decide by a property of the finding or its repository, use overrides.",
+          "type": "array",
+          "maxItems": 36,
+          "items": {
+            "type": "object",
+            "required": ["outcome"],
+            "additionalProperties": false,
+            "properties": {
+              "exploitation": { "type": "array", "uniqueItems": true, "minItems": 1, "items": { "enum": ["none", "poc", "active"] } },
+              "automatable": { "type": "array", "uniqueItems": true, "minItems": 1, "items": { "enum": ["no", "yes"] } },
+              "technicalImpact": { "type": "array", "uniqueItems": true, "minItems": 1, "items": { "enum": ["partial", "total"] } },
+              "missionWellBeing": { "type": "array", "uniqueItems": true, "minItems": 1, "items": { "$ref": "#/$defs/missionValue" } },
+              "outcome": { "$ref": "#/$defs/outcome" }
+            }
+          }
+        },
+        "overrides": {
+          "description": "Decides the findings a condition holds for by rule, after the table and the mapping. The first rule that holds sets the outcome, so list the most specific first.",
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "required": ["when", "outcome"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "description": "Shown beside the decision when this rule set it.",
+                "type": "string",
+                "maxLength": 100
+              },
+              "when": {
+                "description": "CEL over the finding variables, including the repository's labels, owner and criticality.",
+                "$ref": "common.schema.json#/$defs/celExpression"
+              },
+              "outcome": { "$ref": "#/$defs/outcome" }
+            }
+          }
+        },
+        "outcomes": {
+          "description": "What each outcome asks of the organisation. The priority is what a finding with that outcome is ranked as; dueDays is its remediation window, and 0 or left out means the standard update cycle.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "track": { "$ref": "#/$defs/outcomeSpec" },
+            "trackStar": { "$ref": "#/$defs/outcomeSpec" },
+            "attend": { "$ref": "#/$defs/outcomeSpec" },
+            "act": { "$ref": "#/$defs/outcomeSpec" }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "missionValue": {
+      "description": "Mission and well-being: the combination of mission prevalence and public well-being impact.",
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "outcome": {
+      "description": "The SSVC decision. Track and Track* are remediated in the standard update cycle (Track* is watched more closely), Attend sooner, Act as soon as possible.",
+      "type": "string",
+      "enum": ["Track", "Track*", "Attend", "Act"]
+    },
+    "outcomeSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "priority": {
+          "description": "low, medium, high or immediate. Defaults: Track low, Track* medium, Attend high, Act immediate.",
+          "type": "string",
+          "enum": ["low", "medium", "high", "immediate"]
+        },
+        "dueDays": {
+          "description": "The remediation window in days. 0 or left out is the standard update cycle.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 365,
+          "default": 0
+        }
+      }
+    }
+  }
+}

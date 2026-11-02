@@ -1,0 +1,52 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/SsvcPolicy.schema.json
+apiVersion: vulnetix.com/v1
+kind: SsvcPolicy
+metadata:
+  name: default
+  labels:
+    team: platform-security
+  annotations:
+    ticket: https://tracker.example.com/SEC-3120
+spec:
+  # How Vulnetix's signals become the four decision points. These are the
+  # defaults written out, with a stricter automatable test.
+  exploitation:
+    active: kev || exploitMaturity in ['active', 'weaponized']
+    poc: exploitMaturity == 'poc' || exploitCount > 0
+  automatable: cvss >= 9.0 || epss >= 0.5
+  technicalImpact: cvss >= 9.0 || malicious
+  # Mission and well-being, from the repository's criticality.
+  missionWellBeing:
+    low: low
+    medium: medium
+    high: high
+    critical: high
+    unclassified: medium
+  # Cells of the CISA table the organisation reads differently.
+  mapping:
+    - exploitation: [active]
+      automatable: [no, yes]
+      technicalImpact: [total]
+      missionWellBeing: [medium, high]
+      outcome: Act
+  # Decide by rule, first match wins.
+  overrides:
+    - name: card data in scope
+      when: labels['pci'] == 'in-scope' && severity in ['critical', 'high']
+      outcome: Act
+    - name: no fix and not reachable
+      when: "!reachable && fixAvailability == 'no_fix'"
+      outcome: Track
+  outcomes:
+    track:
+      priority: low
+      dueDays: 90
+    trackStar:
+      priority: medium
+      dueDays: 60
+    attend:
+      priority: high
+      dueDays: 14
+    act:
+      priority: immediate
+      dueDays: 3

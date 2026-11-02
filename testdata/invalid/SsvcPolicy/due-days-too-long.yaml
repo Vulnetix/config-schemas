@@ -1,0 +1,7 @@
+# a remediation window is at most a year
+apiVersion: vulnetix.com/v1
+kind: SsvcPolicy
+metadata: {name: default}
+spec:
+  outcomes:
+    track: {dueDays: 400}

@@ -1,0 +1,5 @@
+# one per tenant, named default
+apiVersion: vulnetix.com/v1
+kind: SsvcPolicy
+metadata: {name: strict}
+spec: {}

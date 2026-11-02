@@ -1,0 +1,6 @@
+# the mission and well-being keys are the criticalities and unclassified
+apiVersion: vulnetix.com/v1
+kind: SsvcPolicy
+metadata: {name: default}
+spec:
+  missionWellBeing: {severe: high}
