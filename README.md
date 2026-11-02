@@ -1,5 +1,3 @@
-| `ssvc/` | The CISA SSVC decision (Coordinator table 2.0.3) and the SsvcPolicy that configures it, shared by every runtime that decides. |
-| `SsvcPolicy` | v1.8.0 | How the tenant makes its CISA SSVC decision (Track, Track*, Attend, Act): how signals become the decision points, table cells read differently, rules that decide by finding or repository, and what each outcome asks. One per tenant. |
 # config-schemas
 
 JSON Schemas (draft 2020-12) for every Vulnetix config-as-code kind: the documents `vulnetix config apply` reads from `.vulnetix/config/`, the Terraform provider manages, and the console's "Download as code" writes. This repository is the source of truth; the config engine, the CLI and the provider import it pinned to a release.
@@ -66,6 +64,7 @@ Reference documentation for every kind is at https://docs.vulnetix.com (the Plat
 | `TeaAccessPolicy` | v1.6.0 | Who may read a TEA product, component or collection: private, shared with named organisations, or public. |
 | `TeaPublicationTarget` | v1.6.0 | A remote TEA server registered for mirroring, with its credential. |
 | `Campaign` | v1.6.0 | A remediation campaign: its scope, done criteria, timing, deadline and contributors. Removing it archives the campaign. |
+| `SsvcPolicy` | v1.8.0 | How the tenant makes its CISA SSVC decision (Track, Track*, Attend, Act): how signals become the decision points, table cells read differently, rules that decide by finding or repository, and what each outcome asks. One per tenant. |
 
 A field or kind whose description says "Not stored yet" (`CloudSensors` for one account), and the whole of `VexSource`, is ahead of the server: it validates today, and applying it needs the backend change the description names.
 
@@ -148,6 +147,7 @@ Validation never fetches anything: `$ref`s resolve against the embedded copy.
 | `cmd/schemacheck` | `release` builds the release files; `compat` fails a release that breaks the previous one without a major bump. |
 | `cel/` | The CEL environments for rule expressions, with golden vectors. See [cel/README.md](cel/README.md). |
 | `cmd/celdoc` | Prints the CEL variable reference as Markdown for the docs site. |
+| `ssvc/` | The CISA SSVC decision (Coordinator table 2.0.3) and the SsvcPolicy that configures it, shared by every runtime that decides. |
 
 ## Develop
 
