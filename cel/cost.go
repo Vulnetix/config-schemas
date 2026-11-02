@@ -40,6 +40,8 @@ func (e sizeEstimator) EstimateSize(node checker.AstNode) *checker.SizeEstimate 
 		max = v.MaxValueItems
 	case v.Type == typeStringMap && len(path) == 3 && path[1] == "@values" && path[2] == "@items":
 		max = v.MaxLen
+	case v.Type == typeLabelMap && len(path) == 2 && (path[1] == "@keys" || path[1] == "@values"):
+		max = v.MaxLen
 	default:
 		return nil
 	}

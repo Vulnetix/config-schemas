@@ -37,6 +37,8 @@ const (
 	typeTimestamp  = "timestamp"
 	typeStringList = "list(string)"
 	typeStringMap  = "map(string, list(string))"
+	// typeLabelMap is a map of string to string, such as a repository's labels.
+	typeLabelMap = "map(string, string)"
 )
 
 // String bounds. The estimated cost of an expression is computed from them,
@@ -99,6 +101,9 @@ var variables = map[Context][]Variable{
 		{Name: "repo", Type: typeString, MaxLen: lenName, Doc: "Repository full name, `owner/name`."},
 		{Name: "branch", Type: typeString, MaxLen: lenName, Doc: "Branch the finding was scanned on."},
 		{Name: "path", Type: typeString, MaxLen: lenPath, Doc: "File the finding came from, such as the manifest or lock file, relative to the repository root."},
+		{Name: "labels", Type: typeLabelMap, MaxLen: lenID, MaxItems: 50, Doc: "The key/value labels of the repository the finding is in, as set on the repository's asset record or in a RepositorySettings document: `labels['tier'] == 'prod'`. Empty when the repository has none, and in a runtime that does not know the repository's asset record, so `'tier' in labels` is false there."},
+		{Name: "owner", Type: typeString, MaxLen: lenName, Doc: "Who owns the repository: a team name, a user name or an email address, as set on its asset record. Empty when none is set."},
+		{Name: "criticality", Type: typeString, MaxLen: lenEnum, Doc: "How much the business depends on the repository: `low`, `medium`, `high` or `critical`. Empty when none is set, so `criticality in ['high', 'critical']` is false for an unclassified repository."},
 		nowVar,
 	},
 	// package-firewall internal/policy.Signal and internal/types.OrgConfig.

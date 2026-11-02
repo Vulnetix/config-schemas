@@ -53,6 +53,8 @@ func bound(v Variable) string {
 		return fmt.Sprintf("%d items of %d chars", v.MaxItems, v.MaxLen)
 	case typeStringMap:
 		return fmt.Sprintf("%d keys, %d items each, of %d chars", v.MaxItems, v.MaxValueItems, v.MaxLen)
+	case typeLabelMap:
+		return fmt.Sprintf("%d keys, keys and values of %d chars", v.MaxItems, v.MaxLen)
 	}
 	return ""
 }

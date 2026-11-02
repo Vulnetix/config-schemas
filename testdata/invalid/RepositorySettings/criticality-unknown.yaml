@@ -1,0 +1,8 @@
+# criticality is one of low, medium, high, critical
+apiVersion: vulnetix.com/v1
+kind: RepositorySettings
+metadata: {name: acme-api}
+spec:
+  repository: acme/api
+  autonomy: observe
+  criticality: severe

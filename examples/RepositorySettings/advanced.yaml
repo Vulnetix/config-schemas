@@ -17,3 +17,11 @@ spec:
   defaultsOff:
     - lint-sweep
     - test-sweep
+  labels:
+    tier: prod
+    data: pii
+    pci: in-scope
+  owner:
+    kind: team
+    name: payments
+  criticality: critical

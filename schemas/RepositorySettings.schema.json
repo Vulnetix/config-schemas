@@ -3,7 +3,7 @@
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/RepositorySettings.schema.json",
   "title": "RepositorySettings",
   "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[]},
-  "description": "The Software Factory's controls for one repository: the settings panel of the Factory repositories page. The repository must be one the factory can see, through a managed organisation or another signal. metadata.name is the repository lower-cased, with every run of characters other than a to z and 0 to 9 replaced by one hyphen: acme-payments-api for acme/payments-api. A field left out means its default. Deleting the document removes the repository's own settings, so it runs at the tenant's autonomy.default again, and removes its monthly token cap; the record of the change is kept in the audit trail.",
+  "description": "The Software Factory's controls for one repository: the settings panel of the Factory repositories page. The repository must be one the factory can see, through a managed organisation or another signal. metadata.name is the repository lower-cased, with every run of characters other than a to z and 0 to 9 replaced by one hyphen: acme-payments-api for acme/payments-api. A field left out means its default. The asset fields (labels, owner and criticality) describe the repository as an asset of the business: they are stored per repository, shown on the Repositories page, and become the `labels`, `owner` and `criticality` variables of the CEL finding context, so a risk, suppression, jail or gate rule can select on them. They need the saas migration 20261228000000_repository_asset; until it is applied a document that sets one is refused. Deleting the document removes the repository's own settings, so it runs at the tenant's autonomy.default again, removes its monthly token cap and clears its asset fields; the record of the change is kept in the audit trail.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],
   "additionalProperties": false,
@@ -57,6 +57,38 @@
             "enum": ["pr-review", "ci-fix", "test-sweep", "lint-sweep", "issue-to-pr", "approve-ready", "conflict-fix"]
           },
           "default": []
+        },
+        "labels": {
+          "description": "Key/value labels on the repository as an asset, such as tier: prod or data: pii. At most 50. Keys are lower case letters, digits and . _ / - (at most 63 characters, starting and ending with a letter or digit); values are at most 256 characters. In CEL: labels['tier'] == 'prod'. A label dropped from the document is removed from the repository.",
+          "type": "object",
+          "maxProperties": 50,
+          "additionalProperties": { "type": "string", "maxLength": 256 },
+          "propertyNames": { "pattern": "^[a-z0-9]([a-z0-9._/-]{0,61}[a-z0-9])?$" },
+          "default": {}
+        },
+        "owner": {
+          "description": "Who owns the repository: a team, a user or an email address. In CEL, `owner` is the name.",
+          "type": "object",
+          "required": ["kind", "name"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "description": "team: a team name. user: a user name on the forge or in Vulnetix. email: an email address.",
+              "type": "string",
+              "enum": ["team", "user", "email"]
+            },
+            "name": {
+              "description": "The team name, the user name or the email address.",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 320
+            }
+          }
+        },
+        "criticality": {
+          "description": "How much the business depends on the repository: low, medium, high or critical. Left out, the repository is unclassified and `criticality` is empty in CEL. It is the mission and well-being input of the SSVC decision.",
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"]
         }
       }
     }

@@ -40,6 +40,10 @@ type Finding struct {
 	Repo            string   `json:"repo" yaml:"repo"`
 	Branch          string   `json:"branch" yaml:"branch"`
 	Path            string   `json:"path" yaml:"path"`
+	// Labels, Owner and Criticality come from the repository's asset record.
+	Labels      map[string]string `json:"labels" yaml:"labels"`
+	Owner       string            `json:"owner" yaml:"owner"`
+	Criticality string            `json:"criticality" yaml:"criticality"`
 	// Now is the evaluation time. Zero means time.Now when Eval runs; vectors
 	// set it so they give the same answer on every machine.
 	Now time.Time `json:"now" yaml:"now"`
@@ -76,6 +80,9 @@ func (f Finding) vars(clock time.Time) map[string]any {
 		"repo":            f.Repo,
 		"branch":          f.Branch,
 		"path":            f.Path,
+		"labels":          labelMap(f.Labels),
+		"owner":           f.Owner,
+		"criticality":     f.Criticality,
 		"now":             orNow(f.Now, clock),
 	}
 }
@@ -285,6 +292,14 @@ func strs(s []string) []string {
 		return []string{}
 	}
 	return s
+}
+
+// labelMap turns a nil map into an empty one, for the same reason as strs.
+func labelMap(m map[string]string) map[string]string {
+	if m == nil {
+		return map[string]string{}
+	}
+	return m
 }
 
 // orNow is the input's own Now, or the clock when the caller left it zero.

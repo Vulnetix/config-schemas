@@ -159,6 +159,8 @@ func celType(t string) (*celgo.Type, error) {
 		return celgo.ListType(celgo.StringType), nil
 	case typeStringMap:
 		return celgo.MapType(celgo.StringType, celgo.ListType(celgo.StringType)), nil
+	case typeLabelMap:
+		return celgo.MapType(celgo.StringType, celgo.StringType), nil
 	}
 	return nil, fmt.Errorf("unknown type %q", t)
 }
@@ -292,6 +294,18 @@ func checkBounds(ctx Context, vars map[string]any) error {
 				return newError(CodeInput, "%s: %d items, more than the %d allowed", v.Name, len(val), v.MaxItems)
 			}
 			for _, s := range val {
+				if err := tooLong(v.Name, s, v.MaxLen); err != nil {
+					return err
+				}
+			}
+		case map[string]string:
+			if len(val) > v.MaxItems {
+				return newError(CodeInput, "%s: %d keys, more than the %d allowed", v.Name, len(val), v.MaxItems)
+			}
+			for k, s := range val {
+				if err := tooLong(v.Name, k, v.MaxLen); err != nil {
+					return err
+				}
 				if err := tooLong(v.Name, s, v.MaxLen); err != nil {
 					return err
 				}

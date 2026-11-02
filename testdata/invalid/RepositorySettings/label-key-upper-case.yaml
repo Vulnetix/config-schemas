@@ -1,0 +1,8 @@
+# label keys are lower case, like metadata.labels
+apiVersion: vulnetix.com/v1
+kind: RepositorySettings
+metadata: {name: acme-api}
+spec:
+  repository: acme/api
+  autonomy: observe
+  labels: {Tier: prod}

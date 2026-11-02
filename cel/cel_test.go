@@ -100,6 +100,8 @@ func TestVariablesMatchInputs(t *testing.T) {
 				match = v.Type == typeTimestamp
 			case []string:
 				match = v.Type == typeStringList && v.MaxLen > 0 && v.MaxItems > 0
+			case map[string]string:
+				match = v.Type == typeLabelMap && v.MaxLen > 0 && v.MaxItems > 0
 			case map[string][]string:
 				match = v.Type == typeStringMap && v.MaxLen > 0 && v.MaxItems > 0 && v.MaxValueItems > 0
 			}

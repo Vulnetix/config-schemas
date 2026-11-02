@@ -1,0 +1,8 @@
+# an owner names what it is: a team, a user or an email address
+apiVersion: vulnetix.com/v1
+kind: RepositorySettings
+metadata: {name: acme-api}
+spec:
+  repository: acme/api
+  autonomy: observe
+  owner: {name: payments}
