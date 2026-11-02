@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/MessagingConnection.schema.json
+# A Slack connection needs nothing else: apply returns status.authorizationUrl,
+# where a person installs the Vulnetix Slack app into the workspace.
+apiVersion: vulnetix.com/v1
+kind: MessagingConnection
+metadata:
+  name: security-slack
+spec:
+  type: slack

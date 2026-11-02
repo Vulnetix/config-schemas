@@ -1,0 +1,5 @@
+# content.title is required
+apiVersion: vulnetix.com/v1
+kind: MessagingTemplate
+metadata: {name: t}
+spec: {content: {body: "{{.event.title}}"}}

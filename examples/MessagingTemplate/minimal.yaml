@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/MessagingTemplate.schema.json
+apiVersion: vulnetix.com/v1
+kind: MessagingTemplate
+metadata:
+  name: plain-title
+spec:
+  content:
+    title: "{{.event.title}}"

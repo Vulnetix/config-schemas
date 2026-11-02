@@ -42,6 +42,9 @@ Reference documentation for every kind is at https://docs.vulnetix.com (the Plat
 | `GitHubInstallation` | v1.4.0 | Adopts an installation of the Vulnetix GitHub App by its installation id. The App is installed on GitHub; deleting the document does not uninstall it. |
 | `ForgeConnection` | v1.4.0 | How the Software Factory reaches GitLab, Gitea, Forgejo or GitHub Enterprise Server: a bot token or a GHES App, and an optional OAuth application for members' own sign-in. |
 | `WizConnection` | v1.4.0 | The Wiz service account, verified from inside the connected AWS account. One per tenant; a change replaces it. |
+| `MessagingConnection` | v1.4.0 | A messaging destination: Slack (authorized in a browser), Teams, Discord, Google Chat, Jira or a signed webhook. Its credential is kept in the secrets vault. |
+| `MessagingRoute` | v1.4.0 | Which events go to which messaging connections, with filters, mentions, template, digest and rate limit. |
+| `MessagingTemplate` | v1.4.0 | An organisation's own message template, compiled at plan and versioned on every change. |
 
 A field or kind whose description says "Not stored yet" (`CloudSensors` for one account), and the whole of `VexSource`, is ahead of the server: it validates today, and applying it needs the backend change the description names.
 

@@ -1,0 +1,5 @@
+# a slack connection is authorized in a browser and takes no url
+apiVersion: vulnetix.com/v1
+kind: MessagingConnection
+metadata: {name: chat}
+spec: {type: slack, url: {env: SLACK_URL}}

@@ -1,0 +1,276 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/MessagingRoute.schema.json",
+  "title": "MessagingRoute",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":["MessagingConnection","MessagingTemplate"],"secrets":[],"celFields":[]},
+  "description": "A messaging workflow: which events go to which messaging connections, filtered how, rendered with which template, and how often. Every event the organisation's producers emit is matched against its routes; a route that takes it renders its template once per target and records each delivery in the console's delivery log. A route whose event types reach a sensitive type (security.*, vault.*, or a sensitive Pix event) is marked sensitive: it may then send to a signed webhook only with allowSensitiveWebhook, and to a GitHub repository only when the repository is private. Each change is recorded as a messaging.route.changed event, as a console edit is. Deleting it stops its deliveries; the delivery log is kept.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "MessagingRoute" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["eventTypes"],
+      "additionalProperties": false,
+      "properties": {
+        "displayName": {
+          "description": "The name the console shows. Defaults to metadata.name.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "enabled": {
+          "description": "A disabled route matches nothing.",
+          "type": "boolean",
+          "default": true
+        },
+        "eventTypes": {
+          "description": "The event types the route takes: a type (scan.completed), a family (pix.*), or * for every event. A type that was renamed is stored as its new name.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^(\\*|[a-z0-9_]+(\\.[a-z0-9_]+)*(\\.\\*)?)$"
+          }
+        },
+        "minSeverity": {
+          "description": "The quietest event severity the route takes.",
+          "type": "string",
+          "enum": ["info", "notice", "warning", "critical"],
+          "default": "info"
+        },
+        "filters": {
+          "description": "Narrows the route to one scope, and for scan events to the findings that pass the thresholds. An unset condition lets everything through.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "scope": {
+              "description": "Only events about this application, version, upload or repository. Each field that is set must match the event.",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "appName": { "description": "The application name.", "type": "string", "minLength": 1, "maxLength": 256 },
+                "appVersion": { "description": "The application version.", "type": "string", "minLength": 1, "maxLength": 256 },
+                "uploadUuid": { "description": "One upload.", "type": "string", "format": "uuid" },
+                "repo": { "description": "One repository, owner/name.", "$ref": "common.schema.json#/$defs/repository" }
+              }
+            },
+            "findings": {
+              "description": "Thresholds a scan event's findings must pass. The event is sent with the findings that pass, and not at all when none do.",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cvssThreshold": { "description": "The lowest CVSS base score.", "type": "number", "minimum": 0, "maximum": 10 },
+                "cvssSeverities": {
+                  "description": "Only these CVSS severities.",
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": { "type": "string", "enum": ["critical", "high", "medium", "low", "none"] }
+                },
+                "epssThreshold": { "description": "The lowest EPSS probability.", "type": "number", "minimum": 0, "maximum": 1 },
+                "cessThreshold": { "description": "The lowest CESS score.", "type": "number", "minimum": 0, "maximum": 10 },
+                "isMalware": { "description": "Only malware (true) or only not malware (false).", "type": "boolean" },
+                "isExploitable": { "description": "Only exploitable (true) or only not exploitable (false).", "type": "boolean" },
+                "hasExploits": {
+                  "description": "Only findings whose exploit maturity is one of these.",
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": { "type": "string", "enum": ["poc", "functional", "weaponized", "in_the_wild"] }
+                },
+                "exploitThreshold": { "description": "The fewest known exploits.", "type": "integer", "minimum": 0 },
+                "isEol": { "description": "Only end-of-life packages (true) or only supported ones (false).", "type": "boolean" },
+                "eolDays": { "description": "Only packages that reach end of life within this many days.", "type": "integer", "minimum": 0 },
+                "isReachable": { "description": "Only reachable (true) or only unreachable (false) code.", "type": "boolean" },
+                "ignoreTest": { "description": "Leave out test dependencies.", "type": "boolean", "default": false },
+                "onlyProduction": { "description": "Only production dependencies.", "type": "boolean", "default": false },
+                "onlyDirect": { "description": "Only direct dependencies.", "type": "boolean", "default": false },
+                "newOnly": { "description": "Only findings new in this scan.", "type": "boolean", "default": false }
+              }
+            }
+          }
+        },
+        "actorFilter": {
+          "description": "Narrows the route by who acted.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "description": "any: everyone. include: only the principals and actor kinds listed. exclude: everyone but them.",
+              "type": "string",
+              "enum": ["any", "include", "exclude"],
+              "default": "any"
+            },
+            "principals": {
+              "description": "Principal uuids. At most 100.",
+              "type": "array",
+              "maxItems": 100,
+              "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1, "maxLength": 128 }
+            },
+            "kinds": {
+              "description": "Actor kinds, such as principal, service_account, agent or system. At most 10.",
+              "type": "array",
+              "maxItems": 10,
+              "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1, "maxLength": 64 }
+            }
+          }
+        },
+        "mentionPrincipals": {
+          "description": "Members of the organisation, by principal uuid, to @-mention on every target that supports mentions. Each is mentioned by the identity the messaging centre holds for them on that provider. At most 25.",
+          "type": "array",
+          "maxItems": 25,
+          "uniqueItems": true,
+          "items": { "type": "string", "format": "uuid" }
+        },
+        "mentionStatic": {
+          "description": "Provider user ids to @-mention that are not members, keyed by provider: a Slack user id (U0123ABCD), a Discord user id, a Google Chat user id, a Teams user id or UPN, a Jira account id, or a GitHub login.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "slack": { "$ref": "#/$defs/mentionIds" },
+            "discord": { "$ref": "#/$defs/mentionIds" },
+            "google_chat": { "$ref": "#/$defs/mentionIds" },
+            "teams": { "$ref": "#/$defs/mentionIds" },
+            "jira": { "$ref": "#/$defs/mentionIds" },
+            "github": { "$ref": "#/$defs/mentionIds" }
+          }
+        },
+        "template": {
+          "description": "The metadata.name of a MessagingTemplate to render with. Leave it and systemTemplate out to use the system template for each event type.",
+          "$ref": "common.schema.json#/$defs/name"
+        },
+        "templateVersion": {
+          "description": "Pin the template to one of its versions. Left out, the route follows the template's latest version. Only with template.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "systemTemplate": {
+          "description": "The key of a system template to render every event with (generic, notice, findings.report and so on), instead of the one each event type has. Not with template.",
+          "type": "string",
+          "pattern": "^[a-z0-9_.]{1,64}$"
+        },
+        "digest": {
+          "description": "How events are batched. immediate sends each event as it comes; window sends one digest every 15 or 60 minutes; daily sends one digest a day at hour in tz. tiers overrides that per delivery tier.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mode": { "type": "string", "enum": ["immediate", "window", "daily"], "default": "immediate" },
+            "minutes": {
+              "description": "The window, for mode window, or for an immediate route with a tier set to digest (60 when left out).",
+              "type": "integer",
+              "enum": [15, 60]
+            },
+            "hour": { "description": "The hour of a daily digest, 0 to 23.", "type": "integer", "minimum": 0, "maximum": 23 },
+            "tz": { "description": "The IANA time zone of a daily digest, such as Australia/Sydney.", "type": "string", "minLength": 1, "maxLength": 64 },
+            "tiers": {
+              "description": "Per delivery tier: instant, digest or off. A tier left out follows mode.",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "needs_you": { "$ref": "#/$defs/tierMode" },
+                "error": { "$ref": "#/$defs/tierMode" },
+                "warning": { "$ref": "#/$defs/tierMode" },
+                "info": { "$ref": "#/$defs/tierMode" }
+              }
+            }
+          },
+          "allOf": [
+            {
+              "if": { "properties": { "mode": { "const": "window" } }, "required": ["mode"] },
+              "then": { "required": ["minutes"] }
+            },
+            {
+              "if": { "properties": { "mode": { "const": "daily" } }, "required": ["mode"] },
+              "then": { "required": ["hour", "tz"] }
+            }
+          ]
+        },
+        "maxPerHour": {
+          "description": "At most this many messages an hour per target; the rest are suppressed and logged.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000,
+          "default": 60
+        },
+        "includePII": {
+          "description": "Let personal details (a member's email address) into messages. Off, they are masked.",
+          "type": "boolean",
+          "default": false
+        },
+        "allowSensitiveWebhook": {
+          "description": "Let a sensitive route send to a signed webhook.",
+          "type": "boolean",
+          "default": false
+        },
+        "mode": {
+          "description": "live sends. shadow renders and logs every delivery without sending, to try a route out.",
+          "type": "string",
+          "enum": ["live", "shadow"],
+          "default": "live"
+        },
+        "targets": {
+          "description": "Where the route sends: one entry per connection, each connection at most once. At most 20.",
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "type": "object",
+            "required": ["connection"],
+            "additionalProperties": false,
+            "properties": {
+              "connection": {
+                "description": "The metadata.name of the MessagingConnection to send to. A GitHub Issues connection, which the GitHub App installation makes, is named as export names it.",
+                "$ref": "common.schema.json#/$defs/messagingConnectionRef"
+              },
+              "enabled": {
+                "description": "A disabled target is skipped.",
+                "type": "boolean",
+                "default": true
+              },
+              "options": {
+                "description": "Per provider. slack: channelId overrides the connection's channel. jira: projectKey and issueType override the connection's defaults, labels are added. GitHub Issues: owner and repo (required), labels, assignMentions. Other providers take none.",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "channelId": { "description": "A Slack channel id.", "type": "string", "maxLength": 200 },
+                  "projectKey": { "description": "A Jira project key.", "type": "string", "maxLength": 200 },
+                  "issueType": { "description": "A Jira issue type.", "type": "string", "maxLength": 200 },
+                  "owner": { "description": "The GitHub repository owner.", "type": "string", "maxLength": 200 },
+                  "repo": { "description": "The GitHub repository name.", "type": "string", "maxLength": 200 },
+                  "labels": {
+                    "description": "Labels to add to the issue. At most 10.",
+                    "type": "array",
+                    "maxItems": 10,
+                    "items": { "type": "string", "minLength": 1, "maxLength": 100 }
+                  },
+                  "assignMentions": { "description": "Assign the GitHub issue to the mentioned people.", "type": "boolean" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "not": { "required": ["template", "systemTemplate"] },
+      "dependentRequired": { "templateVersion": ["template"] }
+    }
+  },
+  "$defs": {
+    "mentionIds": {
+      "type": "array",
+      "maxItems": 25,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 128 }
+    },
+    "tierMode": {
+      "type": "string",
+      "enum": ["instant", "digest", "off"]
+    }
+  }
+}

@@ -1,0 +1,5 @@
+# a webhook URL is a credential and is only ever a valueFrom
+apiVersion: vulnetix.com/v1
+kind: MessagingConnection
+metadata: {name: hook}
+spec: {type: discord, url: "https://discord.com/api/webhooks/1/abc"}

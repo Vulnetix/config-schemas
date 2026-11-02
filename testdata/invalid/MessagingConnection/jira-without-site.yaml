@@ -1,0 +1,5 @@
+# a jira connection needs its jira block
+apiVersion: vulnetix.com/v1
+kind: MessagingConnection
+metadata: {name: tickets}
+spec: {type: jira}

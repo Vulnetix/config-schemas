@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/MessagingConnection.schema.json",
+  "title": "MessagingConnection",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":["spec.jira.apiToken","spec.url"],"celFields":[]},
+  "description": "One destination the messaging centre can send to: a Slack channel, a Microsoft Teams workflow, a Discord or Google Chat incoming webhook, a Jira site, or a signed webhook. MessagingRoute targets, AlertTrigger, ScheduledReport and DetectionRule actions name it by metadata.name. Its credential (a webhook URL, a Jira API token, a Slack bot token) is kept in the tenant's secrets vault as a connector entry, never in the document, an export or a plan. A slack connection is authorized in a browser: apply returns status.phase AwaitingAuthorization and status.authorizationUrl, and the connection sends nothing until a person installs the Vulnetix Slack app from that URL. The type and a Jira site cannot change; declare a new connection under another name instead. Deleting it revokes its vault entry and removes it from every route that targets it. GitHub Issues connections come from the GitHub App installation and cannot be declared here, but a route can still target one by the name export gives it.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "MessagingConnection" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "The provider. slack: a channel in a workspace that installs the Vulnetix Slack app. teams: a Microsoft Teams Workflows (Power Automate) incoming webhook. discord and google_chat: an incoming webhook. jira: issues in a Jira Cloud site, with an API token. webhook: an HTTPS endpoint of yours that receives each message signed with the Standard Webhooks scheme. It cannot change once the connection exists.",
+          "type": "string",
+          "enum": ["slack", "teams", "discord", "google_chat", "jira", "webhook"]
+        },
+        "displayName": {
+          "description": "The label the console shows. Defaults to metadata.name.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "paused": {
+          "description": "Stop sending to this connection without removing it. A connection the server stopped after repeated failures, or whose vault entry was revoked, is reported in status.connectionStatus; supplying its credential again starts it.",
+          "type": "boolean",
+          "default": false
+        },
+        "url": {
+          "description": "Where the client reads the URL messages are posted to, for teams, discord, google_chat and webhook. A Discord URL is on discord.com or discordapp.com, a Google Chat URL on chat.googleapis.com, and a Teams URL on logic.azure.com, environment.api.powerplatform.com or webhook.office.com; every URL is https. The URL is the credential, so it is kept in the vault and only a masked form is shown. Required when the connection is created; left out later, the stored URL is kept.",
+          "$ref": "common.schema.json#/$defs/valueFrom"
+        },
+        "slack": {
+          "description": "The channel a slack connection posts to. The workspace is the one the app is installed into from status.authorizationUrl.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "channelId": {
+              "description": "The Slack channel id (C0123456789). Left out, messages need a channel on each route target.",
+              "type": "string",
+              "pattern": "^[A-Z0-9]{2,30}$"
+            },
+            "channelName": {
+              "description": "The channel's name, for display only.",
+              "type": "string",
+              "maxLength": 200
+            }
+          }
+        },
+        "jira": {
+          "description": "The Jira Cloud site a jira connection opens issues in, and the account it acts as.",
+          "type": "object",
+          "required": ["siteUrl", "email"],
+          "additionalProperties": false,
+          "properties": {
+            "siteUrl": {
+              "description": "The site, https://<site>.atlassian.net, with no path. It cannot change once the connection exists.",
+              "type": "string",
+              "pattern": "^https://[A-Za-z0-9-]+\\.atlassian\\.net/?$"
+            },
+            "email": {
+              "description": "The Atlassian account the API token belongs to.",
+              "type": "string",
+              "format": "email",
+              "maxLength": 320
+            },
+            "apiToken": {
+              "description": "Where the client reads the account's API token. Jira is asked who the token belongs to before the connection is saved. Required when the connection is created; left out later, the stored token is kept.",
+              "$ref": "common.schema.json#/$defs/valueFrom"
+            },
+            "defaultProjectKey": {
+              "description": "The project a route target opens issues in when it names none. Stored upper case.",
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_]{0,19}$"
+            },
+            "defaultIssueType": {
+              "description": "The issue type a route target uses when it names none, such as Bug or Task.",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "slack" } }, "required": ["type"] },
+          "then": { "properties": { "url": false, "jira": false } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "jira" } }, "required": ["type"] },
+          "then": { "required": ["jira"], "properties": { "url": false, "slack": false } }
+        },
+        {
+          "if": { "properties": { "type": { "enum": ["teams", "discord", "google_chat", "webhook"] } }, "required": ["type"] },
+          "then": { "properties": { "slack": false, "jira": false } }
+        }
+      ]
+    }
+  }
+}

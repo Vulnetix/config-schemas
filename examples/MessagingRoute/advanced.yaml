@@ -1,0 +1,98 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/MessagingRoute.schema.json
+# The connections and the template are declared in MessagingConnection and
+# MessagingTemplate documents of the same apply.
+apiVersion: vulnetix.com/v1
+kind: MessagingRoute
+metadata:
+  name: critical-findings
+  labels:
+    team: security
+  annotations:
+    runbook: https://wiki.example.com/security/alerts
+spec:
+  displayName: Critical findings to security
+  enabled: true
+  eventTypes:
+    - scan.completed
+    - scan.build_broken
+  minSeverity: warning
+  filters:
+    scope:
+      appName: payments-api
+      appVersion: 2.4.0
+      uploadUuid: 0b6f6c1e-8f4a-4c55-9a0e-3c2d1b7a9e10
+      repo: acme/payments-api
+    findings:
+      cvssThreshold: 7
+      cvssSeverities: [critical, high]
+      epssThreshold: 0.1
+      cessThreshold: 5
+      isMalware: false
+      isExploitable: true
+      hasExploits: [functional, weaponized, in_the_wild]
+      exploitThreshold: 1
+      isEol: false
+      eolDays: 90
+      isReachable: true
+      ignoreTest: true
+      onlyProduction: true
+      onlyDirect: false
+      newOnly: true
+  actorFilter:
+    mode: exclude
+    principals:
+      - 7d3f2a10-4b1c-4e8a-9f20-6a5b4c3d2e1f
+    kinds:
+      - service_account
+  mentionPrincipals:
+    - 2c9e8d7f-1a2b-4c3d-8e4f-5a6b7c8d9e0f
+  mentionStatic:
+    slack: [U0123ABCD]
+    discord: ["123456789012345678"]
+    google_chat: ["112233445566"]
+    teams: [secops@acme.example]
+    jira: ["5b10ac8d82e05b22cc7d4ef5"]
+    github: [octocat]
+  template: security-findings
+  templateVersion: 1
+  digest:
+    mode: immediate
+    minutes: 15
+    tiers:
+      needs_you: instant
+      error: instant
+      warning: digest
+      info: "off"
+  maxPerHour: 120
+  includePII: false
+  allowSensitiveWebhook: false
+  mode: live
+  targets:
+    - connection: security-slack
+      enabled: true
+      options:
+        channelId: C0123456789
+    - connection: appsec-jira
+      options:
+        projectKey: SEC
+        issueType: Bug
+        labels: [vulnetix, critical]
+    - connection: github-acme
+      options:
+        owner: acme
+        repo: security-alerts
+        labels: [vulnetix]
+        assignMentions: true
+---
+apiVersion: vulnetix.com/v1
+kind: MessagingRoute
+metadata:
+  name: nightly-digest
+spec:
+  eventTypes: ["pix.*"]
+  systemTemplate: generic
+  digest:
+    mode: daily
+    hour: 8
+    tz: Australia/Sydney
+  mode: shadow

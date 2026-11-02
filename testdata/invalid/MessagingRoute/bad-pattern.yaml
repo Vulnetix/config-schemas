@@ -1,0 +1,5 @@
+# an event type is lower case, dotted, with an optional trailing .*
+apiVersion: vulnetix.com/v1
+kind: MessagingRoute
+metadata: {name: r}
+spec: {eventTypes: ["Scan.*.completed"]}

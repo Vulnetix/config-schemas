@@ -1,0 +1,5 @@
+# a window digest needs its minutes
+apiVersion: vulnetix.com/v1
+kind: MessagingRoute
+metadata: {name: r}
+spec: {eventTypes: ["*"], digest: {mode: window}}

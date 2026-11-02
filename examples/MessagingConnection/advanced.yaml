@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/MessagingConnection.schema.json
+# One connection of each shape. Credentials are read from the environment by
+# the client and kept in the tenant's secrets vault.
+apiVersion: vulnetix.com/v1
+kind: MessagingConnection
+metadata:
+  name: security-slack
+  labels:
+    team: security
+  annotations:
+    note: Install the Slack app from status.authorizationUrl after the first apply.
+spec:
+  type: slack
+  displayName: Security alerts (Slack)
+  paused: false
+  slack:
+    channelId: C0123456789
+    channelName: sec-alerts
+---
+apiVersion: vulnetix.com/v1
+kind: MessagingConnection
+metadata:
+  name: platform-teams
+spec:
+  type: teams
+  displayName: Platform team (Teams)
+  url:
+    env: VULNETIX_TEAMS_WEBHOOK_URL
+---
+apiVersion: vulnetix.com/v1
+kind: MessagingConnection
+metadata:
+  name: appsec-jira
+spec:
+  type: jira
+  displayName: AppSec Jira
+  jira:
+    siteUrl: https://acme.atlassian.net
+    email: appsec-bot@acme.example
+    apiToken:
+      env: VULNETIX_JIRA_API_TOKEN
+    defaultProjectKey: SEC
+    defaultIssueType: Bug
+---
+apiVersion: vulnetix.com/v1
+kind: MessagingConnection
+metadata:
+  name: siem-webhook
+spec:
+  type: webhook
+  displayName: SIEM intake
+  paused: true
+  url:
+    env: VULNETIX_SIEM_WEBHOOK_URL

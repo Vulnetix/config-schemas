@@ -1,0 +1,5 @@
+# template and systemTemplate are alternatives
+apiVersion: vulnetix.com/v1
+kind: MessagingRoute
+metadata: {name: r}
+spec: {eventTypes: [scan.completed], template: t, systemTemplate: generic}

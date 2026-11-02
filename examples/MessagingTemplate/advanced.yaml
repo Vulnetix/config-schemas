@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/MessagingTemplate.schema.json
+apiVersion: vulnetix.com/v1
+kind: MessagingTemplate
+metadata:
+  name: security-findings
+  labels:
+    team: security
+  annotations:
+    owner: appsec@acme.example
+spec:
+  displayName: Security findings
+  description: Scan results for the security channel, with a link back to the scan.
+  eventScope:
+    - scan.completed
+    - scan.build_broken
+  baseSystemTemplate: generic
+  content:
+    title: "{{.event.title}}"
+    summary: "{{with .subject.label}}{{.}}{{end}}"
+    body: "{{range $k, $v := .data}}- **{{$k}}:** {{truncate 200 $v}}\n{{end}}{{with .mentions}}\n{{mentions .}}{{end}}"
+    fields:
+      - label: Severity
+        value: "{{severityEmoji .event.severity}} {{severityLabel .event.severity}}"
+        inline: true
+    actions:
+      - label: Open in Vulnetix
+        url: "{{.event.url}}"
+    accent: "{{.event.severity}}"
+    issue:
+      title: "[Vulnetix] {{.event.title}}"
+      body: "{{.event.title}}"
+      labels:
+        - vulnetix
+        - security
+    digest:
+      title: "{{.digest.count}} {{plural .digest.count \"event\" \"events\"}}"
+      item: "{{.event.title}}{{with .subject.label}}: {{.}}{{end}}"
+    webhook:
+      includePayload: true

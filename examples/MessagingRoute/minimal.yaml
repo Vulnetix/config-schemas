@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/MessagingRoute.schema.json
+apiVersion: vulnetix.com/v1
+kind: MessagingRoute
+metadata:
+  name: broken-builds
+spec:
+  eventTypes:
+    - scan.build_broken

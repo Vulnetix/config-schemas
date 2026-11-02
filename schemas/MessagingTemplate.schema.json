@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/MessagingTemplate.schema.json",
+  "title": "MessagingTemplate",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[]},
+  "description": "An organisation's own message template, which a MessagingRoute uses instead of the system template for the event type. One template renders for every provider: Slack, Teams, Discord and Google Chat get the title, summary, body, fields, actions and accent; Jira and GitHub Issues get the issue fields; a signed webhook gets the rendered text and, when asked, the event payload. Every text field is a Go text/template run in a sandbox: only the messaging functions are allowed, every value is escaped, and sizes are capped. Plan compiles each field and refuses a template with errors. Every change to content is saved as a new version, noted as applied as code, as a console edit is; earlier versions stay in the template's history. Deleting it is refused while a route outside this apply still uses it.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "MessagingTemplate" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["content"],
+      "additionalProperties": false,
+      "properties": {
+        "displayName": {
+          "description": "The name the console shows, unique among the organisation's templates. Defaults to metadata.name.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "description": {
+          "description": "What the template is for.",
+          "type": "string",
+          "maxLength": 1000
+        },
+        "eventScope": {
+          "description": "The event types the template is meant for: a type (scan.completed), a family (pix.*), or *. The console uses it to offer the template; a route may still use it for any event.",
+          "type": "array",
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/eventPattern" }
+        },
+        "baseSystemTemplate": {
+          "description": "The key of the system template this one was copied from (generic, findings.report, scan.build_broken and so on). It is recorded so the console can say when that system template has a newer version; it does not change the content.",
+          "type": "string",
+          "pattern": "^[a-z0-9_.]{1,64}$"
+        },
+        "content": {
+          "description": "The template itself. Each text field is a template over the event view (.event, .subject, .actor, .data, .mentions, and .digest for a digest).",
+          "type": "object",
+          "required": ["title"],
+          "additionalProperties": false,
+          "properties": {
+            "title": { "description": "The message title. Required.", "type": "string", "minLength": 1, "maxLength": 16384 },
+            "summary": { "description": "One line under the title.", "type": "string", "maxLength": 16384 },
+            "body": { "description": "The message body, in markdown-lite.", "type": "string", "maxLength": 16384 },
+            "fields": {
+              "description": "Name and value pairs shown beside the body. At most 25.",
+              "type": "array",
+              "maxItems": 25,
+              "items": {
+                "type": "object",
+                "required": ["label", "value"],
+                "additionalProperties": false,
+                "properties": {
+                  "label": { "description": "The field's name.", "type": "string", "minLength": 1, "maxLength": 16384 },
+                  "value": { "description": "The field's value.", "type": "string", "maxLength": 16384 },
+                  "inline": { "description": "Show the field beside the previous one where the provider can.", "type": "boolean", "default": false }
+                }
+              }
+            },
+            "actions": {
+              "description": "Buttons or links. At most 10. A URL that does not render to an https URL is dropped from the message.",
+              "type": "array",
+              "maxItems": 10,
+              "items": {
+                "type": "object",
+                "required": ["label", "url"],
+                "additionalProperties": false,
+                "properties": {
+                  "label": { "description": "The button text.", "type": "string", "minLength": 1, "maxLength": 16384 },
+                  "url": { "description": "Where it goes.", "type": "string", "minLength": 1, "maxLength": 16384 }
+                }
+              }
+            },
+            "accent": { "description": "The colour bar: a severity (info, notice, warning, critical) or a #rrggbb colour, usually {{.event.severity}}.", "type": "string", "maxLength": 16384 },
+            "issue": {
+              "description": "What an issue tracker target gets. A field left out falls back to the message's own.",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "title": { "description": "The issue title.", "type": "string", "maxLength": 16384 },
+                "body": { "description": "The issue body.", "type": "string", "maxLength": 16384 },
+                "labels": {
+                  "description": "Labels to put on the issue. At most 10.",
+                  "type": "array",
+                  "maxItems": 10,
+                  "items": { "type": "string", "minLength": 1, "maxLength": 16384 }
+                }
+              }
+            },
+            "digest": {
+              "description": "How a batch of events is summed up when a route sends a digest.",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "title": { "description": "The digest title, over the batch view (.digest.count).", "type": "string", "maxLength": 16384 },
+                "item": { "description": "One line per event in the batch.", "type": "string", "maxLength": 16384 }
+              }
+            },
+            "webhook": {
+              "description": "What a signed webhook target receives.",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "includePayload": { "description": "Send the event's payload, reduced to the fields the catalogue allows, beside the rendered text.", "type": "boolean", "default": false }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "eventPattern": {
+      "description": "An event type (scan.completed), a family (pix.*), or * for every event.",
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^(\\*|[a-z0-9_]+(\\.[a-z0-9_]+)*(\\.\\*)?)$"
+    }
+  }
+}
