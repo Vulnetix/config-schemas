@@ -1,0 +1,5 @@
+# language only applies to body or file
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata: {name: x}
+spec: {language: sigma, ioc: ioc-dns}

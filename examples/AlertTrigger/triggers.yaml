@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/AlertTrigger.schema.json
+apiVersion: vulnetix.com/v1
+kind: AlertTrigger
+metadata:
+  name: dns-investigate
+spec:
+  searchRef: dynamic-dns-lookups
+  everySec: 300
+  levers:
+    minRows: 3
+    windowSec: 900
+    countBy: src_ip
+    cooldownSec: 3600
+    maxPerHour: 4
+    hours: business
+    zone: Australia/Melbourne
+    rowsCap: 25
+    columns: [ts, src_ip, qname]
+    ask: always
+  destination: { kind: workflow }
+---
+apiVersion: vulnetix.com/v1
+kind: AlertTrigger
+metadata:
+  name: root-login-page
+spec:
+  ruleRef: sigmahq-aws-root-login
+  destination:
+    kind: messaging
+    connections: [secops-slack]
+    severity: critical

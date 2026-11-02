@@ -1,0 +1,5 @@
+# severityOverride uses the alert vocabulary, not the Sigma level
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata: {name: x}
+spec: {ioc: ioc-net, severityOverride: high}

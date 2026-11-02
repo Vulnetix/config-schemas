@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/AwsAccount.schema.json
+apiVersion: vulnetix.com/v1
+kind: AwsAccount
+metadata:
+  name: production
+spec:
+  accountId: "123456789012"
+  accountName: acme-production
+  roleName: AdministratorAccess
+  deploy: true
+---
+apiVersion: vulnetix.com/v1
+kind: AwsAccount
+metadata:
+  name: sandpit
+spec:
+  accountId: "210987654321"
+  roleName: VulnetixCloudscanDeploy
+  enabled: false

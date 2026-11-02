@@ -1,0 +1,5 @@
+# intervalSec under 60
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata: {name: x}
+spec: {ioc: ioc-net, intervalSec: 30}

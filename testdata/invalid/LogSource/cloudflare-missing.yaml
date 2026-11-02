@@ -1,0 +1,5 @@
+# a cloudflare source needs the cloudflare block
+apiVersion: vulnetix.com/v1
+kind: LogSource
+metadata: {name: x}
+spec: {type: cloudflare}

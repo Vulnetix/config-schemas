@@ -1,0 +1,5 @@
+# text is required
+apiVersion: vulnetix.com/v1
+kind: SavedSearch
+metadata: {name: x}
+spec: {mode: dsl}

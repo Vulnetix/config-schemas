@@ -1,0 +1,9 @@
+apiVersion: vulnetix.com/v1
+kind: AwsConnection
+metadata:
+  name: default
+spec:
+  region: us-east-1
+  iamUser:
+    accessKeyId: AKIAIOSFODNN7EXAMPLE
+    secretAccessKey: { env: VULNETIX_AWS_SECRET_ACCESS_KEY }

@@ -1,0 +1,5 @@
+# messaging needs connections
+apiVersion: vulnetix.com/v1
+kind: AlertTrigger
+metadata: {name: x}
+spec: {searchRef: a, destination: {kind: messaging}}

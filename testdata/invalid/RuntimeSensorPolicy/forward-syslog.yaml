@@ -1,0 +1,5 @@
+# forward accepts only siem
+apiVersion: vulnetix.com/v1
+kind: RuntimeSensorPolicy
+metadata: {name: x}
+spec: {forward: [syslog]}

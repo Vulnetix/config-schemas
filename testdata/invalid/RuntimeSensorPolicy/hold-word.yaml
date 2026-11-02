@@ -1,0 +1,5 @@
+# hold is a duration such as 15m
+apiVersion: vulnetix.com/v1
+kind: RuntimeSensorPolicy
+metadata: {name: x}
+spec: {hold: forever}

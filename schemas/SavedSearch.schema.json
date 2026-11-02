@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/SavedSearch.schema.json",
+  "title": "SavedSearch",
+  "description": "A Guardian saved search. It is the source of a ScheduledReport, an AlertTrigger, or a DetectionRule with searchRef. The text is compiled when it is saved, so a search that does not compile is refused. The tenant always comes from the caller's token. A tenant keeps at most 500. Deleting one that a ScheduledReport or AlertTrigger still uses is refused.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "SavedSearch" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["text"],
+      "additionalProperties": false,
+      "properties": {
+        "displayName": {
+          "description": "The name the console shows. Defaults to metadata.name.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "mode": {
+          "description": "dsl: the Guardian search language. sigma: a Sigma rule's detection, run as a search.",
+          "type": "string",
+          "enum": ["dsl", "sigma"],
+          "default": "dsl"
+        },
+        "text": {
+          "description": "The search, in the language mode names.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16384
+        },
+        "rangeMs": {
+          "description": "How far back the search reads when it is opened or run by hand, in milliseconds: 1 minute to 30 days.",
+          "type": "integer",
+          "minimum": 60000,
+          "maximum": 2592000000,
+          "default": 86400000
+        }
+      }
+    }
+  }
+}

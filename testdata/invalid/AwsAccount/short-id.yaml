@@ -1,0 +1,5 @@
+# an account id is 12 digits
+apiVersion: vulnetix.com/v1
+kind: AwsAccount
+metadata: {name: x}
+spec: {accountId: '12345'}

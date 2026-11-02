@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/AwsConnection.schema.json",
+  "title": "AwsConnection",
+  "description": "How Vulnetix reaches the tenant's AWS estate. One per tenant. sso: IAM Identity Center, which can reach every account the operator's session can; the accounts are AwsAccount documents. iamUser: a long-lived access key, for an estate without Identity Center; the key's own account (from sts:GetCallerIdentity, never from the document) is the connected account. An sso connection starts a device authorization that a person approves in the AWS access portal, so its first apply, and any apply after the session expires, cannot finish unattended. Deleting it disconnects AWS; the stacks deployed in each account stay until removed there.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "AwsConnection" },
+    "metadata": { "$ref": "common.schema.json#/$defs/singletonMetadata" },
+    "spec": {
+      "type": "object",
+      "required": ["region"],
+      "additionalProperties": false,
+      "properties": {
+        "region": {
+          "description": "The Identity Center region for sso; the region calls are made in for iamUser. An allowlist, because the region becomes part of an endpoint host name.",
+          "type": "string",
+          "enum": [
+            "us-east-1", "us-east-2", "us-west-1", "us-west-2",
+            "eu-west-1", "eu-west-2", "eu-west-3",
+            "eu-central-1", "eu-central-2", "eu-north-1",
+            "eu-south-1", "eu-south-2",
+            "ap-southeast-1", "ap-southeast-2", "ap-southeast-3", "ap-southeast-4",
+            "ap-northeast-1", "ap-northeast-2", "ap-northeast-3",
+            "ap-south-1", "ap-south-2", "ap-east-1",
+            "ca-central-1", "ca-west-1", "sa-east-1",
+            "me-south-1", "me-central-1", "af-south-1", "il-central-1"
+          ]
+        },
+        "sso": {
+          "type": "object",
+          "required": ["startUrl"],
+          "additionalProperties": false,
+          "properties": {
+            "startUrl": {
+              "description": "The AWS access portal URL. Stored as https://<name>.awsapps.com/start.",
+              "type": "string",
+              "pattern": "^https://[a-z0-9-]+\\.awsapps\\.com(/start)?/?$"
+            }
+          }
+        },
+        "iamUser": {
+          "type": "object",
+          "required": ["accessKeyId", "secretAccessKey"],
+          "additionalProperties": false,
+          "properties": {
+            "accessKeyId": {
+              "description": "An identifier, not a secret: it is in CloudTrail on every call it makes.",
+              "type": "string",
+              "pattern": "^[A-Z0-9]{16,128}$"
+            },
+            "secretAccessKey": {
+              "description": "Where the client reads the secret access key. It is proved with sts:GetCallerIdentity, kept in the tenant's vault, and never exported or shown in a plan.",
+              "$ref": "common.schema.json#/$defs/valueFrom"
+            }
+          }
+        },
+        "advancedNetworking": {
+          "description": "Report over the private path from the customer's accounts to Vulnetix instead of the internet. Applies to every account; the next stack deploy fills the parameters.",
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "oneOf": [{ "required": ["sso"] }, { "required": ["iamUser"] }]
+    }
+  }
+}

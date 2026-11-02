@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/AwsAccount.schema.json",
+  "title": "AwsAccount",
+  "description": "One AWS account the AwsConnection reaches, keyed on its account id within the tenant (two tenants may connect the same account). It takes the connection's connector kind. Deploying puts the Vulnetix pipeline stack in the account through the connection; the per-account advancedNetworking column is written only from AwsConnection.spec.advancedNetworking today. Deleting the document turns the account off rather than forgetting it, because the deployed stack outlives the row and has to stay findable.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "AwsAccount" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["accountId"],
+      "additionalProperties": false,
+      "properties": {
+        "accountId": { "$ref": "common.schema.json#/$defs/awsAccountId" },
+        "accountName": {
+          "description": "A display name. AWS's own alias replaces it when the account is read; nothing keys on it.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "roleName": {
+          "description": "For sso: the permission set the CloudFormation deploy runs as.",
+          "type": "string",
+          "pattern": "^[\\w+=,.@-]{1,64}$"
+        },
+        "enabled": {
+          "description": "Whether the account is swept. false leaves the other accounts and the deployed stack alone.",
+          "type": "boolean",
+          "default": true
+        },
+        "deploy": {
+          "description": "Queue a deploy of the pipeline stack when apply creates the account or changes it. A deploy already running is not queued twice. sso deploys need a live Identity Center session.",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    }
+  }
+}

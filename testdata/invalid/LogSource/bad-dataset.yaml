@@ -1,0 +1,5 @@
+# dataset Guardian cannot read
+apiVersion: vulnetix.com/v1
+kind: LogSource
+metadata: {name: x}
+spec: {type: cloudflare, cloudflare: {apiToken: {env: T}, datasets: [spectrum_events]}}

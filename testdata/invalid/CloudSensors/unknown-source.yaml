@@ -1,0 +1,5 @@
+# source outside the catalogue
+apiVersion: vulnetix.com/v1
+kind: CloudSensors
+metadata: {name: x}
+spec: {sources: [detective]}

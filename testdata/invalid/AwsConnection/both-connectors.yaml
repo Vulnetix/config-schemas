@@ -1,0 +1,5 @@
+# sso and iamUser together
+apiVersion: vulnetix.com/v1
+kind: AwsConnection
+metadata: {name: default}
+spec: {region: us-east-1, sso: {startUrl: https://acme.awsapps.com/start}, iamUser: {accessKeyId: AKIAIOSFODNN7EXAMPLE, secretAccessKey: {env: K}}}

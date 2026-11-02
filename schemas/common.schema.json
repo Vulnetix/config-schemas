@@ -112,6 +112,21 @@
       "minLength": 1,
       "pattern": "^[^\\^\\s](.*[^$\\s])?$"
     },
+    "messagingConnectionRef": {
+      "description": "The metadata.name of a MessagingConnection. The server resolves it to the connection's id, which must belong to the tenant.",
+      "$ref": "#/$defs/name"
+    },
+    "awsAccountId": {
+      "description": "A 12-digit AWS account id.",
+      "type": "string",
+      "pattern": "^[0-9]{12}$"
+    },
+    "configFile": {
+      "description": "A file the client reads and sends as the value, relative to the config root. The server never reads a path.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
     "aiCapabilityList": {
       "description": "An allow or deny list for one AI capability family. Each pattern becomes one AI Firewall guardrail row of rule type <family>_<list> (tool_deny, mcp_allow and so on). A deny always wins. Any enabled allow rule puts its family into allowlist mode, where everything it does not name is refused.",
       "type": "object",

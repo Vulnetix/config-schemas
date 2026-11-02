@@ -1,0 +1,5 @@
+# threshold.by holds at most five fields
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata: {name: x}
+spec: {ioc: ioc-net, threshold: {count: 2, windowSec: 60, by: [a, b, c, d, e, f]}}

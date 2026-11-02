@@ -1,0 +1,5 @@
+# mode outside the enum
+apiVersion: vulnetix.com/v1
+kind: SavedSearch
+metadata: {name: x}
+spec: {mode: kql, text: dns_events}

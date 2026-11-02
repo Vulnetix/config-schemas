@@ -1,0 +1,5 @@
+# account is * or a 12-digit id
+apiVersion: vulnetix.com/v1
+kind: CloudSensors
+metadata: {name: x}
+spec: {account: all, sources: [inspector]}

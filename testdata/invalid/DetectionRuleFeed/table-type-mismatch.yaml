@@ -1,0 +1,5 @@
+# a Sigma rule is never in the Snort catalogue
+apiVersion: vulnetix.com/v1
+kind: DetectionRuleFeed
+metadata: {name: x}
+spec: {format: SIGMA, entries: [{ruleTable: snort_rule, ruleType: SIGMA, rule: 9c2d4e6f-1a3b-4c5d-8e7f-0a1b2c3d4e5f}]}

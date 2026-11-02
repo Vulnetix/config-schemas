@@ -1,0 +1,5 @@
+# body needs language
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata: {name: x}
+spec: {body: 'title: x'}

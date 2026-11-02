@@ -1,0 +1,5 @@
+# one per tenant: the name is default
+apiVersion: vulnetix.com/v1
+kind: AwsConnection
+metadata: {name: prod}
+spec: {region: us-east-1, sso: {startUrl: https://acme.awsapps.com/start}}

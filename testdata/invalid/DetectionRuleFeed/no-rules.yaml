@@ -1,0 +1,5 @@
+# name entries or a selector
+apiVersion: vulnetix.com/v1
+kind: DetectionRuleFeed
+metadata: {name: x}
+spec: {format: SIGMA}

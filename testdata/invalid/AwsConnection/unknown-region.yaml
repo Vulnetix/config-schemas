@@ -1,0 +1,5 @@
+# region outside the allowlist
+apiVersion: vulnetix.com/v1
+kind: AwsConnection
+metadata: {name: default}
+spec: {region: us-gov-west-1, sso: {startUrl: https://acme.awsapps.com/start}}

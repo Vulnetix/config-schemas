@@ -1,0 +1,5 @@
+# only file layout 1 exists
+apiVersion: vulnetix.com/v1
+kind: DetectionRuleFeed
+metadata: {name: x}
+spec: {format: SIGMA, schemaVersion: 2, selector: {when: kev}}

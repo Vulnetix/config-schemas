@@ -1,0 +1,5 @@
+# the start URL must be an awsapps.com address
+apiVersion: vulnetix.com/v1
+kind: AwsConnection
+metadata: {name: default}
+spec: {region: us-east-1, sso: {startUrl: https://sso.acme.example/start}}

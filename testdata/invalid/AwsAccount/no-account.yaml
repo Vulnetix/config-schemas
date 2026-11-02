@@ -1,0 +1,5 @@
+# accountId is required
+apiVersion: vulnetix.com/v1
+kind: AwsAccount
+metadata: {name: x}
+spec: {enabled: true}

@@ -1,0 +1,5 @@
+# apiToken is read by the client, never written in the document
+apiVersion: vulnetix.com/v1
+kind: LogSource
+metadata: {name: x}
+spec: {type: cloudflare, cloudflare: {apiToken: abc123, datasets: [http_requests]}}

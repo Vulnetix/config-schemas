@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/RuntimeSensorPolicy.schema.json",
+  "title": "RuntimeSensorPolicy",
+  "description": "The configuration runtime sensors enroll with and keep pulling: mode, hold, rule feeds, forwarding and tamper protection, and which people or MDM systems it applies to. It is a sensor provisioning profile. A device takes the enabled profile with the highest priority that matches it, and picks up a change on its next config pull. Sensors configured by hand with an ApiKey do not read profiles; a person changes their mode from the console. A profile with enrolled devices cannot be deleted.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "RuntimeSensorPolicy" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string", "maxLength": 1000 },
+        "enabled": { "type": "boolean", "default": true },
+        "priority": {
+          "description": "Highest wins when several profiles match a device; ties go to the oldest.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000,
+          "default": 100
+        },
+        "match": {
+          "description": "Who enrolls with this profile: a person by exact email or email domain (* for everyone), or a device an MDM integration enrolls.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "emails": {
+              "type": "array",
+              "maxItems": 200,
+              "uniqueItems": true,
+              "items": { "type": "string", "format": "email" }
+            },
+            "domains": {
+              "type": "array",
+              "maxItems": 50,
+              "uniqueItems": true,
+              "items": { "type": "string", "pattern": "^(\\*|@?[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)+)$" }
+            },
+            "mdmIntegrations": {
+              "description": "MDM integrations, by uuid.",
+              "type": "array",
+              "maxItems": 20,
+              "uniqueItems": true,
+              "items": { "type": "string", "format": "uuid" }
+            }
+          }
+        },
+        "credentialMode": {
+          "description": "The credential an enrolled device gets. device-key: a key that works on the sensor routes only, of which the server keeps a hash. user-key: the enrolling person's. org-key: the organization's.",
+          "type": "string",
+          "enum": ["device-key", "user-key", "org-key"],
+          "default": "device-key"
+        },
+        "mode": {
+          "description": "monitor: report matches, block nothing. guard: hold a match on a rule safe to block (a request denied, an exec refused, a connection dropped) until a person confirms a block or marks a false positive, or the hold lapses; an action that cannot be undone is never held. enforce: block every match on a block-mode rule, a running process included. In every mode a rule from a feed whose signature does not verify only detects.",
+          "type": "string",
+          "enum": ["monitor", "guard", "enforce"],
+          "default": "monitor"
+        },
+        "hold": {
+          "description": "How long guard mode holds a match, as a Go duration from 1s to 24h.",
+          "type": "string",
+          "pattern": "^([0-9]+(\\.[0-9]+)?(ns|us|µs|ms|s|m|h))+$",
+          "default": "15m"
+        },
+        "feeds": {
+          "description": "The rule feeds the sensor pulls: a DetectionRuleFeed by name, which the server resolves to its published URL, or an https URL.",
+          "type": "array",
+          "maxItems": 20,
+          "uniqueItems": true,
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "required": ["feedRef"],
+                "additionalProperties": false,
+                "properties": {
+                  "feedRef": { "description": "The metadata.name of a published DetectionRuleFeed.", "$ref": "common.schema.json#/$defs/name" }
+                }
+              },
+              { "type": "string", "format": "uri", "pattern": "^https://[^/\\s]+" }
+            ]
+          }
+        },
+        "feedKey": {
+          "description": "The base64 Ed25519 public key feed manifests must be signed with. Left out, the sensor's built-in key.",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{43}=$"
+        },
+        "egressListen": {
+          "description": "Where the egress proxy listens.",
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[^\\s'\"`$;&|]*:[^\\s'\"`$;&|]*$"
+        },
+        "dnsListen": {
+          "description": "Where the DNS guard listens.",
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[^\\s'\"`$;&|]*:[^\\s'\"`$;&|]*$"
+        },
+        "forward": {
+          "description": "siem: send every DNS and egress decision to Guardian as dns_events and net_events rows.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "const": "siem" }
+        },
+        "inventoryEvery": {
+          "description": "How often the sensor reports the packages running processes load, as a Go duration from 1m to 168h.",
+          "type": "string",
+          "pattern": "^([0-9]+(\\.[0-9]+)?(ns|us|µs|ms|s|m|h))+$",
+          "default": "6h"
+        },
+        "protection": {
+          "description": "How hard the install resists being stopped or removed on the host. standard: a plain service. hardened: a guard restores a sensor that was stopped, disabled or masked, and the user cannot stop it unless allowUserStop. locked: as hardened, and uninstalling needs a one-time code from the console.",
+          "type": "string",
+          "enum": ["standard", "hardened", "locked"],
+          "default": "hardened"
+        },
+        "allowUserStop": {
+          "description": "Let the device's user stop the sensor.",
+          "type": "boolean",
+          "default": false
+        },
+        "heartbeatAlertMinutes": {
+          "description": "Alert when an enrolled sensor has been silent this long.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10080,
+          "default": 15
+        }
+      }
+    }
+  }
+}

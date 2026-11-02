@@ -1,0 +1,5 @@
+# sources is required; an empty list turns everything off
+apiVersion: vulnetix.com/v1
+kind: CloudSensors
+metadata: {name: x}
+spec: {account: '*'}

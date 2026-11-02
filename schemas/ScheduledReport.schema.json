@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/ScheduledReport.schema.json",
+  "title": "ScheduledReport",
+  "description": "A Guardian scheduled send: run a SavedSearch on a calendar and send its rows to messaging connections or email. Each send is charged to the daily query budget like any search, and the plan caps how many are enabled.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "ScheduledReport" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["searchRef", "destination"],
+      "additionalProperties": false,
+      "properties": {
+        "displayName": {
+          "description": "The name the console shows, and the default subject. Defaults to metadata.name.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "searchRef": {
+          "description": "The metadata.name of the SavedSearch to run.",
+          "$ref": "common.schema.json#/$defs/name"
+        },
+        "repeat": {
+          "type": "string",
+          "enum": ["hourly", "every_6h", "daily", "weekly", "monthly"],
+          "default": "daily"
+        },
+        "at": {
+          "description": "The time of day, 24-hour, in zone.",
+          "type": "string",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+          "default": "08:00"
+        },
+        "zone": {
+          "description": "An IANA time zone, such as Australia/Sydney.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "default": "UTC"
+        },
+        "weekday": {
+          "description": "For weekly: 0 is Sunday.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6,
+          "default": 1
+        },
+        "monthday": {
+          "description": "For monthly. At most 28, so every month has the day.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 28,
+          "default": 1
+        },
+        "rowsWindowMs": {
+          "description": "How far back each send reads, in milliseconds: 1 hour to 31 days.",
+          "type": "integer",
+          "minimum": 3600000,
+          "maximum": 2678400000,
+          "default": 86400000
+        },
+        "sincePrevious": {
+          "description": "Read from the previous send instead of rowsWindowMs, so no row is reported twice.",
+          "type": "boolean",
+          "default": false
+        },
+        "whenEmpty": {
+          "description": "skip sends nothing when there are no rows; all_clear sends a message saying so.",
+          "type": "string",
+          "enum": ["skip", "all_clear"],
+          "default": "skip"
+        },
+        "enabled": { "type": "boolean", "default": true },
+        "destination": {
+          "type": "object",
+          "required": ["kind"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "type": "string", "enum": ["messaging", "email"] },
+            "connections": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 10,
+              "uniqueItems": true,
+              "items": { "$ref": "common.schema.json#/$defs/messagingConnectionRef" }
+            },
+            "emails": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 20,
+              "uniqueItems": true,
+              "items": { "type": "string", "format": "email", "maxLength": 254 }
+            },
+            "subject": {
+              "description": "Defaults to displayName.",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            }
+          },
+          "if": { "properties": { "kind": { "const": "messaging" } } },
+          "then": { "required": ["connections"], "properties": { "emails": false } },
+          "else": { "required": ["emails"], "properties": { "connections": false } }
+        },
+        "format": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "layout": {
+              "description": "table_chart: a bar chart of the first measure and the table. table: the table only. summary: the row count only.",
+              "type": "string",
+              "enum": ["table_chart", "table", "summary"],
+              "default": "table_chart"
+            },
+            "rows": { "description": "Rows shown.", "type": "integer", "minimum": 1, "maximum": 100, "default": 20 },
+            "csv": { "description": "Attach a CSV of up to 1,000 rows. Email only.", "type": "boolean", "default": true },
+            "link": { "description": "Link to the search in the console.", "type": "boolean", "default": true },
+            "query": { "description": "Include the query text.", "type": "boolean", "default": false }
+          }
+        }
+      }
+    }
+  }
+}

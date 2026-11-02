@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/LogSource.schema.json
+apiVersion: vulnetix.com/v1
+kind: LogSource
+metadata:
+  name: aws-prod
+spec:
+  type: aws
+  label: Production VPCs
+---
+apiVersion: vulnetix.com/v1
+kind: LogSource
+metadata:
+  name: cloudflare-edge
+spec:
+  type: cloudflare
+  cloudflare:
+    apiToken: { env: CLOUDFLARE_LOGPUSH_TOKEN }
+    datasets: [firewall_events, http_requests, gateway_dns]
+    accountId: 0123456789abcdef0123456789abcdef
+    zoneIds: [fedcba9876543210fedcba9876543210]
+---
+apiVersion: vulnetix.com/v1
+kind: LogSource
+metadata:
+  name: sensor-events
+spec:
+  type: events
+  label: Runtime sensors

@@ -12,9 +12,10 @@ import (
 // whenContexts names the CEL context each kind's `when` is compiled in. A kind
 // that gains a `when` must be listed here, or its examples go unchecked.
 var whenContexts = map[string]Context{
-	"JailPolicy":   ContextFinding,
-	"RiskStrategy": ContextFinding,
-	"Suppression":  ContextFinding,
+	"DetectionRuleFeed": ContextCVE,
+	"JailPolicy":        ContextFinding,
+	"RiskStrategy":      ContextFinding,
+	"Suppression":       ContextFinding,
 }
 
 // Every `when` in the published examples must compile in its kind's context.

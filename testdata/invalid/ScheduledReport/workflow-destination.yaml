@@ -1,0 +1,5 @@
+# a scheduled send cannot start a workflow
+apiVersion: vulnetix.com/v1
+kind: ScheduledReport
+metadata: {name: x}
+spec: {searchRef: a, destination: {kind: workflow}}

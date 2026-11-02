@@ -1,0 +1,5 @@
+# body and sigmahq together
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata: {name: x}
+spec: {language: sigma, body: 'title: x', sigmahq: rules/a.yml}

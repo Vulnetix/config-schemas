@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/DetectionRule.schema.json
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata:
+  name: dynamic-dns
+spec:
+  language: sigma
+  body: |
+    title: Dynamic DNS lookup
+    id: 6f3e0c52-0d4b-4c8e-9a51-2a6b9a0e7d10
+    level: medium
+    logsource:
+      category: dns_query
+    detection:
+      selection:
+        QueryName|endswith:
+          - .duckdns.org
+          - .no-ip.org
+      condition: selection
+  threshold: { count: 5, windowSec: 600, by: [src_ip] }
+  suppressions:
+    - field: QueryName
+      value: updates.duckdns.org
+      until: "2026-12-31"
+  target:
+    connections: [secops-slack]
+---
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata:
+  name: brute-force-file
+spec:
+  language: sigma
+  file: siem/rules/brute-force.yml
+  enabled: false
+---
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata:
+  name: log4shell-countermeasure
+spec:
+  countermeasure: 3b1f8a62-7d2e-4c41-9a0b-5e6f7c8d9e01
+  severityOverride: critical
+  intervalSec: 300
+---
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata:
+  name: sigmahq-aws-root-login
+spec:
+  sigmahq: rules/cloud/aws/cloudtrail/aws_root_account_usage.yml
+  level: high
+---
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata:
+  name: indicator-domains
+spec:
+  ioc: ioc-dns
+  maxAlertsPerRun: 100
+---
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata:
+  name: dns-search-rule
+spec:
+  searchRef: dynamic-dns-lookups
+  level: low

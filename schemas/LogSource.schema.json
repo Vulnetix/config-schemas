@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/LogSource.schema.json",
+  "title": "LogSource",
+  "description": "A way logs reach Guardian, backed by a Guardian ingest token of the same type. The token is minted on create and shown once, by the apply that creates it; it is never exported or shown in a plan. aws: the token for the vulnetix-siem CloudFormation stack you deploy (IngestToken), which sends VPC flow logs, Route 53 Resolver logs and CloudTrail events by Firehose. cloudflare: Guardian creates Logpush jobs with your Cloudflare API token, which is used for those calls only and never stored. events: the token for POST /v1/ingest/events, used by your own scripts and the Vulnetix runtime sensor. Guardian has no update for a token or a Logpush job, so a changed spec is applied as delete and create: the old token is revoked and a new one minted. Managing sources needs the Guardian manager role.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "LogSource" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "enum": ["aws", "cloudflare", "events"] },
+        "label": {
+          "description": "The token's label on the Sources page. Defaults to the type and the date.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "cloudflare": {
+          "description": "The Logpush jobs to create. Running it again does not make a second job for a dataset that already sends to Guardian. Cloudflare allows four Logpush jobs per zone.",
+          "type": "object",
+          "required": ["apiToken", "datasets"],
+          "additionalProperties": false,
+          "properties": {
+            "apiToken": {
+              "description": "Where the client reads the Cloudflare API token. Sent for this apply only; Guardian never stores it, so deleting the source needs it again.",
+              "$ref": "common.schema.json#/$defs/valueFrom"
+            },
+            "datasets": {
+              "description": "firewall_events, http_requests and dns_logs are zone datasets, created on every zone the token can see (or those in zoneIds). The others are account datasets and need accountId.",
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "firewall_events",
+                  "http_requests",
+                  "dns_logs",
+                  "workers_trace_events",
+                  "gateway_dns",
+                  "dns_firewall_logs",
+                  "gateway_network",
+                  "network_analytics_logs",
+                  "audit_logs_v2"
+                ]
+              }
+            },
+            "accountId": {
+              "description": "The Cloudflare account id, for account datasets.",
+              "type": "string",
+              "pattern": "^[0-9a-f]{32}$"
+            },
+            "zoneIds": {
+              "description": "Only these zones. Left out, every zone the token can see (at most 1,000).",
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 50,
+              "uniqueItems": true,
+              "items": { "type": "string", "pattern": "^[0-9a-f]{32}$" }
+            }
+          },
+          "if": {
+            "properties": {
+              "datasets": {
+                "contains": { "enum": ["workers_trace_events", "gateway_dns", "dns_firewall_logs", "gateway_network", "network_analytics_logs", "audit_logs_v2"] }
+              }
+            }
+          },
+          "then": { "required": ["accountId"] }
+        }
+      },
+      "if": { "properties": { "type": { "const": "cloudflare" } } },
+      "then": { "required": ["cloudflare"] },
+      "else": { "properties": { "cloudflare": false } }
+    }
+  }
+}

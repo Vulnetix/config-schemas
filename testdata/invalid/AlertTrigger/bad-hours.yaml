@@ -1,0 +1,5 @@
+# hours outside the enum
+apiVersion: vulnetix.com/v1
+kind: AlertTrigger
+metadata: {name: x}
+spec: {searchRef: a, levers: {hours: weekends}, destination: {kind: workflow}}

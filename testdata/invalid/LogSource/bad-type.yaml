@@ -1,0 +1,5 @@
+# type outside the enum
+apiVersion: vulnetix.com/v1
+kind: LogSource
+metadata: {name: x}
+spec: {type: gcp}

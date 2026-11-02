@@ -1,0 +1,5 @@
+# heartbeatAlertMinutes is 1 to 10080
+apiVersion: vulnetix.com/v1
+kind: RuntimeSensorPolicy
+metadata: {name: x}
+spec: {heartbeatAlertMinutes: 0}

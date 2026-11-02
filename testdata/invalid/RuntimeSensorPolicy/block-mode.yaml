@@ -1,0 +1,5 @@
+# the modes are monitor, guard and enforce
+apiVersion: vulnetix.com/v1
+kind: RuntimeSensorPolicy
+metadata: {name: x}
+spec: {mode: block}

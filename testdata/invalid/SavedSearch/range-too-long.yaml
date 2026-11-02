@@ -1,0 +1,5 @@
+# rangeMs over 30 days
+apiVersion: vulnetix.com/v1
+kind: SavedSearch
+metadata: {name: x}
+spec: {text: dns_events, rangeMs: 2592000001}

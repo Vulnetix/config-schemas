@@ -1,0 +1,5 @@
+# at is HH:MM, 24-hour
+apiVersion: vulnetix.com/v1
+kind: ScheduledReport
+metadata: {name: x}
+spec: {searchRef: a, at: '8am', destination: {kind: email, emails: [a@acme.example]}}

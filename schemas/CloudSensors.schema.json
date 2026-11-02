@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/CloudSensors.schema.json",
+  "title": "CloudSensors",
+  "description": "Which AWS-native sources and Vulnetix passes are read, for one account or for every account. The sources listed are turned on; every other source is turned off for that scope. Once a source is on, everything it reports is ingested: granularity stops at the source. Turning one off stops reading it and keeps the findings already ingested, with their triage history. Each source's consent record is a named inline policy on the execution role, attached by redeploying the stack, so set deploy to attach it in the same apply. Turning a source on needs a connected AWS account. Not stored yet for one account: CloudNativeSource.accountId exists and is keyed, but no route writes an account id and the stack deploy reads the sources for the whole tenant, so only account \"*\" applies today. A document naming an account validates, and applying it needs that write path and a per-account read in the deploy.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "CloudSensors" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["sources"],
+      "additionalProperties": false,
+      "properties": {
+        "account": {
+          "description": "An AWS account id, or * for every account, including those connected later. One document per value.",
+          "anyOf": [
+            { "const": "*" },
+            { "$ref": "common.schema.json#/$defs/awsAccountId" }
+          ],
+          "default": "*"
+        },
+        "sources": {
+          "description": "inspector: Amazon Inspector. security-hub: AWS Security Hub. guardduty, config, macie and access-analyzer: those products, read through Security Hub (one grant, filtered by product). waf: the AWS WAF configuration in front of the account. compute: SSM package inventory, EMR, EKS node groups, running ECS images, CIS AWS Foundations and CloudFormation template checks. compute-artifacts: read inside ECR image layers and Lambda code. network-logs: match Resolver and flow logs against malicious indicators. eks-workloads: list EKS pods and the images each runs; each cluster also needs an access entry you create. compute-artifacts, network-logs and eks-workloads have an effect only with compute on.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "inspector",
+              "security-hub",
+              "guardduty",
+              "config",
+              "macie",
+              "access-analyzer",
+              "waf",
+              "compute",
+              "compute-artifacts",
+              "network-logs",
+              "eks-workloads"
+            ]
+          }
+        },
+        "deploy": {
+          "description": "Redeploy the pipeline stack after a change, so the execution role carries exactly the policies the sources turned on need.",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    }
+  }
+}

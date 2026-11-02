@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/ScheduledReport.schema.json
+apiVersion: vulnetix.com/v1
+kind: ScheduledReport
+metadata:
+  name: weekly-console-sign-ins
+spec:
+  searchRef: console-sign-ins
+  repeat: weekly
+  weekday: 1
+  at: "08:00"
+  zone: Australia/Melbourne
+  rowsWindowMs: 604800000
+  whenEmpty: all_clear
+  destination:
+    kind: email
+    emails: [secops@acme.example]
+    subject: Console sign-ins this week
+  format: { layout: table_chart, rows: 20, csv: true }
+---
+apiVersion: vulnetix.com/v1
+kind: ScheduledReport
+metadata:
+  name: daily-dns-digest
+spec:
+  searchRef: dynamic-dns-lookups
+  sincePrevious: true
+  destination:
+    kind: messaging
+    connections: [secops-slack]
+  format: { layout: summary }

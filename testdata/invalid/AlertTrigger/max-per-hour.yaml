@@ -1,0 +1,5 @@
+# maxPerHour over 60
+apiVersion: vulnetix.com/v1
+kind: AlertTrigger
+metadata: {name: x}
+spec: {searchRef: a, levers: {maxPerHour: 61}, destination: {kind: workflow}}

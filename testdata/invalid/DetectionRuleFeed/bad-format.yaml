@@ -1,0 +1,5 @@
+# format outside the enum
+apiVersion: vulnetix.com/v1
+kind: DetectionRuleFeed
+metadata: {name: x}
+spec: {format: NUCLEI, selector: {when: kev}}

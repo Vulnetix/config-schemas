@@ -1,0 +1,5 @@
+# unknown built-in rule
+apiVersion: vulnetix.com/v1
+kind: DetectionRule
+metadata: {name: x}
+spec: {ioc: ioc-url}

@@ -1,0 +1,5 @@
+# feeds are https only
+apiVersion: vulnetix.com/v1
+kind: RuntimeSensorPolicy
+metadata: {name: x}
+spec: {feeds: ['http://feeds.acme.example/rules.json']}

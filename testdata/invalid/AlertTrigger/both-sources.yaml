@@ -1,0 +1,5 @@
+# searchRef and ruleRef together
+apiVersion: vulnetix.com/v1
+kind: AlertTrigger
+metadata: {name: x}
+spec: {searchRef: a, ruleRef: b, destination: {kind: workflow}}

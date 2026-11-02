@@ -1,0 +1,5 @@
+# the cloudflare block is for type cloudflare only
+apiVersion: vulnetix.com/v1
+kind: LogSource
+metadata: {name: x}
+spec: {type: aws, cloudflare: {apiToken: {env: T}, datasets: [http_requests]}}

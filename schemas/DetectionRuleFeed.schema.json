@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/DetectionRuleFeed.schema.json",
+  "title": "DetectionRuleFeed",
+  "description": "A curated feed of virtual patches, countermeasures and catalogue rules, published to a public URL for IDS, IPS, WAF, SIEM and YARA engines and the Vulnetix runtime sensor to fetch. A feed has one output format, because its consumers each read one. The plan sets how many feeds of each format a tenant may have, and a feed holds at most 500 rules. Name entries, a selector, or both. The format cannot be changed on the server, so a changed format is applied as delete and create, which moves the feed's URL.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "DetectionRuleFeed" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["format"],
+      "additionalProperties": false,
+      "properties": {
+        "displayName": {
+          "description": "The feed's name. Defaults to metadata.name.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "description": { "type": "string", "maxLength": 4096 },
+        "format": {
+          "description": "The output format, and so which rules the feed accepts. SNORT_YARA publishes snort.rules and rules.yar from the third-party catalogue together. SNORT, SURICATA, MODSECURITY, NGINX, AWS_WAF, CLOUDFLARE_WAF and REGEX_L7 are block-lane virtual patches; SIGMA, YARA, STIX and OPENIOC are detect-lane countermeasures. Every published feed also carries rules.json and a signed manifest for the runtime sensor.",
+          "type": "string",
+          "enum": ["SNORT_YARA", "SNORT", "SURICATA", "MODSECURITY", "NGINX", "AWS_WAF", "CLOUDFLARE_WAF", "REGEX_L7", "SIGMA", "YARA", "STIX", "OPENIOC"]
+        },
+        "schemaVersion": {
+          "description": "The layout of the published files.",
+          "type": "integer",
+          "const": 1,
+          "default": 1
+        },
+        "entries": {
+          "description": "Rules named one by one. Each is checked to exist when it is added and again at publish.",
+          "type": "array",
+          "maxItems": 500,
+          "items": { "$ref": "#/$defs/entry" }
+        },
+        "selector": {
+          "description": "Rules chosen by a condition. Not stored yet: the server keeps explicit entries only, so a selector validates and applying it needs the backend change that evaluates it against the rules of the feed's format.",
+          "type": "object",
+          "required": ["when"],
+          "additionalProperties": false,
+          "properties": {
+            "when": {
+              "description": "A condition over the cve variables (id, cvss, epss, kev, published, kind, confidence, falsePositiveRisk, now), evaluated once per candidate rule.",
+              "$ref": "common.schema.json#/$defs/celExpression"
+            }
+          }
+        },
+        "publish": {
+          "description": "true: publish on apply, and again whenever the entries change, to the feed's public URL. false: keep the feed a draft; a published feed is revoked, which deletes its published files.",
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "anyOf": [{ "required": ["entries"] }, { "required": ["selector"] }],
+      "allOf": [
+        { "if": { "properties": { "format": { "const": "SNORT_YARA" } } }, "then": { "$ref": "#/$defs/entriesOf/SNORT_YARA" } },
+        { "if": { "properties": { "format": { "const": "SNORT" } } }, "then": { "$ref": "#/$defs/entriesOf/SNORT" } },
+        { "if": { "properties": { "format": { "const": "SURICATA" } } }, "then": { "$ref": "#/$defs/entriesOf/SURICATA" } },
+        { "if": { "properties": { "format": { "const": "MODSECURITY" } } }, "then": { "$ref": "#/$defs/entriesOf/MODSECURITY" } },
+        { "if": { "properties": { "format": { "const": "NGINX" } } }, "then": { "$ref": "#/$defs/entriesOf/NGINX" } },
+        { "if": { "properties": { "format": { "const": "AWS_WAF" } } }, "then": { "$ref": "#/$defs/entriesOf/AWS_WAF" } },
+        { "if": { "properties": { "format": { "const": "CLOUDFLARE_WAF" } } }, "then": { "$ref": "#/$defs/entriesOf/CLOUDFLARE_WAF" } },
+        { "if": { "properties": { "format": { "const": "REGEX_L7" } } }, "then": { "$ref": "#/$defs/entriesOf/REGEX_L7" } },
+        { "if": { "properties": { "format": { "const": "SIGMA" } } }, "then": { "$ref": "#/$defs/entriesOf/SIGMA" } },
+        { "if": { "properties": { "format": { "const": "YARA" } } }, "then": { "$ref": "#/$defs/entriesOf/YARA" } },
+        { "if": { "properties": { "format": { "const": "STIX" } } }, "then": { "$ref": "#/$defs/entriesOf/STIX" } },
+        { "if": { "properties": { "format": { "const": "OPENIOC" } } }, "then": { "$ref": "#/$defs/entriesOf/OPENIOC" } }
+      ]
+    }
+  },
+  "$defs": {
+    "entry": {
+      "description": "One rule. ruleTable says where it lives: snort_rule and yara_rule are the third-party catalogue; virtual_patch and countermeasure are generated by Vulnetix. ruleType is the rule's format, which must be one the table holds and the feed accepts.",
+      "type": "object",
+      "required": ["ruleTable", "ruleType", "rule"],
+      "additionalProperties": false,
+      "properties": {
+        "ruleTable": { "type": "string", "enum": ["snort_rule", "yara_rule", "virtual_patch", "countermeasure"] },
+        "ruleType": { "type": "string" },
+        "rule": {
+          "description": "The rule's uuid in its table.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "cve": {
+          "description": "The vulnerability the rule was curated for.",
+          "type": "string",
+          "pattern": "^CVE-[0-9]{4}-[0-9]{4,}$"
+        },
+        "disabled": {
+          "description": "Publish the rule commented out. Left false, publish turns it on even when its catalogue marks it disabled.",
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "oneOf": [
+        { "properties": { "ruleTable": { "const": "snort_rule" }, "ruleType": { "const": "SNORT" } } },
+        { "properties": { "ruleTable": { "const": "yara_rule" }, "ruleType": { "const": "YARA" } } },
+        { "properties": { "ruleTable": { "const": "virtual_patch" }, "ruleType": { "enum": ["SNORT", "SURICATA", "MODSECURITY", "NGINX", "AWS_WAF", "CLOUDFLARE_WAF", "REGEX_L7"] } } },
+        { "properties": { "ruleTable": { "const": "countermeasure" }, "ruleType": { "enum": ["SIGMA", "YARA", "STIX", "OPENIOC"] } } }
+      ]
+    },
+    "entriesOf": {
+      "SNORT_YARA": { "properties": { "entries": { "items": { "properties": { "ruleTable": { "enum": ["snort_rule", "yara_rule"] }, "ruleType": { "enum": ["SNORT", "YARA"] } } } } } },
+      "SNORT": { "properties": { "entries": { "items": { "properties": { "ruleType": { "const": "SNORT" } } } } } },
+      "SURICATA": { "properties": { "entries": { "items": { "properties": { "ruleType": { "const": "SURICATA" } } } } } },
+      "MODSECURITY": { "properties": { "entries": { "items": { "properties": { "ruleType": { "const": "MODSECURITY" } } } } } },
+      "NGINX": { "properties": { "entries": { "items": { "properties": { "ruleType": { "const": "NGINX" } } } } } },
+      "AWS_WAF": { "properties": { "entries": { "items": { "properties": { "ruleType": { "const": "AWS_WAF" } } } } } },
+      "CLOUDFLARE_WAF": { "properties": { "entries": { "items": { "properties": { "ruleType": { "const": "CLOUDFLARE_WAF" } } } } } },
+      "REGEX_L7": { "properties": { "entries": { "items": { "properties": { "ruleType": { "const": "REGEX_L7" } } } } } },
+      "SIGMA": { "properties": { "entries": { "items": { "properties": { "ruleType": { "const": "SIGMA" } } } } } },
+      "YARA": { "properties": { "entries": { "items": { "properties": { "ruleType": { "const": "YARA" } } } } } },
+      "STIX": { "properties": { "entries": { "items": { "properties": { "ruleType": { "const": "STIX" } } } } } },
+      "OPENIOC": { "properties": { "entries": { "items": { "properties": { "ruleType": { "const": "OPENIOC" } } } } } }
+    }
+  }
+}

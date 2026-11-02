@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/DetectionRule.schema.json",
+  "title": "DetectionRule",
+  "description": "A Guardian alert rule: a detection run on a schedule over the tenant's logs, raising alerts. Name exactly one of body, file, searchRef, countermeasure, sigmahq or ioc. body and file are the tenant's own rule; the others run a rule Guardian already has, which can be tuned (level, threshold, suppressions, timing) but not edited. A rule whose detection does not compile, or names a log source Guardian has no table for, is stored turned off. The plan caps how many rules run at once. Deleting one that an AlertTrigger still uses is refused.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "DetectionRule" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "displayName": {
+          "description": "The name the console shows. Defaults to the Sigma rule's title, or the saved search's, countermeasure's or built-in rule's name.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "language": {
+          "description": "The language of body or file. sigma: a Sigma rule, or several in one multi-document YAML with one correlation rule, which is the one that alerts. dsl: the Guardian search language. Guardian keeps a DSL rule only as a copy of a saved search today, so a dsl body or file has no direct write path yet; use searchRef until Guardian takes DSL rule text.",
+          "type": "string",
+          "enum": ["sigma", "dsl"]
+        },
+        "body": {
+          "description": "The rule text, at most 256 KiB.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 262144
+        },
+        "file": {
+          "description": "A file holding the rule text, the same as body.",
+          "$ref": "common.schema.json#/$defs/configFile"
+        },
+        "searchRef": {
+          "description": "The metadata.name of a SavedSearch whose text the rule runs. Its text is copied when the rule is created: editing the search later does not change the rule.",
+          "$ref": "common.schema.json#/$defs/name"
+        },
+        "countermeasure": {
+          "description": "A Vulnetix countermeasure of kind SIGMA, by uuid: the virtual patching lane's detection for a vulnerability.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "sigmahq": {
+          "description": "A rule from the SigmaHQ catalogue Guardian imports weekly, by its path in the SigmaHQ repository. Only rules that compile are offered.",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_./-]+\\.ya?ml$"
+        },
+        "ioc": {
+          "description": "A built-in indicator rule. ioc-dns: a domain on an indicator list resolved. ioc-net: a connection to an indicator address.",
+          "type": "string",
+          "enum": ["ioc-dns", "ioc-net"]
+        },
+        "enabled": {
+          "description": "Whether the rule runs. A rule that cannot compile is never on, whatever this says.",
+          "type": "boolean",
+          "default": true
+        },
+        "level": {
+          "description": "The Sigma level. Defaults to the rule's own level, or medium.",
+          "type": "string",
+          "enum": ["informational", "low", "medium", "high", "critical"]
+        },
+        "severityOverride": {
+          "description": "The alert severity, instead of the one the level maps to (informational to info, low to notice, medium to warning, high and critical to critical).",
+          "type": "string",
+          "enum": ["info", "notice", "warning", "critical"]
+        },
+        "intervalSec": {
+          "description": "Seconds between runs.",
+          "type": "integer",
+          "minimum": 60,
+          "maximum": 3600,
+          "default": 60
+        },
+        "latenessSec": {
+          "description": "How long a run waits for late rows before it reads a window, in seconds.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3600,
+          "default": 300
+        },
+        "suppressSec": {
+          "description": "Seconds during which a repeat of the same alert is merged into the open one instead of raising another.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 604800,
+          "default": 900
+        },
+        "maxAlertsPerRun": {
+          "description": "Alerts one run may raise. Beyond it, one overflow alert says how many more matched.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000,
+          "default": 50
+        },
+        "threshold": {
+          "description": "Alert only when at least count rows match within windowSec, counted per the by fields. Wraps the detection as a Sigma event_count correlation.",
+          "type": "object",
+          "required": ["count", "windowSec"],
+          "additionalProperties": false,
+          "properties": {
+            "count": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+            "windowSec": { "type": "integer", "minimum": 60, "maximum": 86400 },
+            "by": {
+              "type": "array",
+              "maxItems": 5,
+              "items": { "type": "string", "minLength": 1, "maxLength": 80 }
+            }
+          }
+        },
+        "suppressions": {
+          "description": "Values that never alert. Each adds a filter on field equal to value to the rule's detection until it lapses.",
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "required": ["field", "value"],
+            "additionalProperties": false,
+            "properties": {
+              "field": { "type": "string", "pattern": "^[A-Za-z0-9_.-]{1,80}$" },
+              "value": { "type": "string", "minLength": 1, "maxLength": 512 },
+              "until": {
+                "description": "The last day it applies is the day before this date (UTC). Left out, it never lapses.",
+                "type": "string",
+                "format": "date"
+              }
+            }
+          }
+        },
+        "target": {
+          "description": "Where the rule's alerts are sent, beyond the Guardian alerts list.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "connections": {
+              "type": "array",
+              "maxItems": 10,
+              "uniqueItems": true,
+              "items": { "$ref": "common.schema.json#/$defs/messagingConnectionRef" }
+            },
+            "emails": {
+              "type": "array",
+              "maxItems": 20,
+              "uniqueItems": true,
+              "items": { "type": "string", "format": "email", "maxLength": 254 }
+            }
+          }
+        }
+      },
+      "oneOf": [
+        { "required": ["body"] },
+        { "required": ["file"] },
+        { "required": ["searchRef"] },
+        { "required": ["countermeasure"] },
+        { "required": ["sigmahq"] },
+        { "required": ["ioc"] }
+      ],
+      "if": { "anyOf": [{ "required": ["body"] }, { "required": ["file"] }] },
+      "then": { "required": ["language"] },
+      "else": { "properties": { "language": false } }
+    }
+  }
+}

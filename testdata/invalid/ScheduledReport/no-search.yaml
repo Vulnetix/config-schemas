@@ -1,0 +1,5 @@
+# searchRef is required
+apiVersion: vulnetix.com/v1
+kind: ScheduledReport
+metadata: {name: x}
+spec: {destination: {kind: email, emails: [a@acme.example]}}

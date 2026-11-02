@@ -1,0 +1,5 @@
+# the account id is a string; unquoted YAML loses leading zeros
+apiVersion: vulnetix.com/v1
+kind: AwsAccount
+metadata: {name: x}
+spec: {accountId: 123456789012}

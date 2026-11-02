@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/RuntimeSensorPolicy.schema.json
+apiVersion: vulnetix.com/v1
+kind: RuntimeSensorPolicy
+metadata:
+  name: engineering-laptops
+spec:
+  description: Every engineer's laptop, in guard mode.
+  priority: 200
+  match:
+    domains: [acme.example]
+  credentialMode: device-key
+  mode: guard
+  hold: 15m
+  feeds:
+    - feedRef: edge-waf
+    - https://vulnetix.com/feeds/0b6f2c1e-4d3a-4e5f-8a9b-7c6d5e4f3a2b/9c8b7a6f-5e4d-4c3b-8a2f-1e0d9c8b7a6f/rules.json
+  forward: [siem]
+  inventoryEvery: 6h
+  protection: hardened
+  heartbeatAlertMinutes: 30
+---
+apiVersion: vulnetix.com/v1
+kind: RuntimeSensorPolicy
+metadata:
+  name: servers-monitor
+spec:
+  priority: 10
+  match:
+    mdmIntegrations: [5e4d3c2b-1a09-4f8e-9d7c-6b5a4f3e2d1c]
+  mode: monitor
+  protection: locked

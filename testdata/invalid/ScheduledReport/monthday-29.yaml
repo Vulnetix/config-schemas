@@ -1,0 +1,5 @@
+# monthday at most 28
+apiVersion: vulnetix.com/v1
+kind: ScheduledReport
+metadata: {name: x}
+spec: {searchRef: a, repeat: monthly, monthday: 29, destination: {kind: email, emails: [a@acme.example]}}
