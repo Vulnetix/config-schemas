@@ -1,0 +1,8 @@
+# an OCI registry is a host, not a URL
+apiVersion: vulnetix.com/v1
+kind: RegistryConnection
+metadata: {name: acme-registry}
+spec:
+  ecosystem: oci
+  url: https://registry.acme.example
+  secret: {env: TOKEN}

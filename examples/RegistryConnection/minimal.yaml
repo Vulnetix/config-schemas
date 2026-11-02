@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/RegistryConnection.schema.json
+apiVersion: vulnetix.com/v1
+kind: RegistryConnection
+metadata:
+  name: github-packages
+spec:
+  ecosystem: npm
+  url: https://npm.pkg.github.com/

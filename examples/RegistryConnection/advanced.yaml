@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/RegistryConnection.schema.json
+apiVersion: vulnetix.com/v1
+kind: RegistryConnection
+metadata:
+  name: acme-artifactory-npm
+  labels:
+    team: platform
+  annotations:
+    ticket: https://tracker.example.com/PLAT-482
+spec:
+  ecosystem: npm
+  url: https://artifactory.acme.example/artifactory/api/npm/npm-local/
+  scope: ["@acme", "@acme-internal"]
+  username: vulnetix-scanner
+  secret: { env: VULNETIX_ARTIFACTORY_PASSWORD }
+  enabled: true
+---
+apiVersion: vulnetix.com/v1
+kind: RegistryConnection
+metadata:
+  name: acme-registry
+spec:
+  ecosystem: oci
+  url: registry.acme.example
+  scope: [acme/payments, acme/platform]
+  secret: { env: VULNETIX_ACME_REGISTRY_TOKEN }

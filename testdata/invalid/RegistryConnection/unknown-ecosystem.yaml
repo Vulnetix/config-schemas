@@ -1,0 +1,8 @@
+# the ecosystems are oci, npm, pypi and maven
+apiVersion: vulnetix.com/v1
+kind: RegistryConnection
+metadata: {name: acme-cargo}
+spec:
+  ecosystem: cargo
+  url: https://cargo.acme.example/
+  secret: {env: TOKEN}

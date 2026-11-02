@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/RegistryConnection.schema.json",
+  "title": "RegistryConnection",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":["spec.secret"],"celFields":[]},
+  "description": "A private package or container registry that Vulnetix scans may read, and how to authenticate to it: an npm registry, a PyPI index, a Maven repository or an OCI registry. The credential is kept in the tenant's secrets vault (a connector entry), never in the connection; a scanner asks the platform to resolve the connection for a registry host and a package, and the credential is opened and the open recorded in the vault activity log. A connection with a username authenticates with basic authentication and the secret as the password; without one, the secret is a bearer token. Apply checks the credential against the registry before storing it and refuses a login the registry rejects. This is separate from the paid container registry logins on the Integrations page, which the crawler uses. Needs the saas migration 20261228020000_scan_registry_connection; until it is applied, plan refuses a document naming it.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "RegistryConnection" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["ecosystem", "url"],
+      "additionalProperties": false,
+      "properties": {
+        "ecosystem": {
+          "description": "oci: a container registry. npm: an npm registry. pypi: a PyPI simple index. maven: a Maven repository.",
+          "type": "string",
+          "enum": ["oci", "npm", "pypi", "maven"]
+        },
+        "url": {
+          "description": "For oci, the registry host with an optional port (registry.example.com, ghcr.io, registry.example.com:5000). For the others, the https URL of the registry or index (https://npm.pkg.github.com/, https://pypi.example.com/simple/, https://maven.example.com/releases/). It is matched against the registry a scan reaches by host.",
+          "type": "string",
+          "maxLength": 512
+        },
+        "scope": {
+          "description": "The packages or repositories this connection serves. Left out, every one at the registry. npm: a scope (@acme). oci: a repository path prefix (acme/payments). maven: a group id prefix (com.acme). pypi: a project name prefix (acme-). When several connections serve one registry, the most specific scope wins.",
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 50,
+          "items": { "type": "string", "pattern": "^[A-Za-z0-9@._/:-]{1,214}$" },
+          "default": []
+        },
+        "username": {
+          "description": "The user for basic authentication, with the secret as the password. Left out, the secret is a bearer token (an npm automation token, a registry access token).",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "secret": {
+          "description": "The password or token, read on the client and sent once. Required when the connection is created; left out afterwards, the stored credential is kept. It is stored in the secrets vault and never exported or shown in a plan. Changing it stores a new version of the vault entry.",
+          "$ref": "common.schema.json#/$defs/valueFrom"
+        },
+        "enabled": {
+          "description": "False keeps the connection and its credential but stops scans using it.",
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "if": { "properties": { "ecosystem": { "const": "oci" } }, "required": ["ecosystem"] },
+      "then": {
+        "properties": { "url": { "pattern": "^[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?(:[0-9]{1,5})?$" } }
+      },
+      "else": {
+        "properties": { "url": { "pattern": "^https://[^\\s/@?#]+(/[^\\s?#]*)?$" } }
+      }
+    }
+  }
+}

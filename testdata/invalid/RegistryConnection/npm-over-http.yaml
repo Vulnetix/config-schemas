@@ -1,0 +1,8 @@
+# the other registries are https URLs, so a credential is never sent in the clear
+apiVersion: vulnetix.com/v1
+kind: RegistryConnection
+metadata: {name: acme-npm}
+spec:
+  ecosystem: npm
+  url: http://npm.acme.example/
+  secret: {env: TOKEN}

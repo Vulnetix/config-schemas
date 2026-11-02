@@ -65,6 +65,7 @@ Reference documentation for every kind is at https://docs.vulnetix.com (the Plat
 | `TeaPublicationTarget` | v1.6.0 | A remote TEA server registered for mirroring, with its credential. |
 | `Campaign` | v1.6.0 | A remediation campaign: its scope, done criteria, timing, deadline and contributors. Removing it archives the campaign. |
 | `SsvcPolicy` | v1.8.0 | How the tenant makes its CISA SSVC decision (Track, Track*, Attend, Act): how signals become the decision points, table cells read differently, rules that decide by finding or repository, and what each outcome asks. One per tenant. |
+| `RegistryConnection` | v1.9.0 | A private npm, PyPI, Maven or OCI registry that scans may read, with its scope. The credential is kept in the secrets vault. |
 
 A field or kind whose description says "Not stored yet" (`CloudSensors` for one account), and the whole of `VexSource`, is ahead of the server: it validates today, and applying it needs the backend change the description names.
 
