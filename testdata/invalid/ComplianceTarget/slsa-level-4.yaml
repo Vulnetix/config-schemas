@@ -1,0 +1,7 @@
+# the build levels are 1 to 3
+apiVersion: vulnetix.com/v1
+kind: ComplianceTarget
+metadata: {name: slsa}
+spec:
+  framework: slsa
+  slsa: {level: 4}

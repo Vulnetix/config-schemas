@@ -43,6 +43,16 @@ func Runtimes() []Runtime {
 			OnError: "The entry is skipped and the error is logged: a deny entry does not block and an allow entry does not waive, so a broken condition neither blocks nor waives more than was declared.",
 		},
 		{
+			Name:    "SSVC decision (vdb-site)",
+			Where:   "`SsvcPolicy` decision point expressions and `overrides[].when`",
+			OnError: "The decision point takes its lower value (not exploited, not automatable, partial impact) and the decision is still made. An override that fails does not hold.",
+		},
+		{
+			Name:    "Cryptography policy (vdb-site)",
+			Where:   "`ComplianceTarget` `crypto.allow` and `crypto.appliesTo`",
+			OnError: "Fails closed for `allow`: a component the expression cannot be evaluated for is reported as a violation, because an unassessed algorithm must not pass a policy. An `appliesTo` that fails leaves the component in scope.",
+		},
+		{
 			Name:    "AI firewall",
 			Where:   "`AiFirewallPolicy` rule `when`",
 			OnError: "The rule is skipped and named in the decision's skipped list with the error. The gateway does not block or flag on a condition it could not evaluate.",

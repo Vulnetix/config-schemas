@@ -78,7 +78,9 @@ func TestTypedHelpers(t *testing.T) {
 		name string
 		got  func() (bool, error)
 	}{
-		{"finding", func() (bool, error) { return EvalFinding("kev && severity == 'critical'", Finding{KEV: true, Severity: "critical"}) }},
+		{"finding", func() (bool, error) {
+			return EvalFinding("kev && severity == 'critical'", Finding{KEV: true, Severity: "critical"})
+		}},
 		{"package", func() (bool, error) { return EvalPackage("malware || versionLag > 3", Package{VersionLag: 4}) }},
 		{"request", func() (bool, error) { return EvalRequest("'shell' in tools", Request{Tools: []string{"shell"}}) }},
 		{"event", func() (bool, error) { return EvalEvent("event == 'push'", Event{Event: "push"}) }},

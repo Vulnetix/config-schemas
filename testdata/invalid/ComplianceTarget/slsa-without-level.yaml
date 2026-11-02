@@ -1,0 +1,6 @@
+# a slsa target names the level it aims for
+apiVersion: vulnetix.com/v1
+kind: ComplianceTarget
+metadata: {name: slsa-target}
+spec:
+  framework: slsa

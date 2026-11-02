@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/ComplianceTarget.schema.json
+apiVersion: vulnetix.com/v1
+kind: ComplianceTarget
+metadata:
+  name: quarterly-owasp
+spec:
+  framework: owasp_top_10

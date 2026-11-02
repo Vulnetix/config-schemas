@@ -21,7 +21,7 @@ func Markdown() string {
 	for _, f := range Functions() {
 		fmt.Fprintf(&b, "| %s | %s |\n", f.Signature, cell(f.Doc))
 	}
-	b.WriteString("\n### When a rule cannot be evaluated\n\nThe library reports a compile or evaluation error and nothing more. What a rule does with it differs by runtime, and only the factory gate fails closed.\n\n")
+	b.WriteString("\n### When a rule cannot be evaluated\n\nThe library reports a compile or evaluation error and nothing more. What a rule does with it differs by runtime. The factory gate and a cryptography policy fail closed; every other rule fails open or is skipped.\n\n")
 	b.WriteString("| Runtime | Field | On an error |\n|---|---|---|\n")
 	for _, r := range Runtimes() {
 		fmt.Fprintf(&b, "| %s | %s | %s |\n", r.Name, r.Where, cell(r.OnError))

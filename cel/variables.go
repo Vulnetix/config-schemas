@@ -21,11 +21,14 @@ const (
 	ContextEvent Context = "event"
 	// ContextCVE is for detection rule feed selectors.
 	ContextCVE Context = "cve"
+	// ContextCBOM is for the cryptography policy of a ComplianceTarget, over
+	// one component of a Cryptography Bill of Materials.
+	ContextCBOM Context = "cbom"
 )
 
 // Contexts lists every context in documentation order.
 func Contexts() []Context {
-	return []Context{ContextFinding, ContextPackage, ContextRequest, ContextEvent, ContextCVE}
+	return []Context{ContextFinding, ContextPackage, ContextRequest, ContextEvent, ContextCVE, ContextCBOM}
 }
 
 // CEL type names used in the tables.
@@ -177,6 +180,28 @@ var variables = map[Context][]Variable{
 		{Name: "kind", Type: typeString, MaxLen: lenEnum, Doc: "Rule format: `SNORT`, `SURICATA`, `MODSECURITY`, `NGINX`, `AWS_WAF`, `CLOUDFLARE_WAF`, `REGEX_L7`, `SIGMA`, `YARA`, `STIX`, `OPENIOC`."},
 		{Name: "confidence", Type: typeString, MaxLen: lenEnum, Doc: "Confidence in the rule: `HIGH`, `MEDIUM`, `LOW`, or empty."},
 		{Name: "falsePositiveRisk", Type: typeString, MaxLen: lenEnum, Doc: "`HIGH`, `MEDIUM`, `LOW`, or empty."},
+		nowVar,
+	},
+	// saas CbomComponent (the CBOM the CLI uploads with `vulnetix cbom`, parsed by
+	// vdb-cyclonedx ParseCBOM), and the CbomScan it belongs to.
+	ContextCBOM: {
+		{Name: "name", Type: typeString, MaxLen: lenName, Doc: "The component's name as the inventory records it: `AES-256-GCM`, `RSA-2048`, `ML-KEM-768`, a certificate subject, or a library name."},
+		{Name: "category", Type: typeString, MaxLen: lenEnum, Doc: "`algorithm`, `certificate`, `key` or `library`."},
+		{Name: "assetType", Type: typeString, MaxLen: lenEnum, Doc: "The CycloneDX cryptographic asset type: `algorithm`, `certificate`, `related-crypto-material`, or empty for a library."},
+		{Name: "oid", Type: typeString, MaxLen: lenID, Doc: "The algorithm's OID, such as `2.16.840.1.101.3.4.1.46`, or empty when unknown."},
+		{Name: "primitive", Type: typeString, MaxLen: lenEnum, Doc: "The CycloneDX cryptographic primitive: `ae`, `block-cipher`, `stream-cipher`, `hash`, `mac`, `kdf`, `drbg`, `signature`, `pke`, `kem`, `key-agree`, `xof`, `combiner`, `other`, or empty."},
+		{Name: "parameterSetIdentifier", Type: typeString, MaxLen: lenID, Doc: "The parameter set: a key size such as `256`, a curve such as `P-256`, or a named set such as `ML-DSA-65`. Empty when none."},
+		{Name: "classicalSecurityLevel", Type: typeInt, Doc: "Classical security strength in bits. 0 when unknown."},
+		{Name: "nistQuantumSecurityLevel", Type: typeInt, Doc: "The NIST post-quantum security category, 1 to 5 (6 for a hybrid that meets the highest). 0 when the algorithm offers none, or when unknown."},
+		{Name: "pqcStatus", Type: typeString, MaxLen: lenEnum, Doc: "`quantum-safe`, `quantum-vulnerable`, `deprecated`, `hybrid`, or empty when not assessed."},
+		{Name: "quantumSafe", Type: typeBool, Derived: true, Doc: "True when `pqcStatus` is `quantum-safe` or `hybrid`, the set the Crypto Inventory counts as safe."},
+		{Name: "deprecated", Type: typeBool, Derived: true, Doc: "True when `pqcStatus` is `deprecated`."},
+		{Name: "standards", Type: typeLabelMap, MaxLen: lenID, MaxItems: 20, Doc: "Each standards body's verdict on the algorithm, by body: `standards['NIST']` is `approved`, `deprecated`, `disallowed` and so on. The bodies the catalogue knows include `NIST`, `BSI` and `CNSA 2.0`. Empty for a component with none."},
+		{Name: "provider", Type: typeString, MaxLen: lenName, Doc: "The library or implementation that provides it, such as `openssl` or `golang.org/x/crypto`."},
+		{Name: "purl", Type: typeString, MaxLen: lenPurl, Doc: "Package URL of the providing library, when known."},
+		{Name: "confidence", Type: typeString, MaxLen: lenEnum, Doc: "How sure the detection is: `high`, `medium`, `low`, or empty."},
+		{Name: "repo", Type: typeString, MaxLen: lenName, Doc: "Repository full name, `owner/name`, of the scan the component was found in."},
+		{Name: "branch", Type: typeString, MaxLen: lenName, Doc: "Branch of that scan."},
 		nowVar,
 	},
 }

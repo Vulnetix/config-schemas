@@ -1,0 +1,99 @@
+# Golden vectors for the cbom context: one component of a Cryptography Bill of
+# Materials. Variables an input leaves out take their zero value.
+context: cbom
+vectors:
+  - name: a quantum-safe algorithm
+    expr: quantumSafe
+    input: {name: ML-KEM-768, category: algorithm, pqcStatus: quantum-safe}
+    want: true
+
+  - name: a hybrid counts as quantum safe
+    expr: quantumSafe
+    input: {pqcStatus: hybrid}
+    want: true
+
+  - name: a quantum-vulnerable algorithm is not
+    expr: quantumSafe
+    input: {name: RSA-2048, pqcStatus: quantum-vulnerable}
+    want: false
+
+  - name: an unassessed algorithm is not quantum safe
+    expr: quantumSafe
+    input: {name: Custom}
+    want: false
+
+  - name: deprecated is derived from the status
+    expr: deprecated && category == 'algorithm'
+    input: {category: algorithm, pqcStatus: deprecated}
+    want: true
+
+  - name: only strong block ciphers and approved hashes
+    expr: "(primitive == 'block-cipher' && classicalSecurityLevel >= 128) || (primitive == 'hash' && classicalSecurityLevel >= 128)"
+    input: {primitive: hash, classicalSecurityLevel: 128}
+    want: true
+
+  - name: a short key fails the allow rule
+    expr: primitive != 'signature' || classicalSecurityLevel >= 112
+    input: {primitive: signature, classicalSecurityLevel: 80}
+    want: false
+
+  - name: NIST approval by body
+    expr: "standards['NIST'] in ['approved', 'recommended']"
+    input: {standards: {NIST: approved, BSI: deprecated}}
+    want: true
+
+  - name: a body with no verdict is absent
+    expr: "'CNSA 2.0' in standards && standards['CNSA 2.0'] == 'approved'"
+    input: {standards: {NIST: approved}}
+    want: false
+
+  - name: a named algorithm list
+    expr: name in ['AES-256-GCM', 'ML-KEM-768', 'ML-DSA-65'] || name.startsWith('SHA3-')
+    input: {name: SHA3-256}
+    want: true
+
+  - name: the quantum security level compares with an int literal
+    expr: category != 'algorithm' || nistQuantumSecurityLevel >= 1
+    input: {category: algorithm, nistQuantumSecurityLevel: 3}
+    want: true
+
+  - name: the library that provides it
+    expr: provider.startsWith('openssl') && purl.matchesPurl('pkg:deb/debian/openssl')
+    input: {provider: openssl, purl: 'pkg:deb/debian/openssl@3.0.11'}
+    want: true
+
+  - name: scoped to a repository
+    expr: repo.startsWith('acme/') && branch == 'main'
+    input: {repo: acme/payments, branch: main}
+    want: true
+
+  - name: standards are a map of strings, not lists
+    expr: "standards['NIST'] == ['approved']"
+    input: {}
+    error: type
+
+  - name: an unknown variable
+    expr: quantumResistant
+    input: {}
+    error: type
+
+  - name: a timestamp result is refused
+    expr: now
+    error: result_type
+
+  - name: a lone operator is a syntax error
+    expr: "&&"
+    error: syntax
+
+  - name: a nested comprehension over a literal list exceeds the estimated cost
+    expr: >-
+      [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99].all(a,
+      [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99].all(b,
+      [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99].all(c,
+      a + b + c >= 0)))
+    error: cost
+
+  - name: an input past a string bound is refused
+    expr: confidence == 'high'
+    input: {confidence: highhighhighhighhighhighhighhighhighhighhighhighhighhighhighhighhighhighhighhighhigh}
+    error: input

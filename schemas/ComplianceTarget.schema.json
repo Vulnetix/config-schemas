@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/ComplianceTarget.schema.json",
+  "title": "ComplianceTarget",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[{"path":"spec.crypto.allow","env":"cbom"},{"path":"spec.crypto.appliesTo","env":"cbom"}]},
+  "description": "A compliance obligation the organisation holds itself to, and how often Vulnetix measures it. For the report frameworks (eu_ai_act, nist_ai_rmf, iso_42001, owasp_top_10, pci_dss, coverage, exposure, eu_cra, iso_27001, owasp_dsomm) each run creates a compliance report for the period, scoped to the repositories named, through the same machinery as a report made by hand, so the OSCAL export, the evidence and the assessor workflow are unchanged. For the three evaluated targets there is no report: each run stores an evaluation. slsa checks the evidence for a SLSA build level; ssdf checks the NIST SP 800-218 practices Vulnetix holds evidence for; crypto-policy evaluates a cryptography policy, written in CEL over the components of the Cryptography Bill of Materials, against the newest CBOM of each repository in scope. The first run is due when the target is created and later runs follow the cadence. Needs the saas migration 20261228030000_compliance_target; until it is applied, plan refuses a document naming it.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "ComplianceTarget" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["framework"],
+      "additionalProperties": false,
+      "properties": {
+        "framework": {
+          "description": "What is measured. A report framework creates a report on each run. slsa, ssdf and crypto-policy are evaluated and need their block below.",
+          "type": "string",
+          "enum": ["eu_ai_act", "nist_ai_rmf", "iso_42001", "owasp_top_10", "pci_dss", "coverage", "exposure", "eu_cra", "iso_27001", "owasp_dsomm", "slsa", "ssdf", "crypto-policy"]
+        },
+        "cadence": {
+          "description": "How often it runs. The period of a report, or the window an evaluation looks back over, is the cadence before the run: a week, a month, a quarter or a year.",
+          "type": "string",
+          "enum": ["weekly", "monthly", "quarterly", "yearly"],
+          "default": "quarterly"
+        },
+        "scope": {
+          "description": "What is measured. Left out, the whole organisation.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "repositories": {
+              "description": "Only these repositories (owner/name), compared without regard to case. Left out or empty, every repository.",
+              "type": "array",
+              "uniqueItems": true,
+              "maxItems": 200,
+              "items": { "$ref": "common.schema.json#/$defs/repository" },
+              "default": []
+            }
+          }
+        },
+        "enabled": {
+          "description": "False keeps the target and its history and stops it running.",
+          "type": "boolean",
+          "default": true
+        },
+        "report": {
+          "description": "For a report framework: how the report is made.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "title": {
+              "description": "The report's name; the period is appended. Left out, the target's name.",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "context": {
+              "description": "The report's context text. For eu_ai_act this describes the AI system and the organisation's role (provider or deployer) and risk class, which the Act's obligations depend on.",
+              "type": "string",
+              "maxLength": 8000
+            }
+          }
+        },
+        "slsa": {
+          "description": "For framework slsa. Evaluated against the evidence Vulnetix holds: provenance records for the dependencies in scope, signatures and attestations on what the organisation publishes, and the Software Factory's minimum SLSA level (ScannerProfile slsaMin). Level 3 asks for what a hardened build platform leaves behind (verified provenance, witnessed signatures); Vulnetix cannot inspect the platform itself, so a pass says the evidence is there.",
+          "type": "object",
+          "required": ["level"],
+          "additionalProperties": false,
+          "properties": {
+            "level": {
+              "description": "The SLSA Build level targeted: 1 provenance exists, 2 signed and verified provenance, 3 hardened build with witnessed signatures.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3
+            }
+          }
+        },
+        "ssdf": {
+          "description": "For framework ssdf. Checks the practices of NIST SP 800-218 that Vulnetix holds evidence for; a practice without evidence is not in the count.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "practices": {
+              "description": "The practice groups checked: PO prepare the organisation, PS protect the software, PW produce well-secured software, RV respond to vulnerabilities. Left out, all four.",
+              "type": "array",
+              "uniqueItems": true,
+              "minItems": 1,
+              "items": { "type": "string", "enum": ["PO", "PS", "PW", "RV"] }
+            },
+            "minMet": {
+              "description": "The percentage of the checked practices that must be met for the target to pass.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100
+            }
+          }
+        },
+        "crypto": {
+          "description": "For framework crypto-policy. A component of the CBOM is acceptable when allow holds for it.",
+          "type": "object",
+          "required": ["allow"],
+          "additionalProperties": false,
+          "properties": {
+            "allow": {
+              "description": "CEL over the cbom variables: true for a component the policy allows, such as `quantumSafe || (primitive == 'block-cipher' && classicalSecurityLevel >= 128)`. A component the expression is false for, or cannot be evaluated for, is a violation.",
+              "$ref": "common.schema.json#/$defs/celExpression"
+            },
+            "appliesTo": {
+              "description": "CEL over the cbom variables: which components the policy judges. Left out, algorithms only (`category == 'algorithm'`).",
+              "$ref": "common.schema.json#/$defs/celExpression",
+              "default": "category == 'algorithm'"
+            },
+            "maxViolations": {
+              "description": "How many violations still pass.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000,
+              "default": 0
+            }
+          }
+        }
+      },
+      "allOf": [
+        { "if": { "properties": { "framework": { "const": "slsa" } }, "required": ["framework"] }, "then": { "required": ["slsa"] }, "else": { "not": { "required": ["slsa"] } } },
+        { "if": { "properties": { "framework": { "const": "crypto-policy" } }, "required": ["framework"] }, "then": { "required": ["crypto"] }, "else": { "not": { "required": ["crypto"] } } },
+        { "if": { "properties": { "framework": { "const": "ssdf" } }, "required": ["framework"] }, "else": { "not": { "required": ["ssdf"] } } },
+        { "if": { "properties": { "framework": { "enum": ["slsa", "ssdf", "crypto-policy"] } }, "required": ["framework"] }, "then": { "not": { "required": ["report"] } } }
+      ]
+    }
+  }
+}

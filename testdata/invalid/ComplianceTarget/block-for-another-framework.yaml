@@ -1,0 +1,7 @@
+# the slsa block belongs to the slsa framework
+apiVersion: vulnetix.com/v1
+kind: ComplianceTarget
+metadata: {name: owasp}
+spec:
+  framework: owasp_top_10
+  slsa: {level: 2}

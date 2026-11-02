@@ -1,0 +1,7 @@
+# an evaluated target makes no report
+apiVersion: vulnetix.com/v1
+kind: ComplianceTarget
+metadata: {name: ssdf}
+spec:
+  framework: ssdf
+  report: {title: SSDF}

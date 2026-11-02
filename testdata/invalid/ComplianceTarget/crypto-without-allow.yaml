@@ -1,0 +1,7 @@
+# a cryptography policy says what is allowed
+apiVersion: vulnetix.com/v1
+kind: ComplianceTarget
+metadata: {name: crypto}
+spec:
+  framework: crypto-policy
+  crypto: {maxViolations: 3}

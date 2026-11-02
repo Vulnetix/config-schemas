@@ -91,6 +91,8 @@ func DecodeInput(ctx Context, node map[string]any) (Input, error) {
 		return decodeAs[Event](node)
 	case ContextCVE:
 		return decodeAs[CVE](node)
+	case ContextCBOM:
+		return decodeAs[CBOMComponent](node)
 	}
 	return nil, fmt.Errorf("unknown context %q", ctx)
 }

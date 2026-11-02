@@ -1,0 +1,6 @@
+# the frameworks are the report frameworks and slsa, ssdf and crypto-policy
+apiVersion: vulnetix.com/v1
+kind: ComplianceTarget
+metadata: {name: soc2}
+spec:
+  framework: soc2

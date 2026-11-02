@@ -72,7 +72,7 @@ func TestEstimateBoundsActualCost(t *testing.T) {
 func TestVariablesMatchInputs(t *testing.T) {
 	inputs := map[Context]Input{
 		ContextFinding: Finding{}, ContextPackage: Package{}, ContextRequest: Request{},
-		ContextEvent: Event{}, ContextCVE: CVE{},
+		ContextEvent: Event{}, ContextCVE: CVE{}, ContextCBOM: CBOMComponent{},
 	}
 	for _, ctx := range Contexts() {
 		vars := inputs[ctx].vars(time.Now())

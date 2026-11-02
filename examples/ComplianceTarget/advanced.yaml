@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/ComplianceTarget.schema.json
+apiVersion: vulnetix.com/v1
+kind: ComplianceTarget
+metadata:
+  name: eu-ai-act-payments
+  labels:
+    team: governance
+  annotations:
+    ticket: https://tracker.example.com/GRC-77
+spec:
+  framework: eu_ai_act
+  cadence: quarterly
+  scope:
+    repositories: [acme/payments-api, acme/fraud-model]
+  enabled: true
+  report:
+    title: EU AI Act, payments
+    context: The organisation is the provider of a high-risk credit scoring system (Annex III, 5b).
+---
+apiVersion: vulnetix.com/v1
+kind: ComplianceTarget
+metadata:
+  name: slsa-build-l2
+spec:
+  framework: slsa
+  cadence: monthly
+  slsa:
+    level: 2
+---
+apiVersion: vulnetix.com/v1
+kind: ComplianceTarget
+metadata:
+  name: ssdf-core
+spec:
+  framework: ssdf
+  cadence: quarterly
+  ssdf:
+    practices: [PS, PW, RV]
+    minMet: 80
+---
+apiVersion: vulnetix.com/v1
+kind: ComplianceTarget
+metadata:
+  name: pqc-readiness
+spec:
+  framework: crypto-policy
+  cadence: monthly
+  crypto:
+    allow: quantumSafe || (primitive in ['block-cipher', 'hash', 'mac'] && classicalSecurityLevel >= 128)
+    appliesTo: category == 'algorithm' && confidence != 'low'
+    maxViolations: 0

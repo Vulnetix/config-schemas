@@ -285,6 +285,55 @@ func (c CVE) vars(clock time.Time) map[string]any {
 	}
 }
 
+// CBOMComponent is one component of a Cryptography Bill of Materials: a
+// cryptographic algorithm, certificate or key, or a crypto library (saas
+// CbomComponent).
+type CBOMComponent struct {
+	Name                     string            `json:"name" yaml:"name"`
+	Category                 string            `json:"category" yaml:"category"`
+	AssetType                string            `json:"assetType" yaml:"assetType"`
+	OID                      string            `json:"oid" yaml:"oid"`
+	Primitive                string            `json:"primitive" yaml:"primitive"`
+	ParameterSetIdentifier   string            `json:"parameterSetIdentifier" yaml:"parameterSetIdentifier"`
+	ClassicalSecurityLevel   int               `json:"classicalSecurityLevel" yaml:"classicalSecurityLevel"`
+	NistQuantumSecurityLevel int               `json:"nistQuantumSecurityLevel" yaml:"nistQuantumSecurityLevel"`
+	PQCStatus                string            `json:"pqcStatus" yaml:"pqcStatus"`
+	Standards                map[string]string `json:"standards" yaml:"standards"`
+	Provider                 string            `json:"provider" yaml:"provider"`
+	Purl                     string            `json:"purl" yaml:"purl"`
+	Confidence               string            `json:"confidence" yaml:"confidence"`
+	Repo                     string            `json:"repo" yaml:"repo"`
+	Branch                   string            `json:"branch" yaml:"branch"`
+	Now                      time.Time         `json:"now" yaml:"now"`
+}
+
+// Context implements Input.
+func (CBOMComponent) Context() Context { return ContextCBOM }
+
+func (c CBOMComponent) vars(clock time.Time) map[string]any {
+	status := strings.ToLower(c.PQCStatus)
+	return map[string]any{
+		"name":                     c.Name,
+		"category":                 c.Category,
+		"assetType":                c.AssetType,
+		"oid":                      c.OID,
+		"primitive":                c.Primitive,
+		"parameterSetIdentifier":   c.ParameterSetIdentifier,
+		"classicalSecurityLevel":   int64(c.ClassicalSecurityLevel),
+		"nistQuantumSecurityLevel": int64(c.NistQuantumSecurityLevel),
+		"pqcStatus":                c.PQCStatus,
+		"quantumSafe":              status == "quantum-safe" || status == "hybrid",
+		"deprecated":               status == "deprecated",
+		"standards":                labelMap(c.Standards),
+		"provider":                 c.Provider,
+		"purl":                     c.Purl,
+		"confidence":               c.Confidence,
+		"repo":                     c.Repo,
+		"branch":                   c.Branch,
+		"now":                      orNow(c.Now, clock),
+	}
+}
+
 // strs turns a nil slice into an empty one, so an absent list is [] in an
 // expression rather than a value the adapter has to special-case.
 func strs(s []string) []string {
