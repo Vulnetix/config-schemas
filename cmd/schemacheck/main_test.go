@@ -29,6 +29,8 @@ func TestDiffFindsBreakingChanges(t *testing.T) {
 		"property a removed":      {`{"additionalProperties":false,"properties":{"a":{}}}`, `{"additionalProperties":false,"properties":{}}`},
 		"pattern changed":         {`{"pattern":"^a"}`, `{"pattern":"^b"}`},
 		"const v1 became v2":      {`{"const":"v1"}`, `{"const":"v2"}`},
+		// A condition on a value the old schema already allowed narrows it.
+		"allOf changed length": {`{"properties":{"t":{"enum":["a","b"]}},"allOf":[]}`, `{"properties":{"t":{"enum":["a","b"]}},"allOf":[{"if":{"properties":{"t":{"const":"b"}}},"then":{"required":["x"]}}]}`},
 	}
 	for want, c := range cases {
 		got := strings.Join(diffJSON(t, c[0], c[1]), "\n")
@@ -47,6 +49,9 @@ func TestDiffAllowsWidening(t *testing.T) {
 		{`{"type":"string"}`, `{"type":["string","null"]}`},
 		{`{"$ref":"https://h/v1.0.0/common.schema.json#/a"}`, `{"$ref":"https://h/v1.1.0/common.schema.json#/a"}`},
 		{`{"description":"old"}`, `{"description":"new"}`},
+		// A condition gated on a newly added enum value only constrains
+		// documents the old schema refused.
+		{`{"properties":{"t":{"enum":["a"]}},"allOf":[{"x":1}]}`, `{"properties":{"t":{"enum":["a","b"]}},"allOf":[{"if":{"properties":{"t":{"const":"b"}}},"then":{"required":["x"]}},{"x":1}]}`},
 	}
 	for _, c := range cases {
 		if got := diffJSON(t, c[0], c[1]); len(got) != 0 {

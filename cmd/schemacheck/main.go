@@ -317,6 +317,13 @@ func Diff(at string, old, cur any) []string {
 		oa, _ := o[kw].([]any)
 		na, _ := n[kw].([]any)
 		if len(oa) != len(na) && na != nil {
+			// An allOf condition gated on a value the old schema refused
+			// constrains only documents the old schema refused, so it can be
+			// added in a minor release. Matching is by content, so the new
+			// conditions may go anywhere in the list.
+			if kw == "allOf" && len(na) > len(oa) && onlyGatedAdditions(o, oa, na) {
+				continue
+			}
 			add("%s changed length", kw)
 			continue
 		}
@@ -367,4 +374,54 @@ func num(v any) *float64 {
 		return &f
 	}
 	return nil
+}
+
+// onlyGatedAdditions reports whether na is oa plus conditions of the form
+// {"if": {"properties": {"p": {"const": v}}}, "then": ...} where v is a value
+// the old schema's enum for p did not allow. Every old item must still be
+// present unchanged.
+func onlyGatedAdditions(old map[string]any, oa, na []any) bool {
+	key := func(v any) string { b, _ := json.Marshal(v); return string(b) }
+	have := map[string]int{}
+	for _, v := range na {
+		have[key(v)]++
+	}
+	for _, v := range oa {
+		if have[key(v)] == 0 {
+			return false
+		}
+		have[key(v)]--
+	}
+	oldProps, _ := old["properties"].(map[string]any)
+	for _, v := range na {
+		k := key(v)
+		if have[k] == 0 {
+			continue
+		}
+		have[k]--
+		m, _ := v.(map[string]any)
+		cond, _ := m["if"].(map[string]any)
+		props, _ := cond["properties"].(map[string]any)
+		if len(props) != 1 {
+			return false
+		}
+		for p, c := range props {
+			cm, _ := c.(map[string]any)
+			val, ok := cm["const"]
+			if !ok {
+				return false
+			}
+			op, _ := oldProps[p].(map[string]any)
+			enum, ok := op["enum"].([]any)
+			if !ok {
+				return false
+			}
+			for _, e := range enum {
+				if fmt.Sprint(e) == fmt.Sprint(val) {
+					return false
+				}
+			}
+		}
+	}
+	return true
 }
