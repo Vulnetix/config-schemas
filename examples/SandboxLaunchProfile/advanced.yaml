@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/SandboxLaunchProfile.schema.json
+apiVersion: vulnetix.com/v1
+kind: SandboxLaunchProfile
+metadata:
+  name: dev-sandbox
+  labels:
+    team: platform
+spec:
+  sandbox: 3c9e1f2a-7b4d-4e6f-8a1b-2c3d4e5f6a7b
+  packs: [python, node]
+  extensions:
+    - name: ripgrep
+      registry: nixpkgs
+      version: "14.1.0"
+      checksum: sha256-AbCdEf0123456789AbCdEf0123456789AbCdEf01234=
+  image: ghcr.io/vulnetix/pix-sandbox@sha256:2f4c6a8e0b1d3f5a7c9e1b3d5f7a9c1e3b5d7f9a1c3e5b7d9f1a3c5e7b9d1f3a
+  notes: Pinned to the October image until the Python 3.13 packs land.
+  webControls: true
+  webGuardrailsOff: false
+  webProjectSettings: true
+  classifier: jev
+  versionPolicy:
+    strategy: pinned
+    pins:
+      ruff: "0.8.4"

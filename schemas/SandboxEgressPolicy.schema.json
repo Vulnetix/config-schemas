@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/SandboxEgressPolicy.schema.json",
+  "title": "SandboxEgressPolicy",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[]},
+  "description": "The outbound network policy of one Pix sandbox: its egress mode and the hostnames allowed or denied, the same two things the console's egress page sets. Egress is decided by hostname only, as the sandbox enforces it: a rule is a DNS name or a *. wildcard over one, never an address or a port. The hosts the sandbox needs for itself cannot be declared. A host decided in the console and left out of the document goes back to undecided on apply. Only an owner or admin can change it. Deleting the document resets the mode to inherit and every decision to undecided; the record of the hosts the sandbox reached stays.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "SandboxEgressPolicy" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["sandbox"],
+      "additionalProperties": false,
+      "properties": {
+        "sandbox": { "$ref": "SandboxLaunchProfile.schema.json#/$defs/sandboxId" },
+        "mode": {
+          "description": "allow_all_logged lets every host through and records it; deny_except_allow refuses every host not allowed. Left out, the product default.",
+          "type": "string",
+          "enum": ["allow_all_logged", "deny_except_allow"]
+        },
+        "allow": {
+          "description": "Hosts allowed. With mode deny_except_allow, the only hosts reached.",
+          "$ref": "#/$defs/hosts"
+        },
+        "deny": {
+          "description": "Hosts refused whatever the mode.",
+          "$ref": "#/$defs/hosts"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "hosts": {
+      "type": "array",
+      "maxItems": 500,
+      "uniqueItems": true,
+      "items": {
+        "description": "A lower-case DNS name (api.github.com), or *. and a DNS name for every name under it (*.githubusercontent.com).",
+        "type": "string",
+        "maxLength": 253,
+        "pattern": "^(\\*\\.)?[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\\.[a-z][a-z0-9-]{0,61}$"
+      }
+    }
+  }
+}

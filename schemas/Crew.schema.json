@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/Crew.schema.json",
+  "title": "Crew",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[]},
+  "description": "A crew of the organisation's Belai library: a named set of worker agents a host runs together. A crew's display name is unique in the library; a document naming a crew nobody declared adopts it. Members name agent profiles by their name, as the console's crew editor does; whether each exists and is a worker is checked by the host when it installs the crew. Every apply that changes it saves a new version; deleting the document hides the crew and keeps its versions.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "Crew" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["members"],
+      "additionalProperties": false,
+      "properties": {
+        "displayName": {
+          "description": "The crew's name in the library: one line of at most 128 characters, not starting belai:. Defaults to metadata.name.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(.*\\S)?$"
+        },
+        "description": {
+          "description": "One line of at most 500 characters.",
+          "type": "string",
+          "maxLength": 500
+        },
+        "members": {
+          "description": "The agents in the crew, 1 to 8.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "required": ["profile"],
+            "additionalProperties": false,
+            "properties": {
+              "profile": {
+                "description": "The name of an agent profile in the library (its front matter name).",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "replicas": {
+                "description": "How many copies of the agent run, 1 to 8. Left out, one.",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 8
+              }
+            }
+          }
+        },
+        "onePerRepo": {
+          "description": "Run at most one copy of the crew per repository.",
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

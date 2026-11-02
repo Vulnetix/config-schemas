@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/SandboxEgressPolicy.schema.json
+apiVersion: vulnetix.com/v1
+kind: SandboxEgressPolicy
+metadata:
+  name: dev-sandbox-egress
+spec:
+  sandbox: 3c9e1f2a-7b4d-4e6f-8a1b-2c3d4e5f6a7b

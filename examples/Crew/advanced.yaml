@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/Crew.schema.json
+apiVersion: vulnetix.com/v1
+kind: Crew
+metadata:
+  name: release-crew
+  annotations:
+    owner: platform-team
+spec:
+  displayName: Release crew
+  description: Reviews, tests and writes the notes for every release branch.
+  members:
+    - profile: reviewer
+      replicas: 2
+    - profile: security-reviewer
+  onePerRepo: true

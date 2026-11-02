@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/Crew.schema.json
+apiVersion: vulnetix.com/v1
+kind: Crew
+metadata:
+  name: review-crew
+spec:
+  members:
+    - profile: reviewer

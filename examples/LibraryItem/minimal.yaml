@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/LibraryItem.schema.json
+apiVersion: vulnetix.com/v1
+kind: LibraryItem
+metadata:
+  name: pdf-tools
+spec:
+  type: skill
+  body: |
+    ---
+    name: pdf-tools
+    description: Read, split and merge PDF files.
+    ---
+    Use the pdf tools on the path the user gives.

@@ -53,6 +53,11 @@ Reference documentation for every kind is at https://docs.vulnetix.com (the Plat
 | `FactoryTrigger` | v1.5.0 | A trigger node of a workflow: a webhook event with typed conditions, a finding, a label, a kanban move, a firewall sighting or a manual run. |
 | `FactorySchedule` | v1.5.0 | A cron schedule that starts a workflow, with its time zone and timer. |
 | `FactoryBudget` | v1.5.0 | A token or call budget for the factory, an organisation, a repository, a workflow or one step, with alerts and the action at the limit. |
+| `AgentProfile` | v1.6.0 | A Belai agent definition and the files beside it, by the id in its front matter. Versioned on every change. |
+| `Crew` | v1.6.0 | A named set of Belai worker agents a host runs together. |
+| `LibraryItem` | v1.6.0 | A skill, prompt, command, process, MCP server, repo, budget, provider, rewrite table, hook bundle or launch configuration of the Belai library, checked by the library's own validator. |
+| `SandboxLaunchProfile` | v1.6.0 | What the next launch of a Pix sandbox installs and how Belai runs on it. |
+| `SandboxEgressPolicy` | v1.6.0 | A Pix sandbox's egress mode and the hostnames it may or may not reach. |
 
 A field or kind whose description says "Not stored yet" (`CloudSensors` for one account), and the whole of `VexSource`, is ahead of the server: it validates today, and applying it needs the backend change the description names.
 

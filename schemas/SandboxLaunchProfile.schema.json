@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/SandboxLaunchProfile.schema.json",
+  "title": "SandboxLaunchProfile",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[]},
+  "description": "The launch configuration of one Pix sandbox: what the next launch or relaunch of the sandbox installs and how Belai runs on it. A field left out inherits the product default. The sandbox is bought in the console and never created here; one sandbox has one launch configuration, so a document for a sandbox adopts it. Applying a change marks the sandbox for relaunch. The egress mode is SandboxEgressPolicy's; model providers, provisioning and models keep their own console pages. Only an owner or admin can change it. Deleting the document resets every field it manages to inherit.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "SandboxLaunchProfile" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["sandbox"],
+      "additionalProperties": false,
+      "properties": {
+        "sandbox": { "$ref": "#/$defs/sandboxId" },
+        "packs": {
+          "description": "The tool packs installed, at most 32. An empty list installs none; left out, the product default packs.",
+          "type": "array",
+          "maxItems": 32,
+          "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,31}$" }
+        },
+        "extensions": {
+          "description": "Extra packages installed, at most 64.",
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "description": "The package name in its registry.", "type": "string", "minLength": 1, "maxLength": 128 },
+              "registry": { "description": "Where the package comes from. Left out, nixpkgs.", "type": "string", "enum": ["nixpkgs", "nixhub", "flakehub"] },
+              "version": { "description": "The version wanted. Left out, the registry's current one.", "type": "string", "maxLength": 64 },
+              "checksum": { "description": "The expected content hash, as the registry states it (sha256-...).", "type": "string", "maxLength": 128 }
+            }
+          }
+        },
+        "image": {
+          "description": "The machine image, pinned by digest (registry/name@sha256:<64 hex>), never a tag. Left out, the product default image.",
+          "type": "string",
+          "pattern": "^[a-z0-9.-]+(/[A-Za-z0-9._-]+)+@sha256:[0-9a-f]{64}$"
+        },
+        "notes": {
+          "description": "Free notes for the sandbox's owners, one line of at most 2000 characters.",
+          "type": "string",
+          "maxLength": 2000
+        },
+        "webControls": { "description": "Let a browser session control Belai (belai rc --web-controls).", "type": "boolean" },
+        "webGuardrailsOff": { "description": "Let a browser session turn the guardrails off. Needs webControls on.", "type": "boolean" },
+        "webProjectSettings": { "description": "Let a browser session change project settings.", "type": "boolean" },
+        "classifier": {
+          "description": "The decision model Belai uses: clef, jev, or tev1 (used only while the sandbox's provider keys include Together AI).",
+          "type": "string",
+          "enum": ["clef", "jev", "tev1"]
+        },
+        "versionPolicy": {
+          "description": "Which versions of installed packages a launch aims at. Left out, none is set.",
+          "type": "object",
+          "required": ["strategy"],
+          "additionalProperties": false,
+          "properties": {
+            "strategy": { "type": "string", "enum": ["safest", "stable", "latest", "rolling", "pinned"] },
+            "pins": {
+              "description": "Versions pinned by nixpkgs attribute, at most 100. The pinned strategy needs at least one.",
+              "type": "object",
+              "maxProperties": 100,
+              "propertyNames": { "pattern": "^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$" },
+              "additionalProperties": { "type": "string", "pattern": "^[0-9A-Za-z][0-9A-Za-z._+-]{0,63}$" }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "webGuardrailsOff": { "const": true }, "webControls": { "const": false } }, "required": ["webGuardrailsOff", "webControls"] },
+          "then": false
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "sandboxId": {
+      "description": "The sandbox, by its id (a lower-case UUID), as the console's sandbox page shows it.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    }
+  }
+}

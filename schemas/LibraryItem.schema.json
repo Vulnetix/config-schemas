@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/LibraryItem.schema.json",
+  "title": "LibraryItem",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[]},
+  "description": "One item of the organisation's Belai library that is not an agent or a crew: a skill (an Agent Skills SKILL.md), prompt, command, process, MCP server, repo, budget set, provider set, bash rewrite table, hook bundle or launch configuration. The body is the item exactly as the library stores it, and the item's name is the one the body carries; the library holds one live item of a name per type, and neither the type nor the name can change under a metadata.name. The server checks the body with the library's own validator, the one the console and the Belai CLI use. Every apply that changes it saves a new version; deleting the document hides the item and keeps its versions. An item nobody declared is exported under its name.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "LibraryItem" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "skill, prompt and command are markdown with front matter; the others are JSON documents in the library's format for that type.",
+          "type": "string",
+          "enum": ["skill", "prompt", "command", "process", "mcp", "repo", "budget", "provider", "rewrite", "hook", "launch"]
+        },
+        "body": {
+          "description": "The item: markdown for skill, prompt and command, JSON for the rest. The library's size limit for the type applies.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 262144
+        },
+        "file": {
+          "description": "A file holding the item, the same as body.",
+          "$ref": "common.schema.json#/$defs/configFile"
+        },
+        "files": {
+          "description": "The scripts a hook bundle runs, written beside its hooks.json. Only a hook carries files: at most 32, each a relative path of safe segments (not hooks.json) and UTF-8 text of up to 256 KiB.",
+          "type": "array",
+          "maxItems": 32,
+          "items": { "$ref": "AgentProfile.schema.json#/$defs/libraryFile" }
+        }
+      },
+      "oneOf": [
+        { "required": ["body"] },
+        { "required": ["file"] }
+      ],
+      "if": { "properties": { "type": { "not": { "const": "hook" } } }, "required": ["type"] },
+      "then": { "properties": { "files": false } }
+    }
+  }
+}

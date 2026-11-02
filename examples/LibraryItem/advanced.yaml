@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/LibraryItem.schema.json
+apiVersion: vulnetix.com/v1
+kind: LibraryItem
+metadata:
+  name: install-guard
+  labels:
+    team: platform
+spec:
+  type: hook
+  body: |
+    {
+      "name": "install-guard",
+      "description": "Checks package installs before they run",
+      "hooks": {
+        "PreToolUse": [
+          {"matcher": "Bash", "hooks": [{"type": "command", "command": "bash scripts/guard.sh", "timeout": 30}]}
+        ]
+      }
+    }
+  files:
+    - path: scripts/guard.sh
+      body: |
+        #!/usr/bin/env bash
+        exec vulnetix agent hook
+    - path: scripts/allow.txt
+      file: hooks/install-guard/allow.txt
+---
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/LibraryItem.schema.json
+apiVersion: vulnetix.com/v1
+kind: LibraryItem
+metadata:
+  name: triage-prompt
+spec:
+  type: prompt
+  file: prompts/triage.md

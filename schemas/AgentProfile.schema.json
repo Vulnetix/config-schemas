@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/AgentProfile.schema.json",
+  "title": "AgentProfile",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[]},
+  "description": "An agent of the organisation's Belai library: the markdown agent definition Belai writes, and the files the agent uses beside it. The profile is identified by the id in the definition's front matter, so the same agent backed up from a host and declared here is one profile, and that id cannot change under a metadata.name. Every apply that changes it saves a new version, as a save in the console does; deleting the document hides the profile and keeps its versions and files. A profile nobody declared is exported under its name.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "AgentProfile" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "description": "The agent definition: markdown with front matter between --- lines, holding id (a lower-case UUID) and name, and optionally display_name, avatar_id and a palette of four #rrggbb colours. At most 64 KiB.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 65536
+        },
+        "file": {
+          "description": "A file holding the agent definition, the same as body.",
+          "$ref": "common.schema.json#/$defs/configFile"
+        },
+        "files": {
+          "description": "Files the agent uses, written beside the definition when a host installs it. At most 32 files of up to 256 KiB each and 2 MiB in all, each UTF-8 text.",
+          "type": "array",
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/libraryFile" }
+        }
+      },
+      "oneOf": [
+        { "required": ["body"] },
+        { "required": ["file"] }
+      ]
+    }
+  },
+  "$defs": {
+    "libraryFile": {
+      "type": "object",
+      "required": ["path"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "description": "Where the file is written, relative to the agent: one line, no .. segment, naming a file.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "body": {
+          "description": "The file's contents.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 262144
+        },
+        "file": {
+          "description": "A file holding the contents, the same as body.",
+          "$ref": "common.schema.json#/$defs/configFile"
+        }
+      },
+      "oneOf": [
+        { "required": ["body"] },
+        { "required": ["file"] }
+      ]
+    }
+  }
+}

@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/AgentProfile.schema.json
+apiVersion: vulnetix.com/v1
+kind: AgentProfile
+metadata:
+  name: security-reviewer
+  labels:
+    team: appsec
+spec:
+  body: |
+    ---
+    id: 0b7e4d2c-9a1f-4c3e-8d5b-2f6a7e8c9d01
+    name: security-reviewer
+    display_name: Security reviewer
+    palette: ["#0f172a", "#1e293b", "#38bdf8", "#f8fafc"]
+    ---
+    You review pull requests for injection, authorization and secrets
+    handling, and cite the checklist in checklists/review.md.
+  files:
+    - path: checklists/review.md
+      body: |
+        - Inputs are validated at the boundary.
+        - Every route checks the caller's role.
+    - path: checklists/secrets.md
+      file: agents/security-reviewer/secrets.md
+---
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/AgentProfile.schema.json
+apiVersion: vulnetix.com/v1
+kind: AgentProfile
+metadata:
+  name: release-notes
+spec:
+  file: agents/release-notes.md
