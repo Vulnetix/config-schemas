@@ -1,0 +1,10 @@
+# a contributor is identified by exactly one of principal, login or email
+apiVersion: vulnetix.com/v1
+kind: Campaign
+metadata: {name: log4shell}
+spec:
+  name: Log4Shell clean-up
+  target: vulnerabilities
+  done: {criteria: [{type: gone-from-scans}]}
+  contributors:
+    - {login: payments-oncall, email: oncall@example.com}

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/TeaProduct.schema.json",
+  "title": "TeaProduct",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[]},
+  "description": "A product the tenant publishes through the Transparency Exchange API (TEA): the top of the product, release, collection and artifact tree that TEA consumers read. The product itself is config. Its releases, their collections and the artifacts in them are published by CI pipelines as software ships, so they are not declared here. The server assigns the product's UUID and TEI and reports them in status. Who may read the product is declared with a TeaAccessPolicy; until one exists the product is private. Removing the document deletes the product while no release has been published under it. Once CI has published a release, the product and its releases stay, and only the config management of the product ends.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "TeaProduct" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "The product name TEA consumers see, such as Acme Payments. Unique among the tenant's products. The first time a name is published the server derives the product's UUID from it, so a CI pipeline that publishes releases under the same product name writes to this product. Changing the name later keeps the UUID.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(.*\\S)?$"
+        },
+        "identifiers": {
+          "description": "Identifiers for the product besides its TEI, in the order consumers see them. The server assigns the TEI (urn:tei:uuid:<domain>:<uuid>) itself because it names this server's authority over the product, so it is reported in status and cannot be declared.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/identifier" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "object",
+      "required": ["idType", "idValue"],
+      "additionalProperties": false,
+      "properties": {
+        "idType": {
+          "description": "PURL: a package URL. CPE: a CPE 2.3 name. COMPLIANCE_DOCUMENT: a compliance document type the TEA specification names.",
+          "type": "string",
+          "enum": ["PURL", "CPE", "COMPLIANCE_DOCUMENT"]
+        },
+        "idValue": {
+          "description": "The identifier itself.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      }
+    }
+  }
+}

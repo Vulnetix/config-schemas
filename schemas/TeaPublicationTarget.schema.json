@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/TeaPublicationTarget.schema.json",
+  "title": "TeaPublicationTarget",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":["spec.credential"],"celFields":[]},
+  "description": "A remote TEA server the tenant is willing to mirror published objects to, registered once so it can be reviewed, rather than named by URL in each access policy. Mirroring is a copy the receiving server then governs. This server does not mirror yet: the target is registered and kept, plan warns that nothing is copied to it, and the publisher API still refuses publishTo. The server derives the target's TEI domain from rootUrl, and a tenant registers each domain once. Removing the document deregisters the target and discards its credential; copies already sent stay where they are.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "TeaPublicationTarget" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["rootUrl"],
+      "additionalProperties": false,
+      "properties": {
+        "rootUrl": {
+          "description": "The remote server's TEA root, the rootUrl its own discovery document advertises, without a trailing slash. Must be https, because a mirror carries a credential.",
+          "type": "string",
+          "maxLength": 2048,
+          "pattern": "^https://[A-Za-z0-9.-]+(:[0-9]{1,5})?(/[^\\s?#]*[^\\s?#/])?$"
+        },
+        "description": {
+          "description": "What this target is, for whoever reviews the list later.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "credential": {
+          "description": "Where the client reads the bearer credential this server presents to the target. It is encrypted with the tenant's KMS key, never exported or shown in a plan, and supplying the same value again is no change. Left out, the target is registered without a credential, or keeps the one it has.",
+          "$ref": "common.schema.json#/$defs/valueFrom"
+        },
+        "suspended": {
+          "description": "Keep the target registered but send it nothing.",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+# status is reported, not declared; removing the document archives a campaign
+apiVersion: vulnetix.com/v1
+kind: Campaign
+metadata: {name: log4shell}
+spec:
+  name: Log4Shell clean-up
+  target: vulnerabilities
+  status: archived
+  done: {criteria: [{type: gone-from-scans}]}

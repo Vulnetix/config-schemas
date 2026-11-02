@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/TeaPublicationTarget.schema.json
+apiVersion: vulnetix.com/v1
+kind: TeaPublicationTarget
+metadata:
+  name: globex-tea
+  labels:
+    owner: platform
+spec:
+  rootUrl: https://tea.globex.example.com/tea/v1
+  description: Globex's TEA server, for the payments contract.
+  credential: { env: GLOBEX_TEA_TOKEN }
+  suspended: true

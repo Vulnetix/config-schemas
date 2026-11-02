@@ -1,0 +1,9 @@
+# the server assigns the TEI, so a document cannot declare one
+apiVersion: vulnetix.com/v1
+kind: TeaProduct
+metadata: {name: acme-payments}
+spec:
+  name: Acme Payments
+  identifiers:
+    - idType: TEI
+      idValue: urn:tei:uuid:vulnetix.com:00000000-0000-4000-8000-000000000001

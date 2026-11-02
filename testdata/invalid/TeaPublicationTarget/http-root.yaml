@@ -1,0 +1,5 @@
+# rootUrl must be https, because a mirror carries a credential
+apiVersion: vulnetix.com/v1
+kind: TeaPublicationTarget
+metadata: {name: globex-tea}
+spec: {rootUrl: "http://tea.globex.example.com/tea/v1"}

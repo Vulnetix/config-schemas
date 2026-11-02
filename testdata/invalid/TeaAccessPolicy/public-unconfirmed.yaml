@@ -1,0 +1,5 @@
+# public needs confirmPublic: true
+apiVersion: vulnetix.com/v1
+kind: TeaAccessPolicy
+metadata: {name: acme-payments}
+spec: {product: acme-payments, visibility: public}

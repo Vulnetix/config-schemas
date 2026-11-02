@@ -1,0 +1,9 @@
+# sharedWith is allowed only when visibility is shared
+apiVersion: vulnetix.com/v1
+kind: TeaAccessPolicy
+metadata: {name: acme-payments}
+spec:
+  product: acme-payments
+  visibility: private
+  sharedWith:
+    - organization: 6f1c2a8e-3b4d-4e5f-8a9b-0c1d2e3f4a5b

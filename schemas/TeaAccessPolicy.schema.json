@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/TeaAccessPolicy.schema.json",
+  "title": "TeaAccessPolicy",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":["TeaProduct","TeaComponent","TeaCollection"],"secrets":[],"celFields":[]},
+  "description": "Who may read one published TEA object: a product, a component or a release's collection. This is the Vulnetix publication overlay's access policy; the TEA consumption API itself does not say who may fetch what. The policy in force for any object is the narrowest one declared anywhere from the object up to its product, so a private product keeps everything beneath it private whatever those objects declare, and widening the product back restores each one to its own declaration. Plan refuses a policy wider than the one its parent enforces. An object no policy covers is private. Removing the document removes the declaration, and the object inherits from its parent again; for a product or component that means private. Mirroring to other TEA servers (publishTo in the publisher API) is not part of this kind, because this server does not mirror yet.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "TeaAccessPolicy" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["visibility"],
+      "additionalProperties": false,
+      "properties": {
+        "product": {
+          "description": "The metadata.name of a TeaProduct the policy applies to.",
+          "$ref": "common.schema.json#/$defs/name"
+        },
+        "component": {
+          "description": "The metadata.name of a TeaComponent the policy applies to.",
+          "$ref": "common.schema.json#/$defs/name"
+        },
+        "collection": {
+          "description": "The metadata.name of a TeaCollection the policy applies to. It covers the artifacts in the collection, and is narrowed by the policy of the release's product or component.",
+          "$ref": "common.schema.json#/$defs/name"
+        },
+        "visibility": {
+          "description": "private: only this organisation may read the object. shared: this organisation and the organisations in sharedWith may read it, and readers must authenticate. public: anyone may read it without authenticating. Public cannot be taken back in practice, because whatever was fetched while it was public stays fetched, so it also needs confirmPublic.",
+          "type": "string",
+          "enum": ["private", "shared", "public"]
+        },
+        "sharedWith": {
+          "description": "The organisations entitled to read the object while visibility is shared. Allowed only with shared, so that a later change to private cannot leave a grant standing. Where several levels of the tree declare shared, a reader needs a grant at every level and the earliest expiry applies.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["organization"],
+            "additionalProperties": false,
+            "properties": {
+              "organization": {
+                "description": "The reading organisation's UUID on this server, the identity it authenticates as.",
+                "type": "string",
+                "format": "uuid"
+              },
+              "organizationName": {
+                "description": "The organisation's display name, for whoever reviews the grants. Advisory only: the UUID is the identity, so a rename never moves a grant.",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "expires": {
+                "description": "When the grant lapses, such as the end of an evaluation or a contract. Left out, the grant lasts until it is removed.",
+                "$ref": "common.schema.json#/$defs/timestamp"
+              }
+            }
+          }
+        },
+        "confirmPublic": {
+          "description": "Required, and true, when visibility is public: the document's author confirms the object is meant for the open web. The publisher API asks for the same confirmation with ?confirm=public.",
+          "type": "boolean"
+        }
+      },
+      "oneOf": [{ "required": ["product"] }, { "required": ["component"] }, { "required": ["collection"] }],
+      "allOf": [
+        {
+          "if": { "properties": { "visibility": { "const": "public" } } },
+          "then": { "required": ["confirmPublic"], "properties": { "confirmPublic": { "const": true } } }
+        },
+        {
+          "if": { "properties": { "visibility": { "enum": ["private", "public"] } } },
+          "then": { "not": { "required": ["sharedWith"] } }
+        }
+      ]
+    }
+  }
+}

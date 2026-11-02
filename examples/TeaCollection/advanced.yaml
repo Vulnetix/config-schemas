@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/TeaCollection.schema.json
+# A collection belongs to a product release or to a component release.
+apiVersion: vulnetix.com/v1
+kind: TeaCollection
+metadata:
+  name: acme-payments-2-4-0
+  annotations:
+    note: Embargoed until the advisory is published; see the TeaAccessPolicy of the same name.
+spec:
+  product: acme-payments
+  release: 2.4.0
+---
+apiVersion: vulnetix.com/v1
+kind: TeaCollection
+metadata:
+  name: payments-api-2-4-0
+spec:
+  component: payments-api
+  release: 2.4.0

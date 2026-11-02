@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/TeaAccessPolicy.schema.json
+apiVersion: vulnetix.com/v1
+kind: TeaAccessPolicy
+metadata:
+  name: acme-payments
+spec:
+  product: acme-payments
+  visibility: private

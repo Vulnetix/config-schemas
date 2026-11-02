@@ -1,0 +1,102 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/Campaign.schema.json
+# Every scope dimension is shown; a real campaign sets the few it needs.
+apiVersion: vulnetix.com/v1
+kind: Campaign
+metadata:
+  name: kev-burndown-q1
+  labels:
+    team: platform-security
+  annotations:
+    ticket: https://tracker.example.com/SEC-118
+spec:
+  name: KEV burndown, Q1
+  description: Close every internet-exposed finding in the CISA KEV catalogue before the audit.
+  target: vulnerabilities
+  timing: frozen
+  deadline: 2027-03-31
+  ownerEmail: appsec-lead@example.com
+  scope:
+    repos:
+      - acme/payments-api
+      - acme/web
+    category: sca
+    filters:
+      identity:
+        findingId: [CVE-2021-44228]
+        repoName: [acme/payments-api]
+        branchName: [main]
+        commitSha: [4f2a9c1]
+        source: [vulnetix]
+        category: [sca]
+        packageName: [log4j-core]
+        packageVersion: [2.14.1]
+        packageEcosystem: [maven]
+        purl: [pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1]
+        cpe: ["cpe:2.3:a:apache:log4j:2.14.1:*:*:*:*:*:*:*"]
+        vendor: [apache]
+        product: [log4j]
+      weakness:
+        cwes: [CWE-502]
+        aliases: [GHSA-jfh8-c2jp-5v3q]
+        ruleKeys: [java.lang.security.audit.jndi-injection]
+        cleanCodeCategories: [intentionality]
+      impact:
+        minCvss: 7
+        minCwss: 50
+        minEpss: 0.1
+        minEpssPercentile: 0.9
+        minCess: 5
+      exploitAsserted:
+        kev: true
+        vulncheckKev: true
+        msrcExploited: true
+        ransomware: true
+      exploitObserved:
+        any: true
+        sources: [shadowserver]
+      reachability:
+        verdicts: [REACHABLE]
+        assessedOnly: true
+      exposure:
+        internetExposed: true
+        audiences: [public]
+      supplyChain:
+        malicious: true
+        squatted: true
+        abandoned: true
+        badActor: true
+        scorecardBelow: 4
+      attackChain:
+        attackPathIds: [ap-ingress-payments]
+        techniques: [T1190]
+        tactics: [TA0001]
+      lifecycle:
+        eol: true
+        unmaintained: true
+      licence:
+        expressions: [GPL-3.0-only]
+        violatesPolicy: true
+    exclusions:
+      testCode: true
+      devDeps: true
+      transitiveDeps: true
+      suppressed: true
+      minConfidence: 0.5
+  done:
+    join: any
+    criteria:
+      - type: gone-from-scans
+        repos: [acme/payments-api]
+        category: sca
+      - type: safe-version
+      - type: eol-supported
+        mode: supported
+  contributors:
+    - principal: 2b7e1516-28ae-4d2a-a6ab-f7158809cf4f
+      displayName: Dana Reyes
+      role: owner
+    - login: payments-oncall
+      role: contributor
+    - email: auditor@example.com
+      displayName: External auditor
+      role: contact

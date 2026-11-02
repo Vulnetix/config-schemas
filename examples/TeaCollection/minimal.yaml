@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/TeaCollection.schema.json
+apiVersion: vulnetix.com/v1
+kind: TeaCollection
+metadata:
+  name: acme-payments-2-4-0
+spec:
+  product: acme-payments
+  release: 2.4.0

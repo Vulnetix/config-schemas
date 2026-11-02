@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/TeaProduct.schema.json
+apiVersion: vulnetix.com/v1
+kind: TeaProduct
+metadata:
+  name: acme-payments
+  labels:
+    team: payments
+  annotations:
+    note: Releases are published by the payments-api release workflow.
+spec:
+  name: Acme Payments
+  identifiers:
+    - idType: PURL
+      idValue: pkg:github/acme/payments-api
+    - idType: CPE
+      idValue: cpe:2.3:a:acme:payments:*:*:*:*:*:*:*:*

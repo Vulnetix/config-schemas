@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/TeaComponent.schema.json
+apiVersion: vulnetix.com/v1
+kind: TeaComponent
+metadata:
+  name: payments-api
+  labels:
+    team: payments
+spec:
+  name: payments-api
+  identifiers:
+    - idType: PURL
+      idValue: pkg:oci/payments-api?repository_url=ghcr.io/acme

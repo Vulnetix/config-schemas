@@ -1,0 +1,313 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/Campaign.schema.json",
+  "title": "Campaign",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[]},
+  "description": "A remediation campaign: a named, time-boxed push to drive a chosen set of vulnerabilities, dependencies or repositories to a defined done state. The scope chooses the cohort, the done criteria decide when each member of it is closed, and the campaign records which members were admitted, when, and what later scan closed each one. What a campaign has achieved is runtime state, reported in status and never declared: its cohort, progress, freeze time and whether it has completed. The cohort is evaluated after apply, the first time the campaign is opened or refreshed. The repositories the scope and the criteria name must resolve when the document is applied, as they must when the console saves a campaign. Removing the document archives the campaign rather than deleting it, so the record of what was committed to, and whether it happened, is kept; an archived campaign is no longer part of the tenant's config, and applying the document again starts a new campaign.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "Campaign" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["name", "target", "done"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "The campaign's name, as the console shows it.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(.*\\S)?$"
+        },
+        "description": {
+          "description": "What the campaign is for, in a sentence or two.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "target": {
+          "description": "What the cohort is made of. vulnerabilities: findings. dependencies: dependencies in use. repositories: both the findings and the dependencies of the repositories in scope. Fixed once the campaign exists: a changed target is refused, because the cohort it already admitted would no longer fit it.",
+          "type": "string",
+          "enum": ["vulnerabilities", "dependencies", "repositories"]
+        },
+        "timing": {
+          "description": "frozen: the cohort is locked the first time the campaign is evaluated, so entities found later never join and the burndown's denominator cannot move. scopeCreep: every evaluation admits whatever newly matches the scope. A frozen campaign's scope and criteria cannot be changed; set scopeCreep first, which unfreezes it.",
+          "type": "string",
+          "enum": ["frozen", "scopeCreep"],
+          "default": "frozen"
+        },
+        "deadline": {
+          "description": "When the campaign is due. Recorded as a deadline set by hand.",
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "ownerEmail": {
+          "description": "The email address of the person accountable for the campaign.",
+          "type": "string",
+          "format": "email",
+          "maxLength": 320
+        },
+        "scope": {
+          "description": "The filter that chooses the cohort. Left out, or empty, the campaign covers the whole estate. Every filter set narrows the cohort further. Some dimensions are recorded and not yet evaluated (attackChain, licence.violatesPolicy, supplyChain.scorecardBelow, exploitObserved.sources, weakness.cleanCodeCategories and weakness.ruleKeys); the console reports them as deferred.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "repos": {
+              "description": "The repositories the campaign covers. For a repositories campaign they are the target itself; for the others they narrow it. Each must resolve to a repository Vulnetix holds or can fetch from its forge.",
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "$ref": "common.schema.json#/$defs/repository" }
+            },
+            "category": {
+              "description": "One finding category. Left out, every category.",
+              "type": "string",
+              "enum": ["sca", "sast", "secrets", "iac", "license"]
+            },
+            "filters": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "identity": {
+                  "description": "Match findings by what they are and where they were found. Each list matches any of its values.",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "findingId": { "description": "Finding ids, such as CVE-2021-44228 or GHSA ids.", "$ref": "#/$defs/strings" },
+                    "repoName": { "description": "Repository full names.", "$ref": "#/$defs/strings" },
+                    "branchName": { "description": "Branch names.", "$ref": "#/$defs/strings" },
+                    "commitSha": { "description": "Commit SHAs.", "$ref": "#/$defs/strings" },
+                    "source": { "description": "The scanner or tool that reported the finding.", "$ref": "#/$defs/strings" },
+                    "category": { "description": "Finding categories, as the findings list shows them.", "$ref": "#/$defs/strings" },
+                    "packageName": { "description": "Package names.", "$ref": "#/$defs/strings" },
+                    "packageVersion": { "description": "Package versions.", "$ref": "#/$defs/strings" },
+                    "packageEcosystem": { "description": "Package ecosystems, such as npm or pypi.", "$ref": "#/$defs/strings" },
+                    "purl": { "description": "Package URLs.", "$ref": "#/$defs/strings" },
+                    "cpe": { "description": "CPE names.", "$ref": "#/$defs/strings" },
+                    "vendor": { "description": "Vendors, as the advisory names them.", "$ref": "#/$defs/strings" },
+                    "product": { "description": "Products, as the advisory names them.", "$ref": "#/$defs/strings" }
+                  }
+                },
+                "weakness": {
+                  "description": "Match findings by weakness.",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "cwes": { "description": "CWE ids, such as CWE-79.", "$ref": "#/$defs/strings" },
+                    "aliases": { "description": "Advisory aliases.", "$ref": "#/$defs/strings" },
+                    "ruleKeys": { "description": "Static analysis rule keys. Recorded, not yet evaluated.", "$ref": "#/$defs/strings" },
+                    "cleanCodeCategories": { "description": "Clean code categories. Recorded, not yet evaluated.", "$ref": "#/$defs/strings" }
+                  }
+                },
+                "impact": {
+                  "description": "Minimum scores. A finding must reach every minimum set.",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "minCvss": { "description": "Minimum effective CVSS base score.", "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+                    "minCwss": { "description": "Minimum effective CWSS score.", "type": "number", "exclusiveMinimum": 0 },
+                    "minEpss": { "description": "Minimum EPSS probability, from 0 to 1.", "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+                    "minEpssPercentile": { "description": "Minimum EPSS percentile, from 0 to 1.", "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+                    "minCess": { "description": "Minimum effective CESS score.", "type": "number", "exclusiveMinimum": 0 }
+                  }
+                },
+                "exploitAsserted": {
+                  "description": "Findings someone with standing says are exploited. Each flag set must hold.",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kev": { "description": "In the CISA Known Exploited Vulnerabilities catalogue.", "type": "boolean" },
+                    "vulncheckKev": { "description": "In the VulnCheck KEV catalogue.", "type": "boolean" },
+                    "msrcExploited": { "description": "Marked exploited by the Microsoft Security Response Center.", "type": "boolean" },
+                    "ransomware": { "description": "Known to be used in ransomware campaigns.", "type": "boolean" }
+                  }
+                },
+                "exploitObserved": {
+                  "description": "Findings with exploitation observed in the wild.",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "any": { "description": "Observed by any source.", "type": "boolean" },
+                    "sources": { "description": "Observed by one of these sources. Recorded, not yet evaluated.", "$ref": "#/$defs/strings" }
+                  }
+                },
+                "reachability": {
+                  "description": "Findings by reachability analysis.",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "verdicts": { "description": "Reachability verdicts, such as REACHABLE or UNREACHABLE. Assessed and unreachable is a different state from never assessed, and either may be targeted.", "$ref": "#/$defs/strings" },
+                    "assessedOnly": { "description": "Only findings reachability analysis looked at.", "type": "boolean" }
+                  }
+                },
+                "exposure": {
+                  "description": "Findings by exposure.",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "internetExposed": { "description": "Only findings in services exposed to the internet.", "type": "boolean" },
+                    "audiences": { "description": "Exposure audiences, such as public or internal.", "$ref": "#/$defs/strings" }
+                  }
+                },
+                "supplyChain": {
+                  "description": "Dependencies with supply chain risk. Each flag set must hold.",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "malicious": { "description": "Known malicious packages.", "type": "boolean" },
+                    "squatted": { "description": "Typosquatted or namespace-squatted packages.", "type": "boolean" },
+                    "abandoned": { "description": "Abandoned packages.", "type": "boolean" },
+                    "badActor": { "description": "Packages published by a known bad actor.", "type": "boolean" },
+                    "scorecardBelow": { "description": "OpenSSF Scorecard score below this value. Recorded, not yet evaluated.", "type": "number", "minimum": 0, "maximum": 10 }
+                  }
+                },
+                "attackChain": {
+                  "description": "Findings on an attack path. Recorded, not yet evaluated.",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "attackPathIds": { "description": "Attack path ids.", "$ref": "#/$defs/strings" },
+                    "techniques": { "description": "MITRE ATT&CK technique ids, such as T1190.", "$ref": "#/$defs/strings" },
+                    "tactics": { "description": "MITRE ATT&CK tactic ids, such as TA0001.", "$ref": "#/$defs/strings" }
+                  }
+                },
+                "lifecycle": {
+                  "description": "Findings by package lifecycle.",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "eol": { "description": "Packages past end of life.", "type": "boolean" },
+                    "unmaintained": { "description": "Unmaintained packages.", "type": "boolean" }
+                  }
+                },
+                "licence": {
+                  "description": "Findings by licence.",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "expressions": { "description": "SPDX licence expressions.", "$ref": "#/$defs/strings" },
+                    "violatesPolicy": { "description": "Licences the licence policy refuses. Recorded, not yet evaluated.", "type": "boolean" }
+                  }
+                }
+              }
+            },
+            "exclusions": {
+              "description": "Noise left out of the cohort.",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "testCode": { "description": "Leave out findings in test code.", "type": "boolean" },
+                "devDeps": { "description": "Leave out development dependencies.", "type": "boolean" },
+                "transitiveDeps": { "description": "Leave out transitive dependencies.", "type": "boolean" },
+                "suppressed": { "description": "Leave out suppressed findings.", "type": "boolean" },
+                "minConfidence": { "description": "Leave out findings whose scanner confidence is below this value. Findings with no confidence score are kept.", "type": "number", "minimum": 0 }
+              }
+            }
+          }
+        },
+        "done": {
+          "description": "When a member of the cohort is done.",
+          "type": "object",
+          "required": ["criteria"],
+          "additionalProperties": false,
+          "properties": {
+            "join": {
+              "description": "all: a member is done when every criterion holds. any: when one does.",
+              "type": "string",
+              "enum": ["all", "any"],
+              "default": "all"
+            },
+            "criteria": {
+              "description": "The done criteria. For a vulnerabilities campaign: gone-from-scans, safe-version and eol-supported. For a dependencies campaign: package-removed, latest-version and safe-version-used. A repositories campaign takes either family. A finding the scanner marks fixed always closes, whatever the criteria.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["type"],
+                "additionalProperties": false,
+                "properties": {
+                  "type": {
+                    "description": "gone-from-scans: the finding is no longer reported. safe-version: the package moved to a version the advisory says is fixed. eol-supported: the package is on a supported release line. package-removed: the dependency is no longer used. latest-version: the dependency is on its latest version. safe-version-used: the dependency is on a version with no known vulnerability.",
+                    "type": "string",
+                    "enum": ["gone-from-scans", "safe-version", "eol-supported", "package-removed", "latest-version", "safe-version-used"]
+                  },
+                  "repos": {
+                    "description": "gone-from-scans only: the repositories whose scans must no longer report the finding, which may differ from the scope. Each must resolve as the scope's repositories do.",
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": { "$ref": "common.schema.json#/$defs/repository" }
+                  },
+                  "category": {
+                    "description": "gone-from-scans only: the finding category whose scans count.",
+                    "type": "string",
+                    "enum": ["sca", "sast", "secrets", "iac", "license"]
+                  },
+                  "mode": {
+                    "description": "eol-supported only. latest: the latest release line. supported: any release line still supported.",
+                    "type": "string",
+                    "enum": ["latest", "supported"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "contributors": {
+          "description": "Who is on the hook. Each contributor is identified by exactly one of principal, login or email, because a console member, a code owner and an external contact are different identities. Plan lists each contributor added or removed, and apply changes only those.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "principal": {
+                "description": "A console member, by their Vulnetix principal UUID.",
+                "type": "string",
+                "format": "uuid"
+              },
+              "login": {
+                "description": "A GitHub login, such as a code owner.",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9-]+(\\[bot\\])?$"
+              },
+              "email": {
+                "description": "An email address, for a contact outside the console.",
+                "type": "string",
+                "format": "email",
+                "maxLength": 320
+              },
+              "displayName": {
+                "description": "The name to show.",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "role": {
+                "description": "owner: accountable for the campaign. contributor: does the work. contact: kept informed.",
+                "type": "string",
+                "enum": ["owner", "contributor", "contact"],
+                "default": "contributor"
+              }
+            },
+            "oneOf": [
+              { "required": ["principal"], "not": { "anyOf": [{ "required": ["login"] }, { "required": ["email"] }] } },
+              { "required": ["login"], "not": { "anyOf": [{ "required": ["principal"] }, { "required": ["email"] }] } },
+              { "required": ["email"], "not": { "anyOf": [{ "required": ["principal"] }, { "required": ["login"] }] } }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "strings": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 512 }
+    }
+  }
+}

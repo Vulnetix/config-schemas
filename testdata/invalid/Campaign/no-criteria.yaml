@@ -1,0 +1,8 @@
+# a campaign needs at least one done criterion
+apiVersion: vulnetix.com/v1
+kind: Campaign
+metadata: {name: log4shell}
+spec:
+  name: Log4Shell clean-up
+  target: vulnerabilities
+  done: {criteria: []}

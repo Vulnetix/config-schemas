@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/TeaAccessPolicy.schema.json
+# The product is public, one component is shared with a customer under
+# contract, and one release's collection is embargoed. The narrowest policy
+# on the way up from an object to its product is the one in force.
+apiVersion: vulnetix.com/v1
+kind: TeaAccessPolicy
+metadata:
+  name: acme-payments
+  annotations:
+    approved-by: https://tracker.example.com/SEC-210
+spec:
+  product: acme-payments
+  visibility: public
+  confirmPublic: true
+---
+apiVersion: vulnetix.com/v1
+kind: TeaAccessPolicy
+metadata:
+  name: payments-api
+spec:
+  component: payments-api
+  visibility: shared
+  sharedWith:
+    - organization: 6f1c2a8e-3b4d-4e5f-8a9b-0c1d2e3f4a5b
+      organizationName: Globex Corporation
+      expires: 2027-06-30T00:00:00Z
+---
+apiVersion: vulnetix.com/v1
+kind: TeaAccessPolicy
+metadata:
+  name: acme-payments-2-4-0
+spec:
+  collection: acme-payments-2-4-0
+  visibility: private

@@ -58,6 +58,12 @@ Reference documentation for every kind is at https://docs.vulnetix.com (the Plat
 | `LibraryItem` | v1.6.0 | A skill, prompt, command, process, MCP server, repo, budget, provider, rewrite table, hook bundle or launch configuration of the Belai library, checked by the library's own validator. |
 | `SandboxLaunchProfile` | v1.6.0 | What the next launch of a Pix sandbox installs and how Belai runs on it. |
 | `SandboxEgressPolicy` | v1.6.0 | A Pix sandbox's egress mode and the hostnames it may or may not reach. |
+| `TeaProduct` | v1.5.0 | A product published through the Transparency Exchange API. Its releases and artifacts are published by CI, not declared. |
+| `TeaComponent` | v1.5.0 | A component published through the Transparency Exchange API. |
+| `TeaCollection` | v1.5.0 | The collection of a release CI has published, so an access policy can name it. |
+| `TeaAccessPolicy` | v1.5.0 | Who may read a TEA product, component or collection: private, shared with named organisations, or public. |
+| `TeaPublicationTarget` | v1.5.0 | A remote TEA server registered for mirroring, with its credential. |
+| `Campaign` | v1.5.0 | A remediation campaign: its scope, done criteria, timing, deadline and contributors. Removing it archives the campaign. |
 
 A field or kind whose description says "Not stored yet" (`CloudSensors` for one account), and the whole of `VexSource`, is ahead of the server: it validates today, and applying it needs the backend change the description names.
 

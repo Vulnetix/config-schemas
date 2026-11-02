@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/TeaCollection.schema.json",
+  "title": "TeaCollection",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":["TeaProduct","TeaComponent"],"secrets":[],"celFields":[]},
+  "description": "The collection of one published release: the versioned set of artifacts (SBOMs, VEX documents, attestations) TEA serves for it. TEA gives a collection the UUID of its release, so a collection exists only for a release a CI pipeline has already published, and plan fails until it has been. Declaring the collection makes sure it exists and gives a TeaAccessPolicy something to name, such as an embargo on one release. The artifacts are runtime data: CI adds them, and each addition moves the collection's version on, which status reports and which is not a change to this document. A collection this document creates starts at version 1 with the update reason INITIAL_RELEASE; one CI created first is adopted as it is. Removing the document deletes the collection while it has never held an artifact; otherwise the collection stays with its release and only the config management of it ends.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "TeaCollection" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["release"],
+      "additionalProperties": false,
+      "properties": {
+        "product": {
+          "description": "The metadata.name of a TeaProduct, for the collection of one of its product releases.",
+          "$ref": "common.schema.json#/$defs/name"
+        },
+        "component": {
+          "description": "The metadata.name of a TeaComponent, for the collection of one of its component releases.",
+          "$ref": "common.schema.json#/$defs/name"
+        },
+        "release": {
+          "description": "The release's version, exactly as CI published it, such as 2.4.0.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S+$"
+        }
+      },
+      "oneOf": [{ "required": ["product"] }, { "required": ["component"] }]
+    }
+  }
+}

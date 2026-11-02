@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/TeaComponent.schema.json",
+  "title": "TeaComponent",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[]},
+  "description": "A component the tenant publishes through the Transparency Exchange API (TEA): a part a product is assembled from, such as a service, a library or an installer. Component releases, and the distributions and artifacts under them, are published by CI pipelines and are not declared here; a product release names the component releases it is built from when CI publishes it. A component given the same name as a TeaProduct is the same subject to consumers, who then see one node carrying both identities. The server assigns the component's UUID and TEI and reports them in status. Who may read it is declared with a TeaAccessPolicy; until one exists the component is private. Removing the document deletes the component while no release has been published under it. Once CI has published a release, the component and its releases stay, and only the config management of the component ends.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "TeaComponent" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "The component name TEA consumers see, such as payments-api. Unique among the tenant's components. The first time a name is published the server derives the component's UUID from it, so a CI pipeline that publishes releases under the same component name writes to this component. Changing the name later keeps the UUID.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^\\S(.*\\S)?$"
+        },
+        "identifiers": {
+          "description": "Identifiers for the component besides its TEI, in the order consumers see them. The server assigns the TEI itself, so it is reported in status and cannot be declared.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/identifier" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "object",
+      "required": ["idType", "idValue"],
+      "additionalProperties": false,
+      "properties": {
+        "idType": {
+          "description": "PURL: a package URL. CPE: a CPE 2.3 name. COMPLIANCE_DOCUMENT: a compliance document type the TEA specification names.",
+          "type": "string",
+          "enum": ["PURL", "CPE", "COMPLIANCE_DOCUMENT"]
+        },
+        "idValue": {
+          "description": "The identifier itself.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      }
+    }
+  }
+}
