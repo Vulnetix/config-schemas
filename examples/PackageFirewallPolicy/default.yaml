@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/PackageFirewallPolicy.schema.json
+apiVersion: vulnetix.com/v1
+kind: PackageFirewallPolicy
+metadata:
+  name: default
+spec:
+  mode: enforce
+  thresholds:
+    cvss: 9.0
+    epss: 0.5
+  block:
+    malware: true
+    kev: true
+    weaponized: true
+    badActors: true
+  cooldownDays: 3
+  review:
+    staleDecisionDays: 180
+  ecosystems:
+    npm: { mode: allowlist_only }
+    go: { mode: warn }
+  mirrors:
+    - ecosystem: go
+      url: https://proxy.golang.org
+      priority: 0
+    - ecosystem: go
+      url: https://goproxy.io
+      priority: 1
+    - ecosystem: npm
+      url: https://registry.npmjs.org

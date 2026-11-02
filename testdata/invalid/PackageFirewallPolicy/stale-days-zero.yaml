@@ -1,0 +1,5 @@
+# staleDecisionDays must be at least 1
+apiVersion: vulnetix.com/v1
+kind: PackageFirewallPolicy
+metadata: {name: default}
+spec: {review: {staleDecisionDays: 0}}

@@ -1,0 +1,6 @@
+# an ATTACK_PATH rule must name an attack path
+apiVersion: vulnetix.com/v1
+kind: RiskStrategy
+metadata: {name: x}
+spec:
+  rules: [{metric: ATTACK_PATH, operator: IS_TRUE}, {metric: REMAINING, operator: ALWAYS}]

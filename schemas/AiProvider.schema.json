@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/AiProvider.schema.json",
+  "title": "AiProvider",
+  "description": "A custom AI Firewall provider owned by the tenant: a model server the gateway forwards to, beside the built-in catalogue. Only this tenant sees or uses it. metadata.name is the provider slug, which becomes the gateway path prefix (/<slug>/<org>/v1/...) and is what AiFirewallPolicy providers and models refer to. A tenant has at most 10 custom providers, and a slug that a built-in provider uses is refused at apply.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "AiProvider" },
+    "metadata": {
+      "allOf": [
+        { "$ref": "common.schema.json#/$defs/metadata" },
+        {
+          "properties": {
+            "name": {
+              "description": "The slug: 2 to 32 lowercase letters, digits or hyphens, starting with a letter. The gateway's own path words and Belai's compiled-in provider names are reserved; a built-in provider's slug is refused at apply.",
+              "pattern": "^[a-z][a-z0-9-]{1,31}$",
+              "not": {
+                "enum": [
+                  "v1", "api", "health", "models",
+                  "openai", "anthropic", "cloudflare-workers-ai", "cloudflare-ai-gateway", "openrouter",
+                  "google-gemini", "ollama", "llama-server", "groq", "deepseek", "fireworks",
+                  "mistral", "together", "xai", "moonshot", "minimax", "alibaba",
+                  "github-copilot", "kiro", "huggingface", "openai-compatible", "typesafe", "strands-decider"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "spec": {
+      "type": "object",
+      "required": ["protocol", "baseUrl", "auth"],
+      "additionalProperties": false,
+      "properties": {
+        "displayName": {
+          "description": "The label the console shows. Defaults to the slug.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[^\u0000-\u001f\u007f]*$"
+        },
+        "serverKind": {
+          "description": "The server type. ollama and llama-server speak openai-chat only.",
+          "type": "string",
+          "enum": ["openai-compatible", "ollama", "llama-server"],
+          "default": "openai-compatible"
+        },
+        "protocol": {
+          "description": "The request surface the server speaks: openai-chat (Chat Completions), openai-responses (Responses, which Codex needs) or anthropic-messages (Messages, which Claude Code speaks). The gateway refuses requests on any other surface.",
+          "type": "string",
+          "enum": ["openai-chat", "openai-responses", "anthropic-messages"]
+        },
+        "baseUrl": {
+          "description": "https://host[:port] and nothing more: no path, query or fragment. The gateway adds the protocol's own path. The host must be publicly reachable; private, loopback and link-local addresses are refused at apply, and again at every connection.",
+          "type": "string",
+          "format": "uri",
+          "maxLength": 1024,
+          "pattern": "^https://[^/?#\\s]+/?$"
+        },
+        "auth": {
+          "description": "How the API key is sent. bearer: Authorization: Bearer <key>. x-api-key: an x-api-key header, plus anthropic-version for anthropic-messages. cf-aig: a cf-aig-authorization header, for Cloudflare AI Gateway.",
+          "type": "string",
+          "enum": ["bearer", "x-api-key", "cf-aig"]
+        },
+        "apiKey": {
+          "description": "Where the client reads the API key. It is stored encrypted for this tenant and provider, and is never exported or shown in a plan. Left out, the key on the server is kept; with no key at all, the gateway refuses requests with provider_key_missing.",
+          "$ref": "common.schema.json#/$defs/valueFrom"
+        },
+        "models": {
+          "description": "The models the server offers.",
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "description": "The model id the server expects, without spaces.",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "pattern": "^[^\\s\u0000-\u001f\u007f]+$"
+              },
+              "name": {
+                "type": "string",
+                "maxLength": 128,
+                "pattern": "^[^\u0000-\u001f\u007f]*$"
+              },
+              "contextWindow": { "description": "Tokens. 0 is unknown.", "type": "integer", "minimum": 0, "maximum": 10000000 },
+              "maxTokens": { "description": "Output tokens. 0 is unknown.", "type": "integer", "minimum": 0, "maximum": 10000000 },
+              "images": { "description": "Accepts image input.", "type": "boolean" }
+            }
+          }
+        }
+      },
+      "if": {
+        "properties": { "serverKind": { "enum": ["ollama", "llama-server"] } },
+        "required": ["serverKind"]
+      },
+      "then": { "properties": { "protocol": { "const": "openai-chat" } } }
+    }
+  }
+}

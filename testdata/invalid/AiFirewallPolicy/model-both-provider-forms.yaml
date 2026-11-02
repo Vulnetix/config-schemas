@@ -1,0 +1,5 @@
+# set exactly one of provider or anyProvider
+apiVersion: vulnetix.com/v1
+kind: AiFirewallPolicy
+spec:
+  models: [{slug: gpt-4o, provider: openai, anyProvider: true, action: allow}]

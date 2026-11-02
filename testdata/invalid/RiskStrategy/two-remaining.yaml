@@ -1,0 +1,6 @@
+# exactly one REMAINING rule, not two
+apiVersion: vulnetix.com/v1
+kind: RiskStrategy
+metadata: {name: x}
+spec:
+  rules: [{metric: REMAINING, operator: ALWAYS}, {metric: REMAINING, operator: ALWAYS}]

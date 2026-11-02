@@ -1,0 +1,5 @@
+# strip applies to tool and MCP rules only
+apiVersion: vulnetix.com/v1
+kind: AiFirewallPolicy
+spec:
+  guardrails: [{name: a, ruleType: skill_deny, action: strip, pattern: pdf}]

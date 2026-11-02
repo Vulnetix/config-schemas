@@ -1,0 +1,7 @@
+# refresh is an interval or a webhook, not both
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata: {name: x}
+spec:
+  refresh: {interval: 6h, webhook: true}
+  path: {path: vex.json}

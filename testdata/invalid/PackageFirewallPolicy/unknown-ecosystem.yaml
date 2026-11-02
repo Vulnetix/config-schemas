@@ -1,0 +1,5 @@
+# ecosystem override for an ecosystem the firewall does not proxy
+apiVersion: vulnetix.com/v1
+kind: PackageFirewallPolicy
+metadata: {name: default}
+spec: {ecosystems: {golang: {mode: warn}}}

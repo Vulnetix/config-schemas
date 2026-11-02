@@ -1,0 +1,4 @@
+# a scope is evaluate or ignore
+apiVersion: vulnetix.com/v1
+kind: LicensePolicy
+scopes: {test: skip}

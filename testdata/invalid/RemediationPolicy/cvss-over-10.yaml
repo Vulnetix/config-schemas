@@ -1,0 +1,10 @@
+# severity thresholds are CVSS scores, 0 to 10
+apiVersion: vulnetix.com/v1
+kind: RemediationPolicy
+metadata: {name: default}
+spec:
+  remediationDays: {critical: 7, high: 30, medium: 90, low: 180}
+  triageThresholdDays: 2
+  exposureWindowDays: 14
+  threatWindowDays: 30
+  severityThresholds: {high: 89, medium: 6.9, low: 4}

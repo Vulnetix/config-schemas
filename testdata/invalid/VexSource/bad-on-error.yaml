@@ -1,0 +1,7 @@
+# onError is keep-last or clear
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata: {name: x}
+spec:
+  onError: retry
+  path: {path: vex.json}

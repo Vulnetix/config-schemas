@@ -1,0 +1,7 @@
+# * only as the whole final name
+apiVersion: vulnetix.com/v1
+kind: PackageList
+metadata: {name: x}
+spec:
+  list: allow
+  entries: [{purl: "pkg:npm/lodash*"}]

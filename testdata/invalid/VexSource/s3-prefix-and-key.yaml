@@ -1,0 +1,6 @@
+# prefix or key, not both
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata: {name: x}
+spec:
+  s3: {bucket: acme-vex, prefix: vex/, key: vex/a.json, roleArn: "arn:aws:iam::123456789012:role/R"}

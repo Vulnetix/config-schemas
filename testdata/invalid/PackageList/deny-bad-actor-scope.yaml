@@ -1,0 +1,7 @@
+# a deny entry is always scope full
+apiVersion: vulnetix.com/v1
+kind: PackageList
+metadata: {name: x}
+spec:
+  list: deny
+  entries: [{purl: "pkg:npm/foo", scope: bad_actor}]

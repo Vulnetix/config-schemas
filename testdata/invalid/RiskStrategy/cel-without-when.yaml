@@ -1,0 +1,6 @@
+# a CEL rule needs when
+apiVersion: vulnetix.com/v1
+kind: RiskStrategy
+metadata: {name: x}
+spec:
+  rules: [{metric: CEL}, {metric: REMAINING, operator: ALWAYS}]

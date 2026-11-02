@@ -1,0 +1,5 @@
+# nosec is a scanner source, not a type a person declares
+apiVersion: vulnetix.com/v1
+kind: Suppression
+metadata: {name: x}
+spec: {type: nosec, scope: {rule: G101}}

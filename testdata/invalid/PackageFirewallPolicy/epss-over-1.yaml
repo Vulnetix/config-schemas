@@ -1,0 +1,5 @@
+# epss is a probability, 0 to 1
+apiVersion: vulnetix.com/v1
+kind: PackageFirewallPolicy
+metadata: {name: default}
+spec: {thresholds: {epss: 5}}

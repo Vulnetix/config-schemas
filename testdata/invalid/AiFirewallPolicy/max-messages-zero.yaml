@@ -1,0 +1,5 @@
+# max_messages needs a positive integer
+apiVersion: vulnetix.com/v1
+kind: AiFirewallPolicy
+spec:
+  guardrails: [{name: a, ruleType: max_messages, action: block, pattern: "0"}]

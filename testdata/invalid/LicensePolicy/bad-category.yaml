@@ -1,0 +1,4 @@
+# category outside the vocabulary
+apiVersion: vulnetix.com/v1
+kind: LicensePolicy
+severity: {copyleft: high}

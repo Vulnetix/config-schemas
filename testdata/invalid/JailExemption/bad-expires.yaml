@@ -1,0 +1,5 @@
+# expires must be a date or date-time
+apiVersion: vulnetix.com/v1
+kind: JailExemption
+metadata: {name: x}
+spec: {repository: acme/api, reason: Waiting on the vendor fix, expires: next week}

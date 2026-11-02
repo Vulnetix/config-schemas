@@ -1,0 +1,5 @@
+# scope must name rule, target or path
+apiVersion: vulnetix.com/v1
+kind: Suppression
+metadata: {name: x}
+spec: {type: wont_fix, scope: {repository: acme/api}}

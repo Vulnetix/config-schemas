@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/PackageList.schema.json",
+  "title": "PackageList",
+  "description": "Entries for the tenant's package firewall allow list or deny list. The tenant has one of each; every PackageList contributes its entries to one of them, and owns only the entries it declares. A deny entry always blocks, in every mode, ahead of every other check. An allow entry waives every policy block (thresholds, KEV, exploits, bad actors, end of life, cooldown, version lag) but never an exact-version malware match, a known-bad artifact hash or a malware scan verdict.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "PackageList" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["list", "entries"],
+      "additionalProperties": false,
+      "properties": {
+        "list": {
+          "description": "Which list the entries go on.",
+          "type": "string",
+          "enum": ["allow", "deny"]
+        },
+        "entries": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/entry" }
+        }
+      },
+      "if": { "properties": { "list": { "const": "deny" } }, "required": ["list"] },
+      "then": {
+        "properties": {
+          "entries": { "items": { "properties": { "purl": { "$ref": "#/$defs/exactPurl" }, "scope": { "const": "full" } } } }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "required": ["purl"],
+      "additionalProperties": false,
+      "properties": {
+        "purl": {
+          "description": "The package, as a purl without qualifiers or subpath. With a version (pkg:npm/lodash@4.17.21) the entry covers that version, and wins over a whole-package entry for it; without one it covers every version. On an allow list a purl whose name is * covers every package in a namespace, matched at a separator, so @acme/* never covers @acme-evil/x: pkg:npm/@acme/* (npm @acme/*), pkg:golang/github.com/acme/* (Go github.com/acme/*, which needs a host and an owner), pkg:maven/com.acme/* (Maven com.acme:*). A namespace entry has no version. The purl type maps to the firewall ecosystem: golang to go, gem to gem, deb to debian, apk to alpine, the rest to the same name.",
+          "anyOf": [
+            { "$ref": "#/$defs/exactPurl" },
+            { "$ref": "#/$defs/namespacePurl" }
+          ]
+        },
+        "reason": {
+          "description": "Why the decision was made, for the people who review the list.",
+          "type": "string"
+        },
+        "scope": {
+          "description": "What an allow entry waives. full: every policy block. bad_actor: only a bad-actor attribution, for an operator who judged that attribution a false positive. A deny entry is always full.",
+          "type": "string",
+          "enum": ["full", "bad_actor"],
+          "default": "full"
+        }
+      }
+    },
+    "exactPurl": {
+      "description": "A package purl, optionally with a version, without a wildcard.",
+      "type": "string",
+      "pattern": "^pkg:(golang|npm|pypi|cargo|gem|hex|pub|maven|nuget|composer|conan|conda|cran|julia|oci|deb|rpm|apk)/[^?#*\\s]+$"
+    },
+    "namespacePurl": {
+      "description": "Every package under a namespace: the name is *, and there is no version. A Go namespace needs a host and an owner.",
+      "type": "string",
+      "anyOf": [
+        { "pattern": "^pkg:golang/[^/@?#*\\s]+/[^@?#*\\s]+/\\*$" },
+        { "pattern": "^pkg:(npm|pypi|cargo|gem|hex|pub|maven|nuget|composer|conan|conda|cran|julia|oci|deb|rpm|apk)/@?[^@?#*\\s]+/\\*$" }
+      ]
+    }
+  }
+}

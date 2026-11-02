@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/AiFirewallPolicy.schema.json
+# The .vulnetix/ai-firewall.yaml shape vulnetix ai-firewall apply reads: no metadata.name.
+apiVersion: vulnetix.com/v1
+kind: AiFirewallPolicy
+metadata:
+  org: 6f2a1c3e-0000-0000-0000-000000000001
+spec:
+  prune: false
+  settings:
+    logsEnabled: false
+  baseline:
+    enabled: true
+    ref: recommended
+    exclude:
+      - pii-phone
+  providers:
+    - slug: openai
+      action: allow
+      key:
+        fromEnv: OPENAI_PROVIDER_KEY
+    - slug: openrouter
+      action: deny
+  models:
+    - slug: gpt-4o
+      provider: openai
+      action: allow
+    - slug: claude-sonnet-4-5
+      anyProvider: true
+      action: allow
+  guardrails:
+    - name: block-aws-keys
+      ruleType: blocked_pattern
+      action: block
+      pattern: '(?i)AKIA[0-9A-Z]{16}'
+      priority: 10
+      enabled: true
+    - name: cap-conversation
+      ruleType: max_messages
+      action: block
+      pattern: "50"
+      priority: 50

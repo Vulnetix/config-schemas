@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/JailPolicy.schema.json",
+  "title": "JailPolicy",
+  "description": "A jail policy: the ordered rules vulnetix jail evaluates for a repository over everything ever reported for it (vulnerabilities past their SLA, dependencies past end of life, migrations that have not landed, hygiene categories that regressed). A policy without repository is the tenant's default; a policy with one is a per-repository override that replaces the default outright. Separate from QualityGate, which judges a single scan.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "JailPolicy" },
+    "metadata": {
+      "description": "metadata.name is stored as the policy's name.",
+      "$ref": "common.schema.json#/$defs/metadata"
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repository": {
+          "description": "The repository this policy overrides the default for. Leave it out for the tenant default; a tenant has at most one default and one policy per repository.",
+          "$ref": "common.schema.json#/$defs/repository"
+        },
+        "description": { "type": "string" },
+        "enabled": { "type": "boolean", "default": true },
+        "enforcementMode": {
+          "description": "enforce applies each rule's onBreach. warn downgrades every breach to a warning, which disarms the jail without a CLI release.",
+          "type": "string",
+          "enum": ["enforce", "warn"],
+          "default": "enforce"
+        },
+        "defaultStalenessDays": {
+          "description": "How old the evidence a rule reads may be, in days, for rules that do not set stalenessDays.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 365,
+          "default": 7
+        },
+        "onStale": {
+          "description": "What a rule does when the evidence it needs is stale or absent, for rules that do not set their own. fail is the default: a gate that passes on missing evidence is worse than no gate.",
+          "$ref": "#/$defs/onStale",
+          "default": "fail"
+        },
+        "rules": {
+          "description": "The rules, in order. Every enabled rule is evaluated on every run; order decides presentation and which rule gives the headline reason, and never short-circuits. Rules are matched to stored rules by label, so labels must be unique within a policy.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/rule" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "onStale": {
+      "type": "string",
+      "enum": ["fail", "warn", "pass"]
+    },
+    "rule": {
+      "description": "One rule: select a population, aggregate it, compare the result with a threshold.",
+      "type": "object",
+      "required": ["kind", "label", "aggregate", "operator", "thresholdLow"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "description": "VULN: vulnerability findings. EOL: end-of-life dependencies. GOAL: a migration target, selected by targetPattern. HYGIENE: findings from the other scanner categories.",
+          "type": "string",
+          "enum": ["VULN", "EOL", "GOAL", "HYGIENE"]
+        },
+        "label": {
+          "description": "The rule's name in jail output and the console, and its key within the policy.",
+          "type": "string",
+          "minLength": 1
+        },
+        "enabled": { "type": "boolean", "default": true },
+        "category": {
+          "description": "Only findings from this scanner category. A HYGIENE rule without one draws from SECRETS, LICENSE, IAC, OCI and MALWARE.",
+          "type": "string",
+          "enum": ["SCA", "SAST", "SECRETS", "IAC", "OCI", "LICENSE", "MALWARE"]
+        },
+        "toolName": {
+          "description": "Only findings reported by this tool.",
+          "type": "string",
+          "minLength": 1
+        },
+        "ecosystem": {
+          "description": "Only dependencies from this package ecosystem.",
+          "type": "string",
+          "minLength": 1
+        },
+        "severityFloor": {
+          "description": "Only findings at or above this severity.",
+          "$ref": "common.schema.json#/$defs/severity"
+        },
+        "flags": {
+          "description": "Every flag listed must hold for a finding to count. kev: in a known-exploited catalogue. malicious: known malware. hasFix: a fixed version exists. reachable: the vulnerable code is called. direct: a direct dependency.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "enum": ["kev", "malicious", "hasFix", "reachable", "direct"] }
+        },
+        "targetPattern": {
+          "description": "GOAL only, and required there: a path.Match glob over the identifier of each fact (a purl, a package name, a rule id).",
+          "type": "string",
+          "minLength": 1
+        },
+        "aggregate": {
+          "description": "COUNT: how many. COUNT_PAST_SLA: how many are past the remediation window of the tenant's RemediationPolicy (VULN only). MAX_AGE_DAYS: the age of the oldest, in days. PERCENT: the share of the population, 0 to 100.",
+          "type": "string",
+          "enum": ["COUNT", "COUNT_PAST_SLA", "MAX_AGE_DAYS", "PERCENT"]
+        },
+        "operator": {
+          "description": "How the aggregate is compared with the thresholds. BETWEEN and OUTSIDE use both thresholds, inclusive.",
+          "type": "string",
+          "enum": ["GT", "GTE", "LT", "LTE", "EQ", "NEQ", "BETWEEN", "OUTSIDE"]
+        },
+        "thresholdLow": {
+          "description": "The threshold, or the lower bound for BETWEEN and OUTSIDE.",
+          "type": "number"
+        },
+        "thresholdHigh": {
+          "description": "The upper bound for BETWEEN and OUTSIDE; required by them. It must not be below thresholdLow.",
+          "type": "number"
+        },
+        "deadline": {
+          "description": "GOAL only. Until this time a breach is downgraded to a warning, whatever onBreach says.",
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "ratchet": {
+          "description": "GOAL only. Breach when the value rose since the last assessment of the same rule on the same branch, so a migration holds its ground before the deadline. With no earlier assessment the value is recorded and the rule passes.",
+          "type": "boolean",
+          "default": false
+        },
+        "onBreach": {
+          "type": "string",
+          "enum": ["BLOCK", "WARN"],
+          "default": "BLOCK"
+        },
+        "stalenessDays": {
+          "description": "Overrides the policy's defaultStalenessDays for this rule.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 365
+        },
+        "onStale": {
+          "description": "Overrides the policy's onStale for this rule.",
+          "$ref": "#/$defs/onStale"
+        },
+        "when": {
+          "description": "An extra condition each fact must meet to be counted, over the finding variables. Not stored yet: JailRule needs the nullable expr column the CEL work adds, and until it exists the engine cannot apply a rule that sets when.",
+          "$ref": "common.schema.json#/$defs/celExpression"
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "operator": { "enum": ["BETWEEN", "OUTSIDE"] } } },
+          "then": { "required": ["thresholdHigh"] }
+        },
+        {
+          "if": { "properties": { "aggregate": { "const": "COUNT_PAST_SLA" } } },
+          "then": { "properties": { "kind": { "const": "VULN" } } }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "GOAL" } } },
+          "then": { "required": ["targetPattern"] },
+          "else": {
+            "properties": {
+              "ratchet": { "const": false },
+              "deadline": false
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,5 @@
+# ruleType outside the gateway's vocabulary
+apiVersion: vulnetix.com/v1
+kind: AiFirewallPolicy
+spec:
+  guardrails: [{name: a, ruleType: regex_block, action: block, pattern: x}]

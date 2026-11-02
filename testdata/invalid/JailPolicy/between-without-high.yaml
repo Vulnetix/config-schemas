@@ -1,0 +1,6 @@
+# BETWEEN needs thresholdHigh
+apiVersion: vulnetix.com/v1
+kind: JailPolicy
+metadata: {name: x}
+spec:
+  rules: [{kind: VULN, label: a, aggregate: COUNT, operator: BETWEEN, thresholdLow: 1}]

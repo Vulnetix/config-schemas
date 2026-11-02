@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/RemediationPolicy.schema.json",
+  "title": "RemediationPolicy",
+  "description": "The tenant's remediation policy (triage policy in the console): the remediation window per severity band, the triage threshold, and the CVSS scores that separate the bands. Exposure reports grade against it, compliance reports cite it, and jail COUNT_PAST_SLA rules read its windows. One per tenant. Either adopt a published standard as it is, so reports cite the standard, or declare your own windows. Saving your own never edits the policy earlier snapshots and reports cite: it saves a new revision and points the tenant at it.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "RemediationPolicy" },
+    "metadata": { "$ref": "common.schema.json#/$defs/singletonMetadata" },
+    "spec": {
+      "oneOf": [
+        { "$ref": "#/$defs/standard" },
+        { "$ref": "#/$defs/custom" }
+      ]
+    }
+  },
+  "$defs": {
+    "days": { "type": "integer", "minimum": 1, "maximum": 3650 },
+    "allowanceDays": { "type": "integer", "minimum": 0, "maximum": 3650, "default": 0 },
+    "cvss": { "type": "number", "minimum": 0, "maximum": 10 },
+    "standard": {
+      "type": "object",
+      "required": ["standard"],
+      "additionalProperties": false,
+      "properties": {
+        "standard": {
+          "description": "A published standard, adopted as it is: baseline-cvss (Baseline CVSS), nist-800-40 (NIST SP 800-40), fedramp (FedRAMP), essential8 (Essential 8), cisa-bod-19-02 (CISA BOD 19-02).",
+          "type": "string",
+          "enum": ["baseline-cvss", "nist-800-40", "fedramp", "essential8", "cisa-bod-19-02"]
+        }
+      }
+    },
+    "custom": {
+      "type": "object",
+      "required": ["remediationDays", "triageThresholdDays", "exposureWindowDays", "threatWindowDays", "severityThresholds"],
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string" },
+        "remediationDays": {
+          "description": "Days to remediate a finding in each band. Windows that do not widen as severity falls are accepted with a warning: they are usually transposed.",
+          "type": "object",
+          "required": ["critical", "high", "medium", "low"],
+          "additionalProperties": false,
+          "properties": {
+            "critical": { "$ref": "#/$defs/days" },
+            "high": { "$ref": "#/$defs/days" },
+            "medium": { "$ref": "#/$defs/days" },
+            "low": { "$ref": "#/$defs/days" }
+          }
+        },
+        "allowanceDays": {
+          "description": "Grace days past each band's window before a finding counts as past its SLA.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "critical": { "$ref": "#/$defs/allowanceDays" },
+            "high": { "$ref": "#/$defs/allowanceDays" },
+            "medium": { "$ref": "#/$defs/allowanceDays" },
+            "low": { "$ref": "#/$defs/allowanceDays" }
+          }
+        },
+        "triageThresholdDays": {
+          "description": "Days by which a new finding must be triaged. Longer than the critical window is accepted with a warning.",
+          "$ref": "#/$defs/days"
+        },
+        "exposureWindowDays": { "description": "The exposure window, in days.", "$ref": "#/$defs/days" },
+        "threatWindowDays": { "description": "The threat window, in days.", "$ref": "#/$defs/days" },
+        "suppressionReviewMaxAgeDays": {
+          "description": "How long a suppression may go without being re-affirmed before reports call it overdue.",
+          "$ref": "#/$defs/days",
+          "default": 365
+        },
+        "severityThresholds": {
+          "description": "The CVSS base scores that separate the severity bands, as the published standards define them. They must increase: low < medium < high.",
+          "type": "object",
+          "required": ["high", "medium", "low"],
+          "additionalProperties": false,
+          "properties": {
+            "high": { "$ref": "#/$defs/cvss" },
+            "medium": { "$ref": "#/$defs/cvss" },
+            "low": { "$ref": "#/$defs/cvss" }
+          }
+        }
+      }
+    }
+  }
+}

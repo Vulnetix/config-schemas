@@ -80,6 +80,71 @@
         "vulnerable_code_cannot_be_controlled_by_adversary",
         "inline_mitigations_already_exist"
       ]
+    },
+    "legacySingletonMetadata": {
+      "description": "Metadata for a singleton kind whose documents predate metadata.name. Both metadata and its name may be left out; a name, when given, must be default.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "const": "default" },
+        "org": { "$ref": "#/$defs/metadata/properties/org" },
+        "labels": { "$ref": "#/$defs/metadata/properties/labels" },
+        "annotations": { "$ref": "#/$defs/metadata/properties/annotations" }
+      }
+    },
+    "timestamp": {
+      "description": "A point in time: an RFC 3339 date-time (2026-12-31T17:00:00Z), or a date (2026-12-31), read as midnight UTC at the start of that day.",
+      "type": "string",
+      "anyOf": [{ "format": "date-time" }, { "format": "date" }]
+    },
+    "repository": {
+      "description": "A repository by its full name, owner/name as the forge shows it. Nested groups (group/subgroup/name) are allowed.",
+      "type": "string",
+      "pattern": "^[^\\s/]+(/[^\\s/]+)+$"
+    },
+    "vaultRef": {
+      "description": "The metadata.name of a VaultEntry holding a credential. The value is read from the tenant's vault when it is needed and is never copied into the referring object.",
+      "$ref": "#/$defs/name"
+    },
+    "capabilityGlob": {
+      "description": "A name, or a glob in which only * is special (mcp__github__*). It matches the whole name: anchors are implied, so a leading ^ or a trailing $ would be matched literally and is refused.",
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^\\^\\s](.*[^$\\s])?$"
+    },
+    "aiCapabilityList": {
+      "description": "An allow or deny list for one AI capability family. Each pattern becomes one AI Firewall guardrail row of rule type <family>_<list> (tool_deny, mcp_allow and so on). A deny always wins. Any enabled allow rule puts its family into allowlist mode, where everything it does not name is refused.",
+      "type": "object",
+      "required": ["family", "list", "action", "patterns"],
+      "additionalProperties": false,
+      "properties": {
+        "family": {
+          "description": "tool: a tool offered to the model. mcp: an MCP server wired into the session. skill: an agent skill. client: the calling client, named by its headers (claude-code, codex-cli).",
+          "type": "string",
+          "enum": ["tool", "mcp", "skill", "client"]
+        },
+        "list": { "type": "string", "enum": ["allow", "deny"] },
+        "action": {
+          "description": "block refuses the request. flag lets it through and records the match. strip removes the matched tool or MCP server and sends the rest of the request; it applies to the tool and mcp families only, because a skill is a value inside another tool and a client is a header.",
+          "type": "string",
+          "enum": ["block", "flag", "strip"]
+        },
+        "priority": {
+          "description": "Evaluation order among guardrails, lowest first.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 100
+        },
+        "enabled": { "type": "boolean", "default": true },
+        "patterns": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/capabilityGlob" }
+        }
+      },
+      "if": { "properties": { "family": { "enum": ["skill", "client"] } }, "required": ["family"] },
+      "then": { "properties": { "action": { "enum": ["block", "flag"] } } }
     }
   }
 }

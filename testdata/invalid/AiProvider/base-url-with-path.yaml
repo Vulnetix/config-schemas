@@ -1,0 +1,5 @@
+# baseUrl is the host only; the gateway adds the path
+apiVersion: vulnetix.com/v1
+kind: AiProvider
+metadata: {name: acme-llm}
+spec: {protocol: openai-chat, baseUrl: "https://llm.example.com/v1", auth: bearer}

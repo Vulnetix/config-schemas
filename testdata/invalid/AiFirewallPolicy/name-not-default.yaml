@@ -1,0 +1,5 @@
+# a metadata.name, when given, must be default
+apiVersion: vulnetix.com/v1
+kind: AiFirewallPolicy
+metadata: {name: prod}
+spec: {}

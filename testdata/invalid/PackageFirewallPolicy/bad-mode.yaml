@@ -1,0 +1,5 @@
+# mode outside the enum
+apiVersion: vulnetix.com/v1
+kind: PackageFirewallPolicy
+metadata: {name: default}
+spec: {mode: block}

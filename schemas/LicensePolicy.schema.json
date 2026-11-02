@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/LicensePolicy.schema.json",
+  "title": "LicensePolicy",
+  "description": "A licence policy: which licence categories produce findings and at what severity, how unresolved licences and dependency scopes are treated, and per-project overrides. Two forms are valid. The repository file .vulnetix/license-policy.yaml, read by vulnetix license and scan --evaluate-licenses, keeps the policy fields at the top level with no metadata; this is what vulnetix license policy init writes. The config form puts the same fields under spec, with metadata. Absent sections inherit the defaults: unknown is warn, no scope is ignored, and only strong-copyleft (high) and unknown (medium) carry a severity.",
+  "type": "object",
+  "required": ["apiVersion", "kind"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "LicensePolicy" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": { "$ref": "#/$defs/policy" },
+    "categories": { "$ref": "#/$defs/policy/properties/categories" },
+    "severity": { "$ref": "#/$defs/policy/properties/severity" },
+    "unknown": { "$ref": "#/$defs/policy/properties/unknown" },
+    "scopes": { "$ref": "#/$defs/policy/properties/scopes" },
+    "projects": { "$ref": "#/$defs/policy/properties/projects" }
+  },
+  "oneOf": [
+    {
+      "description": "The config form.",
+      "required": ["metadata", "spec"],
+      "properties": {
+        "categories": false,
+        "severity": false,
+        "unknown": false,
+        "scopes": false,
+        "projects": false
+      }
+    },
+    {
+      "description": "The repository file form.",
+      "properties": { "spec": false }
+    }
+  ],
+  "$defs": {
+    "category": {
+      "type": "string",
+      "enum": ["permissive", "weak-copyleft", "strong-copyleft", "proprietary", "public-domain", "unknown"]
+    },
+    "severity": {
+      "description": "none produces no finding.",
+      "type": "string",
+      "enum": ["none", "low", "medium", "high", "critical"]
+    },
+    "severityMap": {
+      "description": "The severity of a finding against each category.",
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/category" },
+      "additionalProperties": { "$ref": "#/$defs/severity" }
+    },
+    "unknown": {
+      "description": "What an unresolved licence does. warn reports it without failing; fail treats it as a violation; ignore drops it.",
+      "type": "string",
+      "enum": ["warn", "fail", "ignore"]
+    },
+    "scopes": {
+      "description": "How each dependency scope is treated, keyed by scope name in lower case (development, dev, test, optional). ignore skips the scope; a scope left out is evaluated.",
+      "type": "object",
+      "additionalProperties": { "type": "string", "enum": ["evaluate", "ignore"] }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "categories": {
+          "description": "Reassign SPDX ids to a category, overriding the built-in classification.",
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/category" },
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "severity": { "$ref": "#/$defs/severityMap" },
+        "unknown": { "$ref": "#/$defs/unknown", "default": "warn" },
+        "scopes": { "$ref": "#/$defs/scopes" },
+        "projects": {
+          "description": "Overrides for one project, keyed by the --project label.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "severity": { "$ref": "#/$defs/severityMap" },
+              "unknown": { "$ref": "#/$defs/unknown" },
+              "scopes": { "$ref": "#/$defs/scopes" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

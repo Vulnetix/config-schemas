@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/VexSource.schema.json",
+  "title": "VexSource",
+  "description": "VEX documents read back as suppression rules. A not_affected statement (CycloneDX not_affected or false_positive) becomes a suppression with the document's justification, timestamp and author; fixed or resolved marks the finding remediated; affected, in_triage and exploitable are recorded as triage context; under_investigation is an annotation. Products are matched to findings by purl. A later statement wins. Suppressions a source creates are owned by it: they go when the statement leaves the document, and cannot be deleted by hand. Name exactly one of tea, s3, git, path or urls. Not stored yet: the VexSource and VexSourceSnapshot tables do not exist.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "VexSource" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "description": "openvex: OpenVEX 0.2.0. cyclonedx: CycloneDX VEX 1.4 to 1.7 (vulnerabilities[].analysis). auto: decided per document.",
+          "type": "string",
+          "enum": ["openvex", "cyclonedx", "auto"],
+          "default": "auto"
+        },
+        "scope": {
+          "description": "Which findings the statements may suppress. Left out, the whole tenant.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "org": { "description": "The whole tenant.", "const": true },
+            "repos": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "common.schema.json#/$defs/repository" }
+            },
+            "products": {
+              "description": "TEA products, by TEI or uuid.",
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/teaId" }
+            }
+          },
+          "oneOf": [
+            { "required": ["org"], "properties": { "repos": false, "products": false } },
+            { "anyOf": [{ "required": ["repos"] }, { "required": ["products"] }], "properties": { "org": false } }
+          ]
+        },
+        "trust": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "requireSignature": {
+              "description": "Refuse a document that is not signed.",
+              "type": "boolean",
+              "default": false
+            },
+            "allowedAuthors": {
+              "description": "Only statements by these authors (the VEX author field) are used.",
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "refresh": {
+          "description": "When the documents are fetched again: every interval, or when a webhook says they changed.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "interval": {
+              "description": "A whole number of minutes, hours or days: 30m, 6h, 1d.",
+              "type": "string",
+              "pattern": "^[1-9][0-9]*(m|h|d)$"
+            },
+            "webhook": { "const": true }
+          },
+          "oneOf": [{ "required": ["interval"] }, { "required": ["webhook"] }]
+        },
+        "onError": {
+          "description": "When a fetch fails: keep-last keeps the suppressions from the last good fetch; clear removes them.",
+          "type": "string",
+          "enum": ["keep-last", "clear"],
+          "default": "keep-last"
+        },
+        "tea": {
+          "description": "VEX artifacts from a TEA collection, on the Vulnetix TEA publisher or any TEA server. Name exactly one of product, productRelease or collection.",
+          "type": "object",
+          "required": ["server"],
+          "additionalProperties": false,
+          "properties": {
+            "product": { "$ref": "#/$defs/teaId" },
+            "productRelease": { "$ref": "#/$defs/teaId" },
+            "collection": { "$ref": "#/$defs/teaId" },
+            "server": {
+              "description": "The TEA API root, or the host whose /.well-known/tea discovery names it.",
+              "type": "string",
+              "format": "uri",
+              "pattern": "^https://"
+            }
+          },
+          "oneOf": [
+            { "required": ["product"] },
+            { "required": ["productRelease"] },
+            { "required": ["collection"] }
+          ]
+        },
+        "s3": {
+          "description": "Documents in an S3 bucket, read through a cross-account role whose external id is the tenant uuid (the cloud onboarding trust pattern), or from an S3-compatible endpoint (R2, MinIO). Name exactly one of prefix or key.",
+          "type": "object",
+          "required": ["bucket"],
+          "additionalProperties": false,
+          "properties": {
+            "bucket": { "type": "string", "pattern": "^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$" },
+            "prefix": { "description": "Every object under this prefix.", "type": "string" },
+            "key": { "description": "One object.", "type": "string", "minLength": 1 },
+            "region": { "type": "string", "pattern": "^[a-z]{2}(-[a-z]+)+-[0-9]$" },
+            "roleArn": {
+              "description": "The role to assume. Required unless endpoint is set.",
+              "type": "string",
+              "pattern": "^arn:aws[a-z-]*:iam::[0-9]{12}:role/.+$"
+            },
+            "externalId": {
+              "description": "The external id the role's trust policy requires. Defaults to the tenant uuid.",
+              "type": "string",
+              "minLength": 2
+            },
+            "endpoint": {
+              "description": "An S3-compatible endpoint instead of AWS.",
+              "type": "string",
+              "format": "uri",
+              "pattern": "^https://"
+            },
+            "credentialRef": {
+              "description": "With endpoint: the VaultEntry holding the access key for it.",
+              "$ref": "common.schema.json#/$defs/vaultRef"
+            }
+          },
+          "oneOf": [{ "required": ["prefix"] }, { "required": ["key"] }],
+          "if": { "required": ["endpoint"] },
+          "then": { "required": ["credentialRef"] },
+          "else": { "required": ["roleArn"], "properties": { "credentialRef": false } }
+        },
+        "git": {
+          "description": "Documents in a git repository over HTTPS (GitHub, GitHub Enterprise Server, GitLab, Gitea, Forgejo or any git server). A matching ForgeConnection is used when there is one.",
+          "type": "object",
+          "required": ["url", "paths"],
+          "additionalProperties": false,
+          "properties": {
+            "url": { "type": "string", "format": "uri", "pattern": "^https://" },
+            "ref": { "description": "A branch, tag or commit. Defaults to the default branch.", "type": "string", "minLength": 1 },
+            "paths": {
+              "description": "Globs, relative to the repository root, selecting the documents.",
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "credentialRef": { "$ref": "common.schema.json#/$defs/vaultRef" }
+          }
+        },
+        "path": {
+          "description": "A file or directory, absolute or relative to the config or repository root. Read by the CLI only: at scan time it applies locally, and config apply uploads a snapshot so server views match.",
+          "type": "object",
+          "required": ["path"],
+          "additionalProperties": false,
+          "properties": {
+            "path": { "type": "string", "minLength": 1 }
+          }
+        },
+        "urls": {
+          "description": "Plain HTTPS URLs, each fetched with ETag and If-Modified-Since.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              { "$ref": "#/$defs/httpsUrl" },
+              {
+                "type": "object",
+                "required": ["url"],
+                "additionalProperties": false,
+                "properties": {
+                  "url": { "$ref": "#/$defs/httpsUrl" },
+                  "sha256": {
+                    "description": "Refuse the document unless its SHA-256 matches.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "auth": {
+                    "description": "A request header carrying a credential from the vault.",
+                    "type": "object",
+                    "required": ["header", "credentialRef"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "header": { "type": "string", "pattern": "^[A-Za-z0-9-]+$" },
+                      "credentialRef": { "$ref": "common.schema.json#/$defs/vaultRef" }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "oneOf": [
+        { "required": ["tea"] },
+        { "required": ["s3"] },
+        { "required": ["git"] },
+        { "required": ["path"] },
+        { "required": ["urls"] }
+      ]
+    }
+  },
+  "$defs": {
+    "teaId": {
+      "description": "A TEA identifier (urn:tei:...) or a uuid.",
+      "type": "string",
+      "anyOf": [{ "pattern": "^urn:tei:[a-z0-9-]+:.+" }, { "format": "uuid" }]
+    },
+    "httpsUrl": { "type": "string", "format": "uri", "pattern": "^https://" }
+  }
+}

@@ -1,0 +1,5 @@
+# provider action is allow, deny or default
+apiVersion: vulnetix.com/v1
+kind: AiFirewallPolicy
+spec:
+  providers: [{slug: openai, action: block}]

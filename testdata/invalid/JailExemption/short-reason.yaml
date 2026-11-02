@@ -1,0 +1,5 @@
+# reason shorter than 8 characters once trimmed
+apiVersion: vulnetix.com/v1
+kind: JailExemption
+metadata: {name: x}
+spec: {repository: acme/api, reason: "  temp      "}

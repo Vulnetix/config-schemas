@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/Suppression.schema.json
+apiVersion: vulnetix.com/v1
+kind: Suppression
+metadata:
+  name: lodash-cve-2021-23337
+spec:
+  type: false_positive
+  reason: template() is never called with user input in this service.
+  justification: vulnerable_code_not_in_execute_path
+  scope:
+    category: sca
+    rule: CVE-2021-23337
+    purl: pkg:npm/lodash
+    repository: acme/payments-api
+  expires: 2027-06-30
+  when: '!finding.internetExposed'

@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/PackageList.schema.json
+apiVersion: vulnetix.com/v1
+kind: PackageList
+metadata:
+  name: first-party
+spec:
+  list: allow
+  entries:
+    - purl: pkg:npm/@acme/*
+      reason: Our own npm scope; releases must not wait out the cooldown.
+    - purl: pkg:golang/github.com/acme/*
+      reason: Our own Go modules.
+    - purl: pkg:maven/com.acme/*
+      reason: Our own Maven group.
+    - purl: pkg:pypi/requests@2.32.3
+      reason: CVSS on this release is a false positive for our use.
+    - purl: pkg:npm/left-pad
+      scope: bad_actor
+      reason: Maintainer attribution reviewed and judged a false positive.

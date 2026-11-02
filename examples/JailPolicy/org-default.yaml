@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/JailPolicy.schema.json
+apiVersion: vulnetix.com/v1
+kind: JailPolicy
+metadata:
+  name: org-default
+spec:
+  description: Nothing ships with overdue criticals, retired runtimes or leaked secrets.
+  enforcementMode: enforce
+  defaultStalenessDays: 7
+  onStale: fail
+  rules:
+    - kind: VULN
+      label: No critical past its SLA
+      severityFloor: critical
+      aggregate: COUNT_PAST_SLA
+      operator: GT
+      thresholdLow: 0
+    - kind: VULN
+      label: Reachable KEV findings
+      flags: [kev, reachable]
+      aggregate: COUNT
+      operator: GT
+      thresholdLow: 0
+      when: finding.epss >= 0.1
+    - kind: EOL
+      label: Retired runtimes
+      aggregate: MAX_AGE_DAYS
+      operator: GT
+      thresholdLow: 30
+      onBreach: WARN
+    - kind: HYGIENE
+      label: No live secrets
+      category: SECRETS
+      aggregate: COUNT
+      operator: GT
+      thresholdLow: 0
+      stalenessDays: 1

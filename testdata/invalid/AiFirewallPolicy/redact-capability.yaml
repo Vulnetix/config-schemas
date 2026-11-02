@@ -1,0 +1,5 @@
+# redact rewrites content, so a capability rule cannot use it
+apiVersion: vulnetix.com/v1
+kind: AiFirewallPolicy
+spec:
+  guardrails: [{name: a, ruleType: tool_deny, action: redact, pattern: Bash}]

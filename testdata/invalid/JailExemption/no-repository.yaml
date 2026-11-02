@@ -1,0 +1,5 @@
+# repository is required
+apiVersion: vulnetix.com/v1
+kind: JailExemption
+metadata: {name: x}
+spec: {reason: Waiting on the vendor fix}

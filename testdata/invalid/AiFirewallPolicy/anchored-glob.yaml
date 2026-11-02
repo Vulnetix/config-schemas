@@ -1,0 +1,5 @@
+# capability patterns are globs: anchors are implied, so ^ is refused
+apiVersion: vulnetix.com/v1
+kind: AiFirewallPolicy
+spec:
+  guardrails: [{name: a, ruleType: tool_deny, action: block, pattern: "^Bash$"}]

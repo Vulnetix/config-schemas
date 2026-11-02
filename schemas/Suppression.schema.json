@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/Suppression.schema.json",
+  "title": "Suppression",
+  "description": "A suppression rule: findings that match its scope are suppressed, now and in every later scan, until it expires. Every apply writes the suppression audit. Rules created from a VexSource are owned by that source and cannot be declared here.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "Suppression" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["type", "scope"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "The decision: false_positive (the finding is wrong), wont_fix, risk_accepted, mitigated (a control outside the code covers it) or deferred.",
+          "type": "string",
+          "enum": ["false_positive", "wont_fix", "risk_accepted", "mitigated", "deferred"]
+        },
+        "reason": {
+          "description": "Why, for the people who review suppressions.",
+          "type": "string"
+        },
+        "justification": {
+          "description": "Why the product is not affected, in the OpenVEX vocabulary, for VEX documents minted from this rule. Not stored yet: the Suppression table has no justification column.",
+          "$ref": "common.schema.json#/$defs/vexJustification"
+        },
+        "scope": {
+          "description": "What the rule matches. It must name at least one of rule, target or path; a rule that names none would match everything. Every field given must match.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "category": {
+              "description": "The finding category. crypto and ai are inventory components (a CBOM algorithm, certificate, key or library; an AIBOM agent, SDK, model or service), which match on target.",
+              "type": "string",
+              "enum": ["sast", "secrets", "iac", "container", "sca", "license", "malware", "crypto", "ai"]
+            },
+            "rule": {
+              "description": "The vulnerability or rule id: a CVE or other advisory id, or a SAST, IaC or secrets rule id.",
+              "type": "string",
+              "minLength": 1
+            },
+            "target": {
+              "description": "An inventory component's identity: an algorithm SPDX id, a certificate subject, a purl or a model name.",
+              "type": "string",
+              "minLength": 1
+            },
+            "purl": {
+              "description": "Only findings in this package. Without a version, every version.",
+              "$ref": "common.schema.json#/$defs/purl"
+            },
+            "path": { "description": "A file path, relative to the repository root.", "type": "string", "minLength": 1 },
+            "line": { "description": "A line in path.", "type": "integer", "minimum": 1 },
+            "lineRange": { "description": "A range of lines in path.", "type": "string", "minLength": 1 },
+            "repository": { "$ref": "common.schema.json#/$defs/repository" },
+            "branch": { "type": "string", "minLength": 1 }
+          },
+          "anyOf": [
+            { "required": ["rule"] },
+            { "required": ["target"] },
+            { "required": ["path"] }
+          ]
+        },
+        "expires": {
+          "description": "When the rule stops applying. Left out, it never expires; reports flag it once it goes unreviewed for the RemediationPolicy suppressionReviewMaxAgeDays.",
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "when": {
+          "description": "An extra condition a finding must meet, over the finding variables. Not stored yet: the Suppression table has no expr column until the CEL work adds it.",
+          "$ref": "common.schema.json#/$defs/celExpression"
+        }
+      }
+    }
+  }
+}

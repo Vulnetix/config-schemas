@@ -1,0 +1,5 @@
+# ollama servers speak openai-chat only
+apiVersion: vulnetix.com/v1
+kind: AiProvider
+metadata: {name: acme-llm}
+spec: {serverKind: ollama, protocol: openai-responses, baseUrl: "https://llm.example.com", auth: bearer}

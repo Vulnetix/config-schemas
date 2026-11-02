@@ -1,0 +1,5 @@
+# category outside the enum
+apiVersion: vulnetix.com/v1
+kind: Suppression
+metadata: {name: x}
+spec: {type: wont_fix, scope: {category: dast, rule: X-1}}

@@ -1,0 +1,5 @@
+# delimiter_integrity takes no pattern
+apiVersion: vulnetix.com/v1
+kind: AiFirewallPolicy
+spec:
+  guardrails: [{name: a, ruleType: delimiter_integrity, action: block, pattern: "<sealed>"}]

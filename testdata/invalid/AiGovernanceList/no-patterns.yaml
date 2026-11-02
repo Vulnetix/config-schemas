@@ -1,0 +1,5 @@
+# a list needs at least one pattern
+apiVersion: vulnetix.com/v1
+kind: AiGovernanceList
+metadata: {name: x}
+spec: {family: tool, list: deny, action: block, patterns: []}

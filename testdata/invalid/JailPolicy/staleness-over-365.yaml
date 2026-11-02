@@ -1,0 +1,5 @@
+# defaultStalenessDays is capped at 365
+apiVersion: vulnetix.com/v1
+kind: JailPolicy
+metadata: {name: x}
+spec: {defaultStalenessDays: 400}

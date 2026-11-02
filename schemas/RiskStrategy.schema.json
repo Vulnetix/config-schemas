@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/RiskStrategy.schema.json",
+  "title": "RiskStrategy",
+  "description": "A risk prioritisation strategy: an ordered list of rules that puts every open finding in a priority tier. A finding's tier is the position of the first rule it matches, 0 being the highest priority. A tenant may keep several strategies; one is active, and a tenant with none active uses the system default.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "RiskStrategy" },
+    "metadata": {
+      "description": "metadata.name is stored as the strategy's name.",
+      "$ref": "common.schema.json#/$defs/metadata"
+    },
+    "spec": {
+      "type": "object",
+      "required": ["rules"],
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string" },
+        "active": {
+          "description": "Make this the tenant's active strategy. Activating one deactivates the others, so at most one document in a set should say true.",
+          "type": "boolean",
+          "default": false
+        },
+        "rules": {
+          "description": "The rules in priority order: the first is tier 0. Exactly one REMAINING rule is required, and it belongs last, where it catches every finding no earlier rule matched.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/rule" },
+          "contains": { "properties": { "metric": { "const": "REMAINING" } }, "required": ["metric"] },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      }
+    }
+  },
+  "$defs": {
+    "booleanMetric": {
+      "enum": [
+        "MALWARE", "KEV_CISA", "KEV_ENISA", "KEV_VULNETIX", "KEV_VULNCHECK",
+        "EXPLOIT_WEAPONIZED", "EXPLOIT_ACTIVE", "EXPLOIT_POC",
+        "INTERNET_EXPOSED_PACKAGE", "INTERNET_EXPOSED",
+        "REACHABLE", "UNREACHABLE", "TRACEABLE", "TRACEABLE_GRAPH", "ATTACK_PATH"
+      ]
+    },
+    "scoreMetric": {
+      "enum": ["CVSS", "CWSS", "CUSTOM_CVSS", "CUSTOM_CWSS", "CESS", "EPSS"]
+    },
+    "rule": {
+      "type": "object",
+      "required": ["metric"],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "description": "The tier's name in the console. Defaults to the metric and operator.",
+          "type": "string"
+        },
+        "enabled": { "type": "boolean", "default": true },
+        "metric": {
+          "description": "What the rule tests. Present-or-not signals: MALWARE; KEV_CISA, KEV_ENISA, KEV_VULNETIX, KEV_VULNCHECK (in that known-exploited catalogue); EXPLOIT_WEAPONIZED, EXPLOIT_ACTIVE, EXPLOIT_POC; INTERNET_EXPOSED_PACKAGE (the package was seen on a publicly reachable cloud resource of the repository); INTERNET_EXPOSED (the repository has a publicly reachable cloud resource); REACHABLE and UNREACHABLE (SCA reachability, assessed); TRACEABLE (resolves to a file and lines); TRACEABLE_GRAPH (traceable, and the file is called in the repository graph); ATTACK_PATH (matches attackPathId). Scores: CVSS and CWSS (the effective score, an analyst override preferred), CUSTOM_CVSS and CUSTOM_CWSS (the override only), CESS (0 to 10), EPSS (0 to 1). REMAINING matches everything. CEL matches when the when expression is true.",
+          "anyOf": [
+            { "$ref": "#/$defs/booleanMetric" },
+            { "$ref": "#/$defs/scoreMetric" },
+            { "enum": ["REMAINING", "CEL"] }
+          ]
+        },
+        "operator": {
+          "description": "IS_TRUE for a present-or-not metric. GTE, GT, LTE and LT compare a score with thresholdLow; BETWEEN tests thresholdLow <= score <= thresholdHigh. ALWAYS matches everything, for REMAINING.",
+          "type": "string",
+          "enum": ["IS_TRUE", "GTE", "GT", "LTE", "LT", "BETWEEN", "ALWAYS"]
+        },
+        "thresholdLow": { "type": "number" },
+        "thresholdHigh": { "type": "number" },
+        "attackPathId": {
+          "description": "ATTACK_PATH only, and required there: the attack path the rule matches.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "when": {
+          "description": "The condition of a CEL rule, over the finding variables. Not stored yet: the CEL metric and the nullable expr column on RiskPrioritizationRule do not exist until the CEL work adds them.",
+          "$ref": "common.schema.json#/$defs/celExpression"
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "metric": { "$ref": "#/$defs/booleanMetric" } } },
+          "then": { "required": ["operator"], "properties": { "operator": { "const": "IS_TRUE" } } }
+        },
+        {
+          "if": { "properties": { "metric": { "$ref": "#/$defs/scoreMetric" } } },
+          "then": {
+            "required": ["operator"],
+            "properties": { "operator": { "enum": ["GTE", "GT", "LTE", "LT", "BETWEEN", "ALWAYS"] } }
+          }
+        },
+        {
+          "if": { "properties": { "metric": { "const": "REMAINING" } } },
+          "then": { "required": ["operator"], "properties": { "operator": { "const": "ALWAYS" } } }
+        },
+        {
+          "if": { "properties": { "metric": { "const": "CEL" } } },
+          "then": { "required": ["when"], "properties": { "operator": false } },
+          "else": { "properties": { "when": false } }
+        },
+        {
+          "if": { "properties": { "metric": { "const": "ATTACK_PATH" } } },
+          "then": { "required": ["attackPathId"] },
+          "else": { "properties": { "attackPathId": false } }
+        },
+        {
+          "if": { "properties": { "operator": { "enum": ["GTE", "GT", "LTE", "LT", "BETWEEN"] } }, "required": ["operator"] },
+          "then": { "required": ["thresholdLow"] }
+        },
+        {
+          "if": { "properties": { "operator": { "const": "BETWEEN" } }, "required": ["operator"] },
+          "then": { "required": ["thresholdHigh"] }
+        }
+      ]
+    }
+  }
+}

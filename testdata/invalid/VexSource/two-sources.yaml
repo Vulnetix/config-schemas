@@ -1,0 +1,7 @@
+# exactly one of tea, s3, git, path or urls
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata: {name: x}
+spec:
+  path: {path: vex.json}
+  urls: ["https://example.com/vex.json"]

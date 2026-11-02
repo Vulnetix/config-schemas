@@ -1,0 +1,6 @@
+# attackPathId is only valid on an ATTACK_PATH rule
+apiVersion: vulnetix.com/v1
+kind: RiskStrategy
+metadata: {name: x}
+spec:
+  rules: [{metric: KEV_CISA, operator: IS_TRUE, attackPathId: 0b9d5f9e-3c51-4a0f-9d43-6f1f5f0c2a11}, {metric: REMAINING, operator: ALWAYS}]

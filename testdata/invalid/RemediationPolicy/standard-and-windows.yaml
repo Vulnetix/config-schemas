@@ -1,0 +1,7 @@
+# adopt a standard or declare windows, not both
+apiVersion: vulnetix.com/v1
+kind: RemediationPolicy
+metadata: {name: default}
+spec:
+  standard: fedramp
+  remediationDays: {critical: 7, high: 30, medium: 90, low: 180}

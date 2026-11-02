@@ -1,0 +1,5 @@
+# delimiter_integrity acts by block or flag only
+apiVersion: vulnetix.com/v1
+kind: AiFirewallPolicy
+spec:
+  guardrails: [{name: a, ruleType: delimiter_integrity, action: redact}]

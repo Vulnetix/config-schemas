@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/AiProvider.schema.json
+apiVersion: vulnetix.com/v1
+kind: AiProvider
+metadata:
+  name: acme-vllm
+spec:
+  displayName: ACME vLLM cluster
+  serverKind: openai-compatible
+  protocol: openai-responses
+  baseUrl: https://llm.acme.example
+  auth: bearer
+  apiKey:
+    env: ACME_VLLM_KEY
+  models:
+    - id: qwen3-coder-30b
+      name: Qwen3 Coder 30B
+      contextWindow: 262144
+      maxTokens: 65536

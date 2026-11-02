@@ -1,0 +1,5 @@
+# justification outside the OpenVEX vocabulary
+apiVersion: vulnetix.com/v1
+kind: Suppression
+metadata: {name: x}
+spec: {type: false_positive, justification: code_not_reachable, scope: {rule: CVE-2024-0001}}

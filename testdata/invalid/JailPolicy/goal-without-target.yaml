@@ -1,0 +1,6 @@
+# a GOAL rule needs a targetPattern
+apiVersion: vulnetix.com/v1
+kind: JailPolicy
+metadata: {name: x}
+spec:
+  rules: [{kind: GOAL, label: a, aggregate: COUNT, operator: GT, thresholdLow: 0}]

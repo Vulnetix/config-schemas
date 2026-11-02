@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/JailPolicy.schema.json
+apiVersion: vulnetix.com/v1
+kind: JailPolicy
+metadata:
+  name: payments-api
+spec:
+  repository: acme/payments-api
+  enforcementMode: warn
+  rules:
+    - kind: GOAL
+      label: Off moment.js
+      targetPattern: pkg:npm/moment@*
+      aggregate: COUNT
+      operator: GT
+      thresholdLow: 0
+      deadline: 2027-03-31
+      ratchet: true
+    - kind: VULN
+      label: High findings stay between 0 and 5
+      severityFloor: high
+      aggregate: COUNT
+      operator: OUTSIDE
+      thresholdLow: 0
+      thresholdHigh: 5

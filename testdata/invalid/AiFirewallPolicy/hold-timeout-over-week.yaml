@@ -1,0 +1,5 @@
+# holdTimeoutMinutes is capped at 7 days (10080)
+apiVersion: vulnetix.com/v1
+kind: AiFirewallPolicy
+spec:
+  holdPolicy: {holdUnknown: true, holdTimeoutMinutes: 20000}

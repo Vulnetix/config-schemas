@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/AiFirewallPolicy.schema.json",
+  "title": "AiFirewallPolicy",
+  "description": "The tenant's AI Firewall policy: which providers and models its agents may use, the guardrails the gateway applies to every request, the hold for review setting, and capability allow and deny lists. One per tenant. This is the document vulnetix ai-firewall apply reads from .vulnetix/ai-firewall.yaml, and every file that command accepts is valid here; metadata, and metadata.name, may be left out.",
+  "type": "object",
+  "required": ["apiVersion", "kind"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "AiFirewallPolicy" },
+    "metadata": {
+      "description": "metadata.org, when set, makes apply refuse to run against any other tenant.",
+      "$ref": "common.schema.json#/$defs/legacySingletonMetadata"
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "prune": {
+          "description": "Delete guardrails and model entries on the server that this document does not mention. Off by default, so an apply never removes rules someone made in the console. A provider entry is never pruned: clearing a deny opens access.",
+          "type": "boolean",
+          "default": false
+        },
+        "settings": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "logsEnabled": {
+              "description": "Record per-inference metadata (model, decision, tokens, latency, never the prompt or completion). Paid plans only.",
+              "type": "boolean"
+            }
+          }
+        },
+        "baseline": {
+          "description": "The server's recommended guardrails. Left out, they are added to the desired set; set enabled to false to decline them.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "ref": { "description": "A named baseline set to pin.", "type": "string" },
+            "exclude": {
+              "description": "Baseline guardrail ids to leave out.",
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "providers": {
+          "description": "Provider allow and deny entries, and where each provider's API key comes from. A provider with no entry is usable.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["slug", "action"],
+            "additionalProperties": false,
+            "properties": {
+              "slug": { "description": "A built-in provider slug, or the metadata.name of an AiProvider.", "type": "string", "minLength": 1 },
+              "action": {
+                "description": "allow pins the provider as allowed, deny blocks it, default removes any pin.",
+                "type": "string",
+                "enum": ["allow", "deny", "default"]
+              },
+              "key": {
+                "description": "Where the client reads the provider API key it uploads. Never the key itself. fromEnv wins when both are set.",
+                "type": "object",
+                "minProperties": 1,
+                "additionalProperties": false,
+                "properties": {
+                  "fromEnv": { "type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" },
+                  "fromFile": { "type": "string", "minLength": 1 }
+                }
+              }
+            }
+          }
+        },
+        "models": {
+          "description": "Model allow and deny entries. Once a provider has any allowed model, its other models are denied.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["slug", "action"],
+            "additionalProperties": false,
+            "properties": {
+              "slug": { "description": "The model's id at its provider.", "type": "string", "minLength": 1 },
+              "provider": { "description": "The provider slug the entry applies to.", "type": "string", "minLength": 1 },
+              "anyProvider": { "description": "Apply the entry to every provider listing this model.", "type": "boolean" },
+              "action": { "type": "string", "enum": ["allow", "deny"] }
+            },
+            "oneOf": [
+              { "required": ["provider"], "properties": { "anyProvider": { "const": false } } },
+              { "required": ["anyProvider"], "properties": { "anyProvider": { "const": true }, "provider": false } }
+            ]
+          }
+        },
+        "guardrails": {
+          "description": "Rules the gateway applies to each request, reconciled by name, so names must be unique. Content rules match what a request says; capability rules match the tools, MCP servers and skills it offers and the client sending it.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/guardrail" }
+        },
+        "capabilities": {
+          "description": "Capability allow and deny lists, keyed by a name for the list. Each pattern becomes one guardrail, the same rows the guardrails list writes; this is the shorter way to write a list of them. An AiGovernanceList is the same thing as its own object.",
+          "type": "object",
+          "propertyNames": { "$ref": "common.schema.json#/$defs/name" },
+          "additionalProperties": { "$ref": "common.schema.json#/$defs/aiCapabilityList" }
+        },
+        "holdPolicy": {
+          "description": "Hold for review: what the gateway does with a tool, MCP server, skill or client it has not seen before. An approved capability is recorded as reviewed rather than written as an allow rule, which would put its whole family into allowlist mode.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "holdUnknown": {
+              "description": "Hold a request that carries an unseen capability until someone approves or denies it.",
+              "type": "boolean",
+              "default": false
+            },
+            "holdTimeoutMinutes": {
+              "description": "How long a hold waits for a decision, up to 7 days. 0 waits indefinitely.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10080,
+              "default": 0
+            },
+            "holdTimeoutAction": {
+              "description": "What happens when the wait runs out: keep waiting, deny the capability, or allow it.",
+              "type": "string",
+              "enum": ["wait", "deny", "allow"],
+              "default": "wait"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "guardrail": {
+      "type": "object",
+      "required": ["name", "ruleType", "action"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "baselineId": { "description": "The baseline guardrail this one came from.", "type": "string" },
+        "ruleType": {
+          "description": "Content rules: blocked_pattern (an RE2 regex over the request text), max_messages (a cap on messages per request), pii_redact (email, card, SSN and phone detectors, or your own regex), delimiter_integrity (sealed harness blocks left intact). Capability rules: <family>_allow and <family>_deny for tool, mcp, skill and client.",
+          "type": "string",
+          "enum": [
+            "blocked_pattern", "max_messages", "pii_redact", "delimiter_integrity",
+            "tool_allow", "tool_deny", "mcp_allow", "mcp_deny",
+            "skill_allow", "skill_deny", "client_allow", "client_deny"
+          ]
+        },
+        "action": {
+          "description": "block refuses the request. redact rewrites the matched content (content rules only). flag lets it through and records the match. strip removes the matched tool or MCP server (tool_* and mcp_* rules only).",
+          "type": "string",
+          "enum": ["block", "redact", "flag", "strip"]
+        },
+        "pattern": {
+          "description": "What the rule matches. blocked_pattern: an RE2 regex, required (RE2 has no lookahead or lookbehind). pii_redact: an RE2 regex, or empty for the built-in detectors. max_messages: a positive integer, required. delimiter_integrity: none. Capability rules: a name or * glob, required, anchors implied.",
+          "type": ["string", "integer"]
+        },
+        "priority": {
+          "description": "Evaluation order, lowest first.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "enabled": { "type": "boolean", "default": true }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "ruleType": { "const": "max_messages" } } },
+          "then": {
+            "required": ["pattern"],
+            "properties": {
+              "pattern": {
+                "anyOf": [
+                  { "type": "integer", "minimum": 1 },
+                  { "type": "string", "pattern": "^\\s*\\+?0*[1-9][0-9]*\\s*$" }
+                ]
+              }
+            }
+          },
+          "else": { "properties": { "pattern": { "type": "string" } } }
+        },
+        {
+          "if": { "properties": { "ruleType": { "const": "blocked_pattern" } } },
+          "then": { "required": ["pattern"], "properties": { "pattern": { "pattern": "\\S" } } }
+        },
+        {
+          "if": { "properties": { "ruleType": { "const": "delimiter_integrity" } } },
+          "then": {
+            "properties": {
+              "action": { "enum": ["block", "flag"] },
+              "pattern": { "pattern": "^\\s*$" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "ruleType": { "pattern": "_(allow|deny)$" } } },
+          "then": {
+            "required": ["pattern"],
+            "properties": {
+              "action": { "not": { "const": "redact" } },
+              "pattern": { "$ref": "#/$defs/capabilityPattern" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "action": { "const": "strip" } }, "required": ["action"] },
+          "then": { "properties": { "ruleType": { "enum": ["tool_allow", "tool_deny", "mcp_allow", "mcp_deny"] } } }
+        }
+      ]
+    },
+    "capabilityPattern": {
+      "description": "A capability glob. The CLI trims surrounding space before checking it.",
+      "type": "string",
+      "pattern": "^\\s*[^\\^\\s](.*[^$\\s])?\\s*$"
+    }
+  }
+}

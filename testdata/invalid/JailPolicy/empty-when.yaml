@@ -1,0 +1,6 @@
+# an empty when is not a CEL expression
+apiVersion: vulnetix.com/v1
+kind: JailPolicy
+metadata: {name: x}
+spec:
+  rules: [{kind: VULN, label: a, aggregate: COUNT, operator: GT, thresholdLow: 0, when: ""}]

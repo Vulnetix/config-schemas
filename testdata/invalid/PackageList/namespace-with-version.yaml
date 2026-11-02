@@ -1,0 +1,7 @@
+# a namespace entry covers every version; it has none
+apiVersion: vulnetix.com/v1
+kind: PackageList
+metadata: {name: x}
+spec:
+  list: allow
+  entries: [{purl: "pkg:npm/@acme/*@1.0.0"}]

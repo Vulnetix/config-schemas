@@ -1,0 +1,5 @@
+# the slug is a Belai compiled-in provider name
+apiVersion: vulnetix.com/v1
+kind: AiProvider
+metadata: {name: openrouter}
+spec: {protocol: openai-chat, baseUrl: "https://llm.example.com", auth: bearer}

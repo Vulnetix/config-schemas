@@ -1,0 +1,6 @@
+# flags outside the enum
+apiVersion: vulnetix.com/v1
+kind: JailPolicy
+metadata: {name: x}
+spec:
+  rules: [{kind: VULN, label: a, aggregate: COUNT, operator: GT, thresholdLow: 0, flags: [exploited]}]

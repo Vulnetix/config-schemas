@@ -1,0 +1,4 @@
+# severity outside none, low, medium, high, critical
+apiVersion: vulnetix.com/v1
+kind: LicensePolicy
+severity: {proprietary: blocker}

@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/Suppression.schema.json
+apiVersion: vulnetix.com/v1
+kind: Suppression
+metadata:
+  name: test-fixtures-secrets
+spec:
+  type: risk_accepted
+  reason: Fixture keys in test data are fake.
+  scope:
+    category: secrets
+    path: testdata/fixtures/keys.pem
+    repository: acme/payments-api
+    branch: main

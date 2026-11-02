@@ -1,0 +1,10 @@
+# remediation windows are 1 to 3650 days
+apiVersion: vulnetix.com/v1
+kind: RemediationPolicy
+metadata: {name: default}
+spec:
+  remediationDays: {critical: 0, high: 30, medium: 90, low: 180}
+  triageThresholdDays: 2
+  exposureWindowDays: 14
+  threatWindowDays: 30
+  severityThresholds: {high: 8.9, medium: 6.9, low: 4}

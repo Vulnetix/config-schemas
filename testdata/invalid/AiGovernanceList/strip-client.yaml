@@ -1,0 +1,5 @@
+# strip cannot remove a client, which is a header
+apiVersion: vulnetix.com/v1
+kind: AiGovernanceList
+metadata: {name: x}
+spec: {family: client, list: deny, action: strip, patterns: [curl]}

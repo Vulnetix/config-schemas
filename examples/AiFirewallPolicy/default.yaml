@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/AiFirewallPolicy.schema.json
+apiVersion: vulnetix.com/v1
+kind: AiFirewallPolicy
+metadata:
+  name: default
+spec:
+  baseline:
+    enabled: true
+  guardrails:
+    - name: redact-pii
+      ruleType: pii_redact
+      action: redact
+    - name: sealed-blocks
+      ruleType: delimiter_integrity
+      action: block
+    - name: no-shell
+      ruleType: tool_deny
+      action: strip
+      pattern: Bash
+  capabilities:
+    approved-mcp:
+      family: mcp
+      list: allow
+      action: block
+      patterns: [github, "linear*"]
+    banned-clients:
+      family: client
+      list: deny
+      action: block
+      priority: 10
+      patterns: [unknown]
+  holdPolicy:
+    holdUnknown: true
+    holdTimeoutMinutes: 60
+    holdTimeoutAction: deny

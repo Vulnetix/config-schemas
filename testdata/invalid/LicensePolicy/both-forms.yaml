@@ -1,0 +1,6 @@
+# the config form puts the fields under spec, not beside it
+apiVersion: vulnetix.com/v1
+kind: LicensePolicy
+metadata: {name: default}
+unknown: warn
+spec: {unknown: fail}

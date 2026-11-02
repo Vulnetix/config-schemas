@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/PackageFirewallPolicy.schema.json",
+  "title": "PackageFirewallPolicy",
+  "description": "The tenant's package firewall policy: what the registry proxy refuses to serve, the posture it enforces in, per-ecosystem posture overrides, and the upstream mirrors it fetches from. One per tenant. The allow and deny lists are PackageList objects. A field left out keeps its current value.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "PackageFirewallPolicy" },
+    "metadata": { "$ref": "common.schema.json#/$defs/singletonMetadata" },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "description": "The tenant's default posture. enforce blocks what the policy says to block. warn only observes: every block becomes an advisory logged as WARN, except a deny-list hit, which always blocks. allowlist_only refuses any package without an allow entry.",
+          "$ref": "#/$defs/mode",
+          "default": "enforce"
+        },
+        "thresholds": {
+          "description": "Block a version with a vulnerability scoring at or above a threshold. 0 turns that threshold off.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cvss": { "description": "CVSS base score, 0 to 10.", "type": "number", "minimum": 0, "maximum": 10, "default": 0 },
+            "epss": { "description": "EPSS probability, 0 to 1.", "type": "number", "minimum": 0, "maximum": 1, "default": 0 },
+            "cess": { "description": "Coalition ESS score, 0 to 10.", "type": "number", "minimum": 0, "maximum": 10, "default": 0 }
+          }
+        },
+        "block": {
+          "description": "Signals that block a version on their own. All default to false.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "malware": { "description": "Known malware.", "type": "boolean", "default": false },
+            "eol": { "description": "The version's product is past end of life.", "type": "boolean", "default": false },
+            "kev": { "description": "A vulnerability in a known-exploited catalogue.", "type": "boolean", "default": false },
+            "weaponized": { "description": "A vulnerability with a weaponised exploit.", "type": "boolean", "default": false },
+            "active": { "description": "A vulnerability exploited in the wild.", "type": "boolean", "default": false },
+            "poc": { "description": "A vulnerability with a public proof of concept.", "type": "boolean", "default": false },
+            "badActors": { "description": "A maintainer or signing key attributed to a known threat actor.", "type": "boolean", "default": false }
+          }
+        },
+        "cooldownDays": {
+          "description": "Block a version published fewer than this many days ago. 0 turns it off.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "versionLag": {
+          "description": "Block a version more than this many releases behind its package's newest release (rank 0 is the newest, so 2 serves the three newest). 0 turns it off. Enforced only for ecosystems whose proxy can list every version, and not in warn mode. Note that this is the opposite of the QualityGate versionLag check.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "review": {
+          "description": "When the console flags a curation decision for review. Read by the console only, never by the proxy.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "staleDecisionDays": {
+              "description": "Days since a list entry was decided or last re-affirmed.",
+              "type": "integer",
+              "minimum": 1,
+              "default": 90
+            },
+            "staleUsageDays": {
+              "description": "Days since the proxy last saw traffic for a list entry.",
+              "type": "integer",
+              "minimum": 1,
+              "default": 90
+            }
+          }
+        },
+        "ecosystems": {
+          "description": "Per-ecosystem posture, keyed by ecosystem, overriding mode. An ecosystem left out inherits mode.",
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/ecosystem" },
+          "additionalProperties": {
+            "type": "object",
+            "required": ["mode"],
+            "additionalProperties": false,
+            "properties": {
+              "mode": { "$ref": "#/$defs/mode" }
+            }
+          }
+        },
+        "mirrors": {
+          "description": "The upstream registries the proxy fetches from. When set, this is the whole list: mirrors not named are removed.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["ecosystem", "url"],
+            "additionalProperties": false,
+            "properties": {
+              "ecosystem": { "$ref": "#/$defs/ecosystem" },
+              "url": {
+                "description": "The registry's base URL.",
+                "type": "string",
+                "format": "uri"
+              },
+              "priority": {
+                "description": "Order within the ecosystem, lowest tried first.",
+                "type": "integer",
+                "default": 0
+              },
+              "active": { "type": "boolean", "default": true }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "mode": {
+      "type": "string",
+      "enum": ["enforce", "warn", "allowlist_only"]
+    },
+    "ecosystem": {
+      "description": "A package ecosystem the firewall proxies, by its firewall id.",
+      "type": "string",
+      "enum": [
+        "go", "go-dev", "npm", "pypi", "cargo", "gem", "hex", "pub", "maven", "nuget",
+        "composer", "conan", "conda", "cran", "julia", "oci", "debian", "rpm", "alpine",
+        "helm", "chef", "terraform", "aur", "arch", "homebrew", "homebrew-bottle"
+      ]
+    }
+  }
+}

@@ -1,0 +1,5 @@
+# standard outside the enum
+apiVersion: vulnetix.com/v1
+kind: RemediationPolicy
+metadata: {name: default}
+spec: {standard: pci-dss}

@@ -1,0 +1,6 @@
+# an AWS bucket needs roleArn
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata: {name: x}
+spec:
+  s3: {bucket: acme-vex, key: vex.json}

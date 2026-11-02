@@ -1,0 +1,5 @@
+# the slug is a reserved path word
+apiVersion: vulnetix.com/v1
+kind: AiProvider
+metadata: {name: models}
+spec: {protocol: openai-chat, baseUrl: "https://llm.example.com", auth: bearer}

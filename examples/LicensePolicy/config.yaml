@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/LicensePolicy.schema.json
+apiVersion: vulnetix.com/v1
+kind: LicensePolicy
+metadata:
+  name: default
+spec:
+  severity:
+    strong-copyleft: critical
+    proprietary: high
+  unknown: fail
+  scopes:
+    test: ignore

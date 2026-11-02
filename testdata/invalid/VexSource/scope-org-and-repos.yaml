@@ -1,0 +1,7 @@
+# scope is the whole org or a list of repos and products, not both
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata: {name: x}
+spec:
+  scope: {org: true, repos: [acme/api]}
+  path: {path: vex.json}

@@ -1,0 +1,6 @@
+# GTE needs thresholdLow
+apiVersion: vulnetix.com/v1
+kind: RiskStrategy
+metadata: {name: x}
+spec:
+  rules: [{metric: CVSS, operator: GTE}, {metric: REMAINING, operator: ALWAYS}]

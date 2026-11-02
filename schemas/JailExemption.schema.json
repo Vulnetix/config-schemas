@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/JailExemption.schema.json",
+  "title": "JailExemption",
+  "description": "A time-boxed waiver of the jail policy that applies to one repository. It applies after aggregation: the verdict still reports the observed value, the threshold, that the rule would have breached, and which exemption suppressed it. Removing the document deactivates the exemption; the record of what was waived, by whom and why is kept.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "JailExemption" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["repository", "reason"],
+      "additionalProperties": false,
+      "properties": {
+        "repository": {
+          "description": "The repository waived. The exemption attaches to the jail policy in force for it: its per-repository policy, or the tenant default. Apply fails when no policy applies.",
+          "$ref": "common.schema.json#/$defs/repository"
+        },
+        "rule": {
+          "description": "The label of the rule waived, in the policy in force for the repository. Leave it out to waive every rule in that policy.",
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "description": "Why. At least 8 characters once trimmed: an exemption with no explanation cannot be told apart from the policy having been weakened.",
+          "type": "string",
+          "minLength": 8,
+          "pattern": "\\S[\\s\\S]{6,}\\S"
+        },
+        "expires": {
+          "description": "When the exemption lapses. Left out, it lapses 30 days after it is applied. The server caps it at 365 days after apply: a permanent waiver is a policy change and belongs in the JailPolicy.",
+          "$ref": "common.schema.json#/$defs/timestamp"
+        }
+      }
+    }
+  }
+}

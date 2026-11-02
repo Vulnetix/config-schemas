@@ -1,0 +1,6 @@
+# COUNT_PAST_SLA applies to VULN rules only
+apiVersion: vulnetix.com/v1
+kind: JailPolicy
+metadata: {name: x}
+spec:
+  rules: [{kind: EOL, label: a, aggregate: COUNT_PAST_SLA, operator: GT, thresholdLow: 0}]

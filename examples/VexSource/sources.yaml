@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/VexSource.schema.json
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata:
+  name: vendor-tea
+spec:
+  format: auto
+  scope:
+    products: ["urn:tei:uuid:products.acme.example:7f3c1a52-1b8e-4d0e-9c3f-2a6b8e5d4c10"]
+  trust:
+    requireSignature: true
+    allowedAuthors: [security@acme.example]
+  refresh: { interval: 6h }
+  onError: keep-last
+  tea:
+    product: 7f3c1a52-1b8e-4d0e-9c3f-2a6b8e5d4c10
+    server: https://tea.acme.example
+---
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/VexSource.schema.json
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata:
+  name: vex-bucket
+spec:
+  format: openvex
+  refresh: { webhook: true }
+  s3:
+    bucket: acme-vex-statements
+    prefix: openvex/
+    region: us-east-1
+    roleArn: arn:aws:iam::123456789012:role/VulnetixVexRead
+---
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata:
+  name: platform-repo
+spec:
+  scope:
+    repos: [acme/payments-api, acme/ledger]
+  git:
+    url: https://github.com/acme/security-advisories.git
+    ref: main
+    paths: ["vex/**/*.openvex.json"]
+    credentialRef: github-advisories-token
+---
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata:
+  name: local-vex
+spec:
+  format: cyclonedx
+  path:
+    path: .vulnetix/vex.cdx.json
+---
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata:
+  name: upstream-urls
+spec:
+  refresh: { interval: 1d }
+  onError: clear
+  urls:
+    - https://downloads.example.org/vex/product.openvex.json
+    - url: https://vendor.example.com/vex/all.cdx.json
+      sha256: 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+      auth:
+        header: Authorization
+        credentialRef: vendor-vex-token

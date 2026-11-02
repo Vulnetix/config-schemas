@@ -1,0 +1,5 @@
+# family outside the enum
+apiVersion: vulnetix.com/v1
+kind: AiGovernanceList
+metadata: {name: x}
+spec: {family: model, list: deny, action: block, patterns: [gpt-4o]}

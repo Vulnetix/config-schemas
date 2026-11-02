@@ -4,6 +4,27 @@ JSON Schemas (draft 2020-12) for every Vulnetix config-as-code kind: the documen
 
 Reference documentation for every kind is at https://docs.vulnetix.com (the Platform IaC segment).
 
+## Kinds
+
+| Kind | Since | What it declares |
+|---|---|---|
+| `QualityGate` | v1.0.0 | The checks every `vulnetix scan` in CI must pass. One per tenant. |
+| `JailPolicy` | v1.1.0 | The ordered jail rules for the tenant default or one repository. |
+| `JailExemption` | v1.1.0 | A time-boxed waiver of a jail rule for one repository. |
+| `LicensePolicy` | v1.1.0 | Licence categories, severities, scopes and per-project overrides. Also valid as the flat `.vulnetix/license-policy.yaml`. |
+| `PackageFirewallPolicy` | v1.1.0 | Package firewall thresholds, blocks, mode, per-ecosystem modes and mirrors. One per tenant. |
+| `PackageList` | v1.1.0 | Allow or deny list entries, as purls, including namespace entries such as `pkg:npm/@acme/*`. |
+| `AiFirewallPolicy` | v1.1.0 | Providers, models, guardrails, capability lists and hold for review. The `.vulnetix/ai-firewall.yaml` document. One per tenant. |
+| `AiProvider` | v1.1.0 | A custom AI Firewall provider. |
+| `AiGovernanceList` | v1.1.0 | A tool, MCP server, skill or client allow or deny list. |
+| `RiskStrategy` | v1.1.0 | An ordered risk prioritisation strategy. |
+| `RemediationPolicy` | v1.1.0 | Remediation windows per severity band, or a published standard. One per tenant. |
+| `Suppression` | v1.1.0 | A suppression rule with its scope, OpenVEX justification and expiry. |
+| `VexSource` | v1.1.0 | VEX documents read back as suppression rules, from TEA, S3, git, a path or URLs. |
+| `MalwareIoc` | v1.1.0 | An indicator of compromise the tenant manages. |
+
+A field whose description says "Not stored yet", and the whole of `VexSource`, is ahead of the server: it validates today, and applying it needs the backend change the description names.
+
 ## Schema URLs
 
 Each release publishes every schema as a release asset. The asset URL is the schema's `$id`.

@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/PackageList.schema.json
+apiVersion: vulnetix.com/v1
+kind: PackageList
+metadata:
+  name: banned
+spec:
+  list: deny
+  entries:
+    - purl: pkg:npm/event-stream@3.3.6
+      reason: Compromised release.
+    - purl: pkg:pypi/colourama
+      reason: Typosquat of colorama.

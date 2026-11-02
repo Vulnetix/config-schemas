@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/LicensePolicy.schema.json
+# What vulnetix license policy init writes to .vulnetix/license-policy.yaml.
+apiVersion: vulnetix.com/v1
+kind: LicensePolicy
+categories:
+  strong-copyleft:
+    - AGPL-3.0-only
+    - AGPL-3.0-or-later
+    - SSPL-1.0
+severity:
+  permissive: none
+  public-domain: none
+  weak-copyleft: low
+  strong-copyleft: high
+  proprietary: high
+  unknown: medium
+unknown: warn
+scopes:
+  development: ignore
+  dev: ignore
+  test: ignore
+  optional: ignore
+projects:
+  docs-site:
+    severity:
+      strong-copyleft: low
+    unknown: ignore

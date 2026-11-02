@@ -1,0 +1,5 @@
+# key needs fromEnv or fromFile
+apiVersion: vulnetix.com/v1
+kind: AiFirewallPolicy
+spec:
+  providers: [{slug: openai, action: allow, key: {}}]

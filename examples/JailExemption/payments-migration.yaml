@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/JailExemption.schema.json
+apiVersion: vulnetix.com/v1
+kind: JailExemption
+metadata:
+  name: payments-moment-migration
+  annotations:
+    ticket: https://tracker.example.com/PAY-1432
+spec:
+  repository: acme/payments-api
+  rule: Off moment.js
+  reason: Migration to date-fns is scheduled for the Q1 release train.
+  expires: 2026-12-31

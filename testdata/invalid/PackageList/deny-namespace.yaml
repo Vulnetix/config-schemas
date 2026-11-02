@@ -1,0 +1,7 @@
+# a namespace entry can only be on the allow list
+apiVersion: vulnetix.com/v1
+kind: PackageList
+metadata: {name: x}
+spec:
+  list: deny
+  entries: [{purl: "pkg:npm/@evil/*"}]

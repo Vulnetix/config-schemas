@@ -1,0 +1,4 @@
+# unknown is warn, fail or ignore
+apiVersion: vulnetix.com/v1
+kind: LicensePolicy
+unknown: block

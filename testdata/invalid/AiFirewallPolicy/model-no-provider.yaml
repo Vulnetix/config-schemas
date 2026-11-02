@@ -1,0 +1,5 @@
+# a model needs provider or anyProvider
+apiVersion: vulnetix.com/v1
+kind: AiFirewallPolicy
+spec:
+  models: [{slug: gpt-4o, action: deny}]

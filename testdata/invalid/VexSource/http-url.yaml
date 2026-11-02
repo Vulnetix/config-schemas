@@ -1,0 +1,6 @@
+# urls are HTTPS only
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata: {name: x}
+spec:
+  urls: ["http://example.com/vex.json"]

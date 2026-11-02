@@ -1,0 +1,6 @@
+# rule kind outside the enum (the canonical spelling is upper case)
+apiVersion: vulnetix.com/v1
+kind: JailPolicy
+metadata: {name: x}
+spec:
+  rules: [{kind: vuln, label: a, aggregate: COUNT, operator: GT, thresholdLow: 0}]

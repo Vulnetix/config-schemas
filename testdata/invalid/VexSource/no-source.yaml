@@ -1,0 +1,5 @@
+# a source is required
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata: {name: x}
+spec: {format: openvex}

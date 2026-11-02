@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/RemediationPolicy.schema.json
+apiVersion: vulnetix.com/v1
+kind: RemediationPolicy
+metadata:
+  name: default
+spec:
+  description: Tighter than NIST for internet-facing estates.
+  remediationDays: { critical: 7, high: 30, medium: 90, low: 180 }
+  allowanceDays: { critical: 2, high: 7 }
+  triageThresholdDays: 2
+  exposureWindowDays: 14
+  threatWindowDays: 30
+  suppressionReviewMaxAgeDays: 180
+  severityThresholds: { high: 8.9, medium: 6.9, low: 4.0 }

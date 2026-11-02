@@ -1,0 +1,6 @@
+# VULNETIX_POC_VERIFIED is in the Prisma enum but the strategy API refuses it
+apiVersion: vulnetix.com/v1
+kind: RiskStrategy
+metadata: {name: x}
+spec:
+  rules: [{metric: VULNETIX_POC_VERIFIED, operator: IS_TRUE}, {metric: REMAINING, operator: ALWAYS}]

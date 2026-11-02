@@ -1,0 +1,5 @@
+# blocked_pattern needs a pattern
+apiVersion: vulnetix.com/v1
+kind: AiFirewallPolicy
+spec:
+  guardrails: [{name: a, ruleType: blocked_pattern, action: block, pattern: "  "}]

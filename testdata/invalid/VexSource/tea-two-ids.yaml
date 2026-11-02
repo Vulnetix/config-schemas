@@ -1,0 +1,6 @@
+# tea names exactly one of product, productRelease or collection
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata: {name: x}
+spec:
+  tea: {product: 7f3c1a52-1b8e-4d0e-9c3f-2a6b8e5d4c10, collection: 7f3c1a52-1b8e-4d0e-9c3f-2a6b8e5d4c11, server: "https://tea.example.com"}
