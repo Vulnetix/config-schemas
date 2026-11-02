@@ -38,6 +38,26 @@ type Vector struct {
 	At    *Issue         `yaml:"at"`
 }
 
+// RunVectors runs every embedded vector of every context through eval and
+// returns one error per vector that failed. A runtime's test calls it with
+// its evaluation entry point.
+func RunVectors(eval Evaluator) []error {
+	var errs []error
+	for _, ctx := range Contexts() {
+		vs, err := LoadVectors(ctx)
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+		for _, v := range vs {
+			if err := v.RunWith(ctx, eval); err != nil {
+				errs = append(errs, fmt.Errorf("%s: %w", ctx, err))
+			}
+		}
+	}
+	return errs
+}
+
 // LoadVectors reads the embedded vectors for a context.
 func LoadVectors(ctx Context) ([]Vector, error) {
 	b, err := vectorFiles.ReadFile("testdata/vectors/" + string(ctx) + ".yaml")
@@ -95,27 +115,43 @@ func decodeAs[T Input](node map[string]any) (Input, error) {
 	return v, nil
 }
 
-// Run checks one vector. It returns nil when the outcome is the expected one.
+// Evaluator is how a runtime evaluates a stored rule: the expression and the
+// typed input it builds from its own records.
+type Evaluator func(expr string, in Input) (bool, error)
+
+// Run checks one vector with Compile and Eval. It returns nil when the outcome
+// is the expected one.
 func (v Vector) Run(ctx Context) error {
+	return v.RunWith(ctx, func(expr string, in Input) (bool, error) {
+		prg, err := Compile(ctx, expr)
+		if err != nil {
+			return false, err
+		}
+		return prg.Eval(in)
+	})
+}
+
+// RunWith checks one vector through a runtime's own evaluation path, so every
+// runtime that evaluates rules (vdb-site, the package firewall, the AI
+// firewall, the CLI) proves it gives the answers this release was tested
+// with. eval must return the *Error the cel package returned.
+func (v Vector) RunWith(ctx Context, eval Evaluator) error {
 	if (v.Want == nil) == (v.Error == "") {
 		return fmt.Errorf("%s: set exactly one of want and error", v.Name)
 	}
-	prg, err := Compile(ctx, v.Expr)
+	in, err := DecodeInput(ctx, v.Input)
+	if err != nil {
+		return fmt.Errorf("%s: input: %w", v.Name, err)
+	}
+	got, err := eval(v.Expr, in)
 	if err == nil {
-		var in Input
-		if in, err = DecodeInput(ctx, v.Input); err != nil {
-			return fmt.Errorf("%s: input: %w", v.Name, err)
+		if v.Want == nil {
+			return fmt.Errorf("%s: got %v, want error %s", v.Name, got, v.Error)
 		}
-		var got bool
-		if got, err = prg.Eval(in); err == nil {
-			if v.Want == nil {
-				return fmt.Errorf("%s: got %v, want error %s", v.Name, got, v.Error)
-			}
-			if got != *v.Want {
-				return fmt.Errorf("%s: got %v, want %v", v.Name, got, *v.Want)
-			}
-			return nil
+		if got != *v.Want {
+			return fmt.Errorf("%s: got %v, want %v", v.Name, got, *v.Want)
 		}
+		return nil
 	}
 	var ce *Error
 	if !errors.As(err, &ce) {

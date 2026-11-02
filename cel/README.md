@@ -16,6 +16,17 @@ ok, err := prg.Eval(cel.Finding{Severity: "critical", KEV: true})
 
 Compile once and reuse the `Program`; it is safe for concurrent use. `cel.Check(ctx, expr)` is Compile for plan and validate, returning only the error. `prg.Cost()` is the estimated cost range.
 
+A runtime that evaluates stored rules uses the cached helpers instead, so each distinct expression is compiled once per process:
+
+```go
+ok, err := cel.EvalFinding(rule.When, cel.Finding{Severity: "high", KEV: true})
+// also EvalPackage, EvalRequest, EvalEvent, EvalCVE, and Eval for any Input
+```
+
+They share one `cel.Cache` of up to 4096 programs. A compile error is cached too, so a stored rule that does not compile fails the same way, cheaply, every time; `cel.NewCache(n)` gives a caller its own.
+
+What a runtime does when a rule errors is its own business rule, and each one documents it: the jail and quality gate fail closed (the rule matches), a suppression or prioritisation rule fails open (it does not match), and the firewalls log and skip the rule.
+
 Each context has its own input struct (`Finding`, `Package`, `Request`, `Event`, `CVE`), and `Eval` refuses an input of another context. Every struct has a `Now` field; leave it zero to evaluate at the current time, or set it to get the same answer on every run. Derived variables (marked in the tables) are computed from the other fields and have no field of their own.
 
 ## Errors
@@ -43,16 +54,15 @@ A single `exists` or `all` over a list costs a few hundred thousand at most. A c
 
 ## Golden vectors
 
-`testdata/vectors/<context>.yaml` holds plain-data cases: an expression, an input keyed by variable name, and either `want` (the result) or `error` (the code), with an optional `at` for the first issue's position. Variables an input leaves out take their zero value. The vectors are embedded, so an importer runs exactly the ones its pinned version was tested with:
+`testdata/vectors/<context>.yaml` holds plain-data cases: an expression, an input keyed by variable name, and either `want` (the result) or `error` (the code), with an optional `at` for the first issue's position. Variables an input leaves out take their zero value. The vectors are embedded, so an importer runs exactly the ones its pinned version was tested with, through its own evaluation path:
 
 ```go
-for _, ctx := range cel.Contexts() {
-	vs, _ := cel.LoadVectors(ctx)
-	for _, v := range vs {
-		if err := v.Run(ctx); err != nil { ... }
-	}
+for _, err := range cel.RunVectors(myRuntime.Evaluate) { // func(expr string, in cel.Input) (bool, error)
+	t.Error(err)
 }
 ```
+
+`v.Run(ctx)` checks one vector with Compile and Eval; `v.RunWith(ctx, eval)` checks it through any evaluator.
 
 ## Reference
 
