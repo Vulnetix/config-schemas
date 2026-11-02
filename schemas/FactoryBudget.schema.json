@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/FactoryBudget.schema.json",
+  "title": "FactoryBudget",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":["FactoryWorkflow"],"secrets":[],"celFields":[]},
+  "description": "A Software Factory budget: a limit on the tokens or calls the factory spends, for the whole factory, one GitHub organisation, one repository, one workflow or one step, with alerts and an action at the limit. metadata.name is the budget's name in the console. One budget per scope and provider. The Factory budget (the whole factory, per month, every provider) is set with the budget settings of FactorySettings, not here. Removing the document deletes the budget; its ledger is kept.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "FactoryBudget" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["appliesTo", "limit"],
+      "additionalProperties": false,
+      "properties": {
+        "appliesTo": {
+          "description": "What the budget limits. tenant: the whole factory. org: the repositories of one GitHub App installation, or every organisation when installationId is left out. repo: one repository. workflow: one workflow. node: one step of one workflow.",
+          "type": "string",
+          "enum": ["tenant", "org", "repo", "workflow", "node"]
+        },
+        "window": {
+          "description": "The period the limit covers: one run, a day, a week (from Monday) or a calendar month, all in UTC, or one step's run (node). tenant and workflow take run, day, week or month; org and repo take month; node takes node. Defaults to month, and to node for a node budget.",
+          "type": "string",
+          "enum": ["run", "day", "week", "month", "node"]
+        },
+        "workflow": {
+          "description": "workflow and node: the metadata.name of a FactoryWorkflow.",
+          "$ref": "common.schema.json#/$defs/name"
+        },
+        "node": {
+          "description": "node: the id of the step in the workflow's graph.",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]{1,64}$"
+        },
+        "repository": {
+          "description": "repo: the repository, owner/name.",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$"
+        },
+        "installationId": {
+          "description": "org: the GitHub App installation id of the organisation.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "limit": {
+          "description": "The limit, in unit, for the window. Not above the budget it sits inside: a step's budget not above its workflow's monthly budget, and any other not above the Factory budget, in the same unit.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "unit": {
+          "description": "What the limit counts: model tokens, or calls. Defaults to tokens.",
+          "type": "string",
+          "enum": ["tokens", "calls"],
+          "default": "tokens"
+        },
+        "provider": {
+          "description": "The model providers the budget counts, as one provider id or a comma-separated list, such as anthropic or pix,openai. Every provider when left out.",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9:_.-]{1,64}(,[A-Za-z0-9:_.-]{1,64})*$"
+        },
+        "alertAt": {
+          "description": "The percentages of the limit, ascending, from 1 to 100, at which the factory raises an alert. Defaults to 80 and 100.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": { "type": "integer", "minimum": 1, "maximum": 100 }
+        },
+        "actionAtLimit": {
+          "description": "What the factory does when the limit is reached: pause the run, downgrade to the fast model, switch to the Pix allocation, ask a person, stop hard, or only alert. Defaults to alert_only.",
+          "type": "string",
+          "enum": ["alert_only", "pause_run", "downgrade_to_fast", "switch_to_pix_allocation", "escalate_human", "hard_stop"],
+          "default": "alert_only"
+        }
+      }
+    }
+  }
+}

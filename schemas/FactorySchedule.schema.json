@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/FactorySchedule.schema.json",
+  "title": "FactorySchedule",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":["FactoryWorkflow"],"secrets":[],"celFields":[]},
+  "description": "A cron schedule that starts a Software Factory workflow: a cron trigger node in the workflow's graph whose id is metadata.name (at most 40 characters). Applying one saves and publishes a new version of the workflow, the same as adding the schedule on the Schedules tab, and creates or updates the timer that fires it; the workflow must be published and must not hold an unpublished draft. A cron trigger node the workflow already has under that id is adopted. Removing the document removes the node and its timer and publishes the workflow again.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "FactorySchedule" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["workflow", "cron", "startAt"],
+      "additionalProperties": false,
+      "properties": {
+        "workflow": {
+          "description": "The metadata.name of a FactoryWorkflow: the workflow the schedule starts.",
+          "$ref": "common.schema.json#/$defs/name"
+        },
+        "cron": {
+          "description": "When the workflow runs: five cron fields (minute, hour, day of month, month, day of week) of numbers, ranges, lists and steps. Day of month and day of week cannot both be restricted.",
+          "type": "string",
+          "minLength": 9,
+          "maxLength": 200
+        },
+        "timezone": {
+          "description": "The IANA time zone the cron fields are read in, such as Australia/Melbourne. Defaults to UTC.",
+          "type": "string",
+          "minLength": 1,
+          "default": "UTC"
+        },
+        "runsOn": {
+          "description": "The timer that fires the schedule: aws (an EventBridge Scheduler schedule) or cloudflare (a Worker cron trigger, for workflows that run in a Pix Sandbox). Defaults to aws.",
+          "type": "string",
+          "enum": ["aws", "cloudflare"],
+          "default": "aws"
+        },
+        "overlap": {
+          "description": "What happens when the previous run is still going at the next fire. Defaults to skip_if_running.",
+          "type": "string",
+          "enum": ["skip_if_running", "queue", "cancel_previous"]
+        },
+        "enabled": {
+          "description": "Whether the schedule fires. A schedule of a workflow that is switched off fires but starts nothing.",
+          "type": "boolean",
+          "default": true
+        },
+        "title": {
+          "description": "The trigger node's title in the builder. Left out, the node is titled with metadata.name.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "startAt": {
+          "description": "The ids of the steps in the workflow's graph the schedule leads to: one edge from the trigger to each, in this order.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,39}$" }
+        },
+        "priority": {
+          "description": "The run's priority, 1 (highest) to 5, when runs wait for capacity.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        }
+      }
+    }
+  }
+}

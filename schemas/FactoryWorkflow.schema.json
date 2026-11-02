@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/FactoryWorkflow.schema.json",
+  "title": "FactoryWorkflow",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[]},
+  "description": "A Software Factory workflow: the graph of steps a run walks, from a trigger through scans, decisions, crews, gates and people to its outputs. metadata.name is the workflow's slug (at most 60 characters; slugs that start with sys- belong to the default workflows and cannot be declared). Workflows are versioned: a change to the graph never edits a published version, it saves a new version and, with publish true, publishes it. Triggers and schedules declared as FactoryTrigger and FactorySchedule documents add their own trigger nodes to the graph; those nodes are not part of this document and a graph change keeps them. Removing the document archives the workflow: it is switched off and its triggers removed, and its versions and run history are kept.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "FactoryWorkflow" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["graph"],
+      "additionalProperties": false,
+      "properties": {
+        "displayName": {
+          "description": "The name the console shows. Left out, the workflow is shown under its metadata.name.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "description": {
+          "description": "What the workflow is for, shown under its name in the console.",
+          "type": "string",
+          "maxLength": 2000
+        },
+        "publish": {
+          "description": "true: the graph is the workflow's published version, and new runs use it; a changed graph is saved as the next version and published, which needs a graph that passes the full publish checks (a trigger, every step reachable, no cycle, every decision outcome routed). false: the graph is kept as the workflow's draft and runs keep using the last published version. Apply refuses to publish over a draft someone left unpublished in the console unless the draft already holds this graph.",
+          "type": "boolean",
+          "default": true
+        },
+        "enabled": {
+          "description": "Whether the factory starts runs of the workflow. Switching a workflow off also switches off its event triggers; a run already going is left to finish. A workflow that has never been published cannot be switched on.",
+          "type": "boolean",
+          "default": true
+        },
+        "graph": {
+          "description": "The workflow graph, in the shape the console's workflow builder saves and the workflow API takes.",
+          "type": "object",
+          "required": ["nodes"],
+          "additionalProperties": false,
+          "properties": {
+            "nodes": {
+              "description": "The steps, at most 60.",
+              "type": "array",
+              "maxItems": 60,
+              "items": { "$ref": "#/$defs/node" }
+            },
+            "edges": {
+              "description": "The connections between steps, at most 120. A run moves along an edge when the step it leaves finishes.",
+              "type": "array",
+              "maxItems": 120,
+              "items": { "$ref": "#/$defs/edge" }
+            },
+            "limits": { "$ref": "#/$defs/limits" },
+            "scope": {
+              "description": "The repositories the workflow may run on.",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "repos": {
+                  "description": "Repositories as owner/name, owner/* for every repository of an owner, or * for every managed repository. Names are compared without case.",
+                  "type": "array",
+                  "items": { "type": "string", "pattern": "^(\\*|[A-Za-z0-9._-]{1,100}/(\\*|[A-Za-z0-9._-]{1,100}))$" }
+                },
+                "orgs": {
+                  "description": "GitHub organisations whose managed repositories the workflow may run on.",
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1, "maxLength": 100 }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "required": ["id", "type", "title", "config"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The step's id, unique in the graph: 1 to 40 letters, digits, dashes or underscores. Edges name steps by it.",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,39}$"
+        },
+        "type": {
+          "description": "What the step does. trigger: what starts a run. scan: run scanners or read their results. decision: ask a model a question and route on the answer. crew: hand the work to a Belai crew or agent. gate: hold the run to CI checks, the quality gate and the release jail, and ask a person to approve a config-apply plan. human: ask a person to approve. output: open a pull request, comment, publish to TEA, notify or write VEX. state: read or write a stored object. config-apply: plan, or apply an approved plan of, the Platform IaC documents in the repository's .vulnetix/config/ directory at the pushed commit (config: phase plan or apply, and prune).",
+          "type": "string",
+          "enum": ["trigger", "scan", "decision", "crew", "gate", "human", "output", "state", "config-apply"]
+        },
+        "title": {
+          "description": "The step's title in the builder and the run view. Publishing needs a title that is not empty on every step.",
+          "type": "string",
+          "maxLength": 200
+        },
+        "config": {
+          "description": "The step's settings, which depend on its type; every type has at least one, such as a trigger's kind or a gate's profile. They are the settings the workflow builder edits, under the same names; the server checks them with the builder's own rules, so a step the builder would refuse is refused here too. A trigger step's config is the same as a FactoryTrigger or FactorySchedule spec, with the type under kind (kind: cron for a schedule, with cron, tz and runsOn).",
+          "type": "object",
+          "minProperties": 1
+        },
+        "budget": {
+          "description": "The step's token budget.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tokens": { "description": "Tokens the step may spend in one run; 0 for no limit of its own.", "type": "integer", "minimum": 0 }
+          }
+        },
+        "githubCalls": {
+          "description": "The step's GitHub API call limit.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max": { "description": "GitHub API calls the step may make in one run.", "type": "integer", "minimum": 0 }
+          }
+        },
+        "onQuotaLow": {
+          "description": "What the step does when the GitHub quota is low: carry on with cached data, wait for the quota window, or ask a person.",
+          "type": "string",
+          "enum": ["use_cached", "defer", "escalate"]
+        },
+        "position": {
+          "description": "Where the builder draws the step. It has no effect on runs.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "x": { "type": "number" },
+            "y": { "type": "number" }
+          }
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "required": ["from", "to"],
+      "additionalProperties": false,
+      "properties": {
+        "from": { "description": "The id of the step the edge leaves.", "type": "string", "minLength": 1 },
+        "to": { "description": "The id of the step the edge enters. Nothing may lead into a trigger.", "type": "string", "minLength": 1 },
+        "label": { "description": "The artifact that travels along the edge, shown on the canvas.", "type": "string", "maxLength": 200 },
+        "outcome": {
+          "description": "On an edge leaving a decision: the outcome that takes it, or $below_threshold or $unknown. On an edge leaving a gate: pass, or fail for the loop back to a crew.",
+          "type": "string",
+          "maxLength": 41
+        },
+        "loop": {
+          "description": "Marks the one kind of edge allowed to go back: a gate or decision returning work to a crew, bounded by limits.stopTheLineAttempts.",
+          "type": "boolean"
+        }
+      }
+    },
+    "limits": {
+      "description": "Run limits. A value left out, or 0, keeps the tenant's setting.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "runBudgetTokens": { "description": "Tokens one run may spend. At most monthBudgetTokens when both are set.", "type": "integer", "minimum": 0 },
+        "monthBudgetTokens": { "description": "Tokens the workflow may spend in a calendar month (UTC).", "type": "integer", "minimum": 0 },
+        "concurrency": { "description": "Runs of the workflow at once, 1 to 50.", "type": "integer", "minimum": 0, "maximum": 50 },
+        "githubCallsPerRun": {
+          "description": "The GitHub API calls a run is expected to make, for the estimate the builder shows.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "typical": { "type": "integer", "minimum": 0 },
+            "max": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "stopTheLineAttempts": { "description": "Failed attempts after which a loop back to a crew stops the run, 1 to 10.", "type": "integer", "minimum": 0, "maximum": 10 },
+        "agentCostUsd": { "description": "The cost limit, in US dollars, of each card a worker this workflow starts takes on, up to 10000.", "type": "number", "minimum": 0, "maximum": 10000 },
+        "agentFinalizeAt": { "description": "The share of a limit (0 to 0.95) at which a worker starts wrapping up.", "type": "number", "minimum": 0, "maximum": 0.95 },
+        "agentMaxAttempts": { "description": "Failed attempts a worker may make on one card, up to 10.", "type": "integer", "minimum": 0, "maximum": 10 },
+        "agentMaxContinuations": { "description": "How often a card may resume after its budget ran out, up to 50.", "type": "integer", "minimum": 0, "maximum": 50 },
+        "agentMaxPasses": { "description": "Passes a worker may make on one card, up to 1000.", "type": "integer", "minimum": 0, "maximum": 1000 },
+        "agentMaxWallMinutes": { "description": "Minutes a worker may spend on one card, up to 10080 (a week).", "type": "integer", "minimum": 0, "maximum": 10080 },
+        "agentMaxIterations": { "description": "Tool rounds a worker may take in one pass, up to 400.", "type": "integer", "minimum": 0, "maximum": 400 }
+      }
+    }
+  }
+}

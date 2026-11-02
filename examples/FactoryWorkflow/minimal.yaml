@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/FactoryWorkflow.schema.json
+apiVersion: vulnetix.com/v1
+kind: FactoryWorkflow
+metadata:
+  name: patch-on-demand
+spec:
+  graph:
+    nodes:
+      - id: start
+        type: trigger
+        title: Run by hand
+        config:
+          kind: manual

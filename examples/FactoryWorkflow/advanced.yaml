@@ -1,0 +1,89 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/FactoryWorkflow.schema.json
+apiVersion: vulnetix.com/v1
+kind: FactoryWorkflow
+metadata:
+  name: security-patch-train
+  labels:
+    team: appsec
+  annotations:
+    owner: appsec@acme.com
+spec:
+  displayName: Security patch train
+  description: Scan, patch with belai:security, hold the change to CI and the quality gate, then open a draft pull request.
+  publish: true
+  enabled: true
+  graph:
+    nodes:
+      - id: start
+        type: trigger
+        title: Run by hand
+        config:
+          kind: manual
+        position: { x: 0, y: 0 }
+      - id: scan
+        type: scan
+        title: Scanners
+        config:
+          source: posture
+          scanners: [sca, malscan, secrets]
+          failOn: [malware, secrets]
+          sbomFormat: cyclonedx-1.6
+        githubCalls: { max: 1 }
+        onQuotaLow: use_cached
+        position: { x: 240, y: 0 }
+      - id: patch
+        type: crew
+        title: Patch and verify
+        config:
+          crew: belai:security
+          mode: goal
+          codeTier: smart
+          testsPostEnd: goal
+          testsOnFail: fix
+          maxAttempts: 3
+        budget: { tokens: 300000 }
+        position: { x: 480, y: 0 }
+      - id: gate
+        type: gate
+        title: Quality gate and tests
+        config:
+          profile: org_default
+          releaseJail: enforce
+          onFail: return_to_crew
+          checkSource: mirror
+          maxGithubCalls: 2
+          onQuotaLow: use_cached
+        githubCalls: { max: 2 }
+        position: { x: 720, y: 0 }
+      - id: pr
+        type: output
+        title: Draft pull request
+        config:
+          kind: draft_pr
+          prState: draft
+          reviewers: codeowners
+          attach: cdx_slsa
+        githubCalls: { max: 2 }
+        position: { x: 960, y: 0 }
+    edges:
+      - { from: start, to: scan }
+      - { from: scan, to: patch, label: findings }
+      - { from: patch, to: gate, label: branch }
+      - { from: gate, to: pr, outcome: pass }
+      - { from: gate, to: patch, outcome: fail, loop: true }
+    limits:
+      runBudgetTokens: 400000
+      monthBudgetTokens: 6000000
+      concurrency: 2
+      githubCallsPerRun: { typical: 4, max: 8 }
+      stopTheLineAttempts: 3
+      agentCostUsd: 5
+      agentFinalizeAt: 0.8
+      agentMaxAttempts: 3
+      agentMaxContinuations: 2
+      agentMaxPasses: 20
+      agentMaxWallMinutes: 120
+      agentMaxIterations: 80
+    scope:
+      repos: [acme/payments, acme-labs/*]
+      orgs: [acme]

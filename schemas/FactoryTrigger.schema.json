@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/FactoryTrigger.schema.json",
+  "title": "FactoryTrigger",
+  "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":["FactoryWorkflow"],"secrets":[],"celFields":[]},
+  "description": "Something that starts a Software Factory workflow: a GitHub webhook event, a finding, an issue label, a kanban card move, a firewall sighting, or a person pressing Run. A trigger is a trigger node in the workflow's graph whose id is metadata.name (at most 40 characters), so applying one saves and publishes a new version of the workflow, the same as adding the trigger in the workflow builder; the workflow must be published and must not hold an unpublished draft. A trigger node the workflow already has under that id is adopted. A schedule is a FactorySchedule. Conditions are typed fields: the console takes no expression for a trigger. A trigger is on while its workflow is on. Removing the document removes the node and publishes the workflow again.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "apiVersion": { "$ref": "common.schema.json#/$defs/apiVersion" },
+    "kind": { "const": "FactoryTrigger" },
+    "metadata": { "$ref": "common.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "required": ["workflow", "type", "startAt"],
+      "additionalProperties": false,
+      "properties": {
+        "workflow": {
+          "description": "The metadata.name of a FactoryWorkflow: the workflow the trigger starts.",
+          "$ref": "common.schema.json#/$defs/name"
+        },
+        "type": {
+          "description": "What starts the workflow. webhook: a GitHub delivery to the App (event, conditions). finding: a new finding (severity). label: a label added to an issue or pull request (label). kanban: a card moved on the board (fromList, toList). firewall: a sighting from a firewall, Guardian or the GitHub risk rules (source and its filters). manual: only a person pressing Run.",
+          "type": "string",
+          "enum": ["webhook", "finding", "label", "kanban", "manual", "firewall"]
+        },
+        "title": {
+          "description": "The trigger node's title in the builder. Left out, the node is titled with metadata.name.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "startAt": {
+          "description": "The ids of the steps in the workflow's graph the trigger leads to: one edge from the trigger to each, in this order.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,39}$" }
+        },
+        "priority": {
+          "description": "The run's priority, 1 (highest) to 5, when runs wait for capacity.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "overlap": {
+          "description": "What happens when a run of the workflow for the same subject is already going. Defaults to skip_if_running.",
+          "type": "string",
+          "enum": ["skip_if_running", "queue", "cancel_previous"]
+        },
+        "event": {
+          "description": "webhook: the GitHub event, such as push or pull_request, or one action of it, such as pull_request.opened. firewall: one event of the source, such as package.first_seen (or list several in events).",
+          "type": "string",
+          "minLength": 1
+        },
+        "ref": {
+          "description": "webhook push and release events: default for branch pushes, tags for tag pushes and releases.",
+          "type": "string",
+          "enum": ["default", "tags"]
+        },
+        "conditions": { "$ref": "#/$defs/conditions" },
+        "debounceSeconds": {
+          "description": "webhook and label: deliveries for the same subject inside this window start one run. 0 to 3600; 30 when left out.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3600
+        },
+        "maxRunsPerHour": {
+          "description": "webhook, label and firewall: the most runs the trigger starts in an hour, 1 to 1000; 60 when left out.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "label": {
+          "description": "label: the issue or pull request label that starts the workflow.",
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "description": "finding: the finding severities that start the workflow. All of them when left out.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "common.schema.json#/$defs/severity" }
+        },
+        "fromList": {
+          "description": "kanban: the board list a card leaves.",
+          "type": "string",
+          "minLength": 1
+        },
+        "toList": {
+          "description": "kanban: the board list a card enters.",
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "description": "firewall: where the sighting comes from: the package firewall, the AI firewall, Pix Sandbox egress, Guardian (siem), or the GitHub risk and posture rules.",
+          "type": "string",
+          "enum": ["package-firewall", "ai-firewall", "egress", "siem", "github-risk", "github-posture"]
+        },
+        "events": {
+          "description": "firewall: the source's events that start the workflow, such as package.first_seen and package.blocked. Every event of the source when neither this nor event is set.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "newTo": {
+          "description": "firewall: only a first sighting in the organisation (org), or, for packages, in the repository (repo).",
+          "type": "string",
+          "enum": ["org", "repo"]
+        },
+        "decision": {
+          "description": "firewall: the firewall decisions that start the workflow, such as block or hold.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "ecosystems": {
+          "description": "firewall, package-firewall source: the package ecosystems, such as npm and pypi.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "kinds": {
+          "description": "firewall, ai-firewall source: the capability kinds.",
+          "type": "array",
+          "items": { "type": "string", "enum": ["tool", "mcp_server", "skill", "client"] }
+        },
+        "sandboxes": {
+          "description": "firewall, egress source: the Pix Sandboxes, by name.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "categories": {
+          "description": "firewall, siem source: the Guardian categories.",
+          "type": "array",
+          "items": { "type": "string", "enum": ["network", "dns", "waf", "http", "cloud_audit", "vulnetix", "other"] }
+        },
+        "providers": {
+          "description": "firewall, siem source: the log providers.",
+          "type": "array",
+          "items": { "type": "string", "enum": ["aws", "cloudflare", "vulnetix", "mixed"] }
+        },
+        "tables": {
+          "description": "firewall, siem source: the Guardian tables.",
+          "type": "array",
+          "items": { "type": "string", "enum": ["net_events", "dns_events", "waf_events", "http_events", "cloud_audit", "product_events"] }
+        },
+        "triggers": {
+          "description": "firewall, siem source: the Guardian alert triggers by name.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "ticketRepo": {
+          "description": "firewall: the repository, owner/name, where review tickets for a sighting are opened.",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]{1,100}/[A-Za-z0-9_.-]{1,100}$"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "globs": {
+      "type": "array",
+      "maxItems": 30,
+      "items": { "type": "string", "minLength": 1, "maxLength": 200 }
+    },
+    "names": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "conditions": {
+      "description": "webhook: conditions the delivery must meet, all of them. A condition the delivery carries no data for does not match. Globs: * is any run of characters except /, ** includes /, ? is one character; @default is the repository's default branch.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "actions": { "description": "The event's actions that count, such as opened and synchronize for pull_request. Only when event names no action.", "$ref": "#/$defs/names" },
+        "baseBranch": { "description": "Branch globs the pull request targets, or the pushed branch for a push.", "$ref": "#/$defs/globs" },
+        "headBranch": { "description": "Branch globs of the pull request's head, or the pushed branch for a push.", "$ref": "#/$defs/globs" },
+        "paths": { "description": "push only: path globs, at least one of which a pushed commit changed.", "$ref": "#/$defs/globs" },
+        "pathsIgnore": { "description": "push only: path globs that do not count as a change.", "$ref": "#/$defs/globs" },
+        "labels": {
+          "description": "Labels on the issue or pull request.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "any": { "description": "At least one of these labels.", "$ref": "#/$defs/names" },
+            "all": { "description": "Every one of these labels.", "$ref": "#/$defs/names" }
+          }
+        },
+        "authorType": { "description": "Who made the change: a person (user), a bot, or any.", "type": "string", "enum": ["any", "user", "bot"] },
+        "authors": {
+          "description": "GitHub logins, as globs.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "allow": { "description": "Only these authors.", "$ref": "#/$defs/names" },
+            "deny": { "description": "Never these authors.", "$ref": "#/$defs/names" }
+          }
+        },
+        "draft": { "description": "Draft pull requests: include them, exclude them, or only them.", "type": "string", "enum": ["include", "exclude", "only"] },
+        "origin": { "description": "Pull requests from the same repository, from forks, or any.", "type": "string", "enum": ["any", "same_repo", "fork"] },
+        "conclusion": { "description": "check_run, check_suite and workflow_run: the conclusions that count, such as failure. deployment_status: the states that count.", "$ref": "#/$defs/names" },
+        "reviewState": { "description": "pull_request_review: the review states that count.", "type": "array", "items": { "type": "string", "enum": ["approved", "changes_requested", "dismissed", "commented"] } },
+        "subject": { "description": "What the delivery must be about: a pull request (pr), an issue, nothing in particular (none), or any.", "type": "string", "enum": ["any", "pr", "issue", "none"] },
+        "severity": { "description": "dependabot_alert, code_scanning_alert and posture_finding: the alert severities that count.", "$ref": "#/$defs/names" },
+        "environment": { "description": "deployment_status: environment globs.", "$ref": "#/$defs/globs" },
+        "packageType": { "description": "registry_package: the package types that count, such as container and npm.", "$ref": "#/$defs/names" },
+        "properties": {
+          "description": "Repository custom properties: each property named with the values it may hold, such as team: [payments].",
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

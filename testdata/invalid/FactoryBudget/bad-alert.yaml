@@ -1,0 +1,5 @@
+# alertAt holds percentages from 1 to 100
+apiVersion: vulnetix.com/v1
+kind: FactoryBudget
+metadata: {name: x}
+spec: {appliesTo: org, limit: 10, alertAt: [150]}

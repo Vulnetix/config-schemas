@@ -1,0 +1,5 @@
+# a cron trigger is a FactorySchedule, not a FactoryTrigger
+apiVersion: vulnetix.com/v1
+kind: FactoryTrigger
+metadata: {name: x}
+spec: {workflow: w, type: cron, startAt: [a]}

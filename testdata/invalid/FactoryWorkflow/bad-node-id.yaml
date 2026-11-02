@@ -1,0 +1,5 @@
+# a node id is 1 to 40 letters, digits, dashes or underscores
+apiVersion: vulnetix.com/v1
+kind: FactoryWorkflow
+metadata: {name: x}
+spec: {graph: {nodes: [{id: "a b", type: trigger, title: A, config: {kind: manual}}]}}

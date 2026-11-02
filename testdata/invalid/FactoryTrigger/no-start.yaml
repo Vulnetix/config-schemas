@@ -1,0 +1,5 @@
+# startAt needs at least one step
+apiVersion: vulnetix.com/v1
+kind: FactoryTrigger
+metadata: {name: x}
+spec: {workflow: w, type: manual, startAt: []}

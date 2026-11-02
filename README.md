@@ -49,6 +49,10 @@ Reference documentation for every kind is at https://docs.vulnetix.com (the Plat
 | `ScannerProfile` | v1.5.0 | The factory's scanners, minimum SLSA level and build evidence. One per tenant. |
 | `FactoryManagedOrg` | v1.5.0 | An organisation or account the Software Factory manages. Which repositories the GitHub App reaches stays on GitHub. |
 | `RepositorySettings` | v1.5.0 | The factory's autonomy, kanban mode, token cap, branch protection, TEA publishing and default workflow opt-outs for one repository. |
+| `FactoryWorkflow` | v1.5.0 | A Software Factory workflow graph, saved as a new version on every change and published with `publish: true`. |
+| `FactoryTrigger` | v1.5.0 | A trigger node of a workflow: a webhook event with typed conditions, a finding, a label, a kanban move, a firewall sighting or a manual run. |
+| `FactorySchedule` | v1.5.0 | A cron schedule that starts a workflow, with its time zone and timer. |
+| `FactoryBudget` | v1.5.0 | A token or call budget for the factory, an organisation, a repository, a workflow or one step, with alerts and the action at the limit. |
 
 A field or kind whose description says "Not stored yet" (`CloudSensors` for one account), and the whole of `VexSource`, is ahead of the server: it validates today, and applying it needs the backend change the description names.
 

@@ -1,0 +1,198 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/FactoryTrigger.schema.json
+# Each trigger type, and each webhook condition with an event it applies to.
+apiVersion: vulnetix.com/v1
+kind: FactoryTrigger
+metadata:
+  name: pr-opened
+  labels:
+    team: appsec
+spec:
+  workflow: security-patch-train
+  type: webhook
+  title: Pull request opened or updated
+  startAt: [scan]
+  priority: 2
+  overlap: cancel_previous
+  event: pull_request
+  debounceSeconds: 60
+  maxRunsPerHour: 30
+  conditions:
+    actions: [opened, synchronize, reopened]
+    baseBranch: ["@default", release/*]
+    headBranch: [feature/**]
+    labels:
+      any: [security]
+      all: [ready]
+    authorType: user
+    authors:
+      allow: [alice, bob]
+      deny: [dependabot*]
+    draft: exclude
+    origin: same_repo
+    subject: pr
+    properties:
+      team: [payments]
+---
+apiVersion: vulnetix.com/v1
+kind: FactoryTrigger
+metadata:
+  name: push-default-branch
+spec:
+  workflow: security-patch-train
+  type: webhook
+  startAt: [scan]
+  event: push
+  ref: default
+  conditions:
+    baseBranch: ["@default"]
+    paths: [package.json, "**/go.mod"]
+    pathsIgnore: [docs/**]
+---
+apiVersion: vulnetix.com/v1
+kind: FactoryTrigger
+metadata:
+  name: ci-failed
+spec:
+  workflow: security-patch-train
+  type: webhook
+  startAt: [scan]
+  event: check_run.completed
+  conditions:
+    conclusion: [failure, timed_out]
+---
+apiVersion: vulnetix.com/v1
+kind: FactoryTrigger
+metadata:
+  name: dependabot-critical
+spec:
+  workflow: security-patch-train
+  type: webhook
+  startAt: [scan]
+  event: dependabot_alert.created
+  conditions:
+    severity: [critical, high]
+---
+apiVersion: vulnetix.com/v1
+kind: FactoryTrigger
+metadata:
+  name: production-deploy
+spec:
+  workflow: security-patch-train
+  type: webhook
+  startAt: [scan]
+  event: deployment_status
+  conditions:
+    environment: [production]
+    conclusion: [failure]
+---
+apiVersion: vulnetix.com/v1
+kind: FactoryTrigger
+metadata:
+  name: image-published
+spec:
+  workflow: security-patch-train
+  type: webhook
+  startAt: [scan]
+  event: registry_package.published
+  conditions:
+    packageType: [container]
+---
+apiVersion: vulnetix.com/v1
+kind: FactoryTrigger
+metadata:
+  name: changes-requested
+spec:
+  workflow: security-patch-train
+  type: webhook
+  startAt: [scan]
+  event: pull_request_review.submitted
+  conditions:
+    reviewState: [changes_requested]
+---
+apiVersion: vulnetix.com/v1
+kind: FactoryTrigger
+metadata:
+  name: security-label
+spec:
+  workflow: security-patch-train
+  type: label
+  startAt: [scan]
+  label: belai:security
+  debounceSeconds: 30
+  maxRunsPerHour: 20
+---
+apiVersion: vulnetix.com/v1
+kind: FactoryTrigger
+metadata:
+  name: critical-finding
+spec:
+  workflow: security-patch-train
+  type: finding
+  startAt: [scan]
+  severity: [critical, high]
+---
+apiVersion: vulnetix.com/v1
+kind: FactoryTrigger
+metadata:
+  name: card-to-ready
+spec:
+  workflow: security-patch-train
+  type: kanban
+  startAt: [scan]
+  fromList: backlog
+  toList: ready
+---
+apiVersion: vulnetix.com/v1
+kind: FactoryTrigger
+metadata:
+  name: new-package
+spec:
+  workflow: security-patch-train
+  type: firewall
+  startAt: [scan]
+  source: package-firewall
+  events: [package.first_seen, package.blocked]
+  newTo: org
+  decision: [block]
+  ecosystems: [npm, pypi]
+  ticketRepo: acme/security-reviews
+  maxRunsPerHour: 10
+---
+apiVersion: vulnetix.com/v1
+kind: FactoryTrigger
+metadata:
+  name: new-mcp-server
+spec:
+  workflow: security-patch-train
+  type: firewall
+  startAt: [scan]
+  source: ai-firewall
+  event: ai.capability_first_seen
+  kinds: [mcp_server, skill]
+---
+apiVersion: vulnetix.com/v1
+kind: FactoryTrigger
+metadata:
+  name: sandbox-egress
+spec:
+  workflow: security-patch-train
+  type: firewall
+  startAt: [scan]
+  source: egress
+  event: egress.host_first_seen
+  sandboxes: [build-sandbox]
+---
+apiVersion: vulnetix.com/v1
+kind: FactoryTrigger
+metadata:
+  name: guardian-dns
+spec:
+  workflow: security-patch-train
+  type: firewall
+  startAt: [scan]
+  source: siem
+  event: siem.fired
+  categories: [dns]
+  providers: [aws]
+  tables: [dns_events]
+  triggers: [suspicious-dns]

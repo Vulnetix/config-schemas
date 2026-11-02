@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/FactorySchedule.schema.json
+apiVersion: vulnetix.com/v1
+kind: FactorySchedule
+metadata:
+  name: nightly
+spec:
+  workflow: security-patch-train
+  cron: 0 3 * * *
+  startAt: [scan]

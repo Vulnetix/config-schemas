@@ -1,0 +1,5 @@
+# limit must be at least 1
+apiVersion: vulnetix.com/v1
+kind: FactoryBudget
+metadata: {name: x}
+spec: {appliesTo: org, limit: 0}

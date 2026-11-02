@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/FactorySchedule.schema.json
+apiVersion: vulnetix.com/v1
+kind: FactorySchedule
+metadata:
+  name: weekday-sweep
+  annotations:
+    ticket: https://tracker.acme.com/SEC-142
+spec:
+  workflow: security-patch-train
+  title: Weekday dependency sweep
+  cron: 0 3 * * 1-5
+  timezone: Australia/Melbourne
+  runsOn: aws
+  overlap: skip_if_running
+  enabled: true
+  startAt: [scan]
+  priority: 3

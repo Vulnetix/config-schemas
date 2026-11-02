@@ -1,0 +1,5 @@
+# runsOn is aws or cloudflare
+apiVersion: vulnetix.com/v1
+kind: FactorySchedule
+metadata: {name: x}
+spec: {workflow: w, cron: "0 3 * * *", runsOn: engine, startAt: [a]}

@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/FactoryBudget.schema.json
+# A budget for each scope that takes a reference.
+apiVersion: vulnetix.com/v1
+kind: FactoryBudget
+metadata:
+  name: patch-train-daily
+  labels:
+    team: appsec
+spec:
+  appliesTo: workflow
+  workflow: security-patch-train
+  window: day
+  limit: 1500000
+  unit: tokens
+  provider: anthropic,openai
+  alertAt: [50, 80, 100]
+  actionAtLimit: pause_run
+---
+apiVersion: vulnetix.com/v1
+kind: FactoryBudget
+metadata:
+  name: patch-step
+spec:
+  appliesTo: node
+  workflow: security-patch-train
+  node: patch
+  window: node
+  limit: 300000
+  actionAtLimit: downgrade_to_fast
+---
+apiVersion: vulnetix.com/v1
+kind: FactoryBudget
+metadata:
+  name: payments-repo
+spec:
+  appliesTo: repo
+  repository: acme/payments
+  window: month
+  limit: 5000
+  unit: calls
+  actionAtLimit: escalate_human
+---
+apiVersion: vulnetix.com/v1
+kind: FactoryBudget
+metadata:
+  name: acme-org
+spec:
+  appliesTo: org
+  installationId: 41234567
+  limit: 10000000
+  actionAtLimit: alert_only

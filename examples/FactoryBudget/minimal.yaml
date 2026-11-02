@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/FactoryBudget.schema.json
+apiVersion: vulnetix.com/v1
+kind: FactoryBudget
+metadata:
+  name: org-monthly-tokens
+spec:
+  appliesTo: org
+  limit: 20000000
