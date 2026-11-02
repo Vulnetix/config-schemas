@@ -323,6 +323,10 @@ func Diff(at string, old, cur any) []string {
 	for _, kw := range []string{"allOf", "anyOf", "oneOf"} {
 		oa, _ := o[kw].([]any)
 		na, _ := n[kw].([]any)
+		if (kw == "anyOf" || kw == "oneOf") && oa != nil && na != nil {
+			out = append(out, diffAlternatives(at, kw, oa, na)...)
+			continue
+		}
 		if len(oa) != len(na) && na != nil {
 			// An allOf condition gated on a value the old schema refused
 			// constrains only documents the old schema refused, so it can be
@@ -339,6 +343,57 @@ func Diff(at string, old, cur any) []string {
 				out = append(out, Diff(fmt.Sprintf("%s/%s/%d", at, kw, i), oa[i], na[i])...)
 			}
 		}
+	}
+	return out
+}
+
+// diffAlternatives compares the alternatives of an anyOf or oneOf. A document
+// valid against an old alternative stays valid when the new schema still has an
+// alternative at least as permissive, wherever it sits in the list, so adding
+// an alternative widens what the schema accepts and is compatible. An old
+// alternative with no compatible counterpart in the new list was removed or
+// narrowed, which is breaking. (For oneOf, a document matching both an old and
+// a new alternative is not covered; the new alternatives are expected to be
+// distinct from the old ones.)
+func diffAlternatives(at, kw string, oa, na []any) []string {
+	used := make([]bool, len(na))
+	matched := make([]bool, len(oa))
+	key := func(v any) string { b, _ := json.Marshal(v); return string(b) }
+	// Pair identical alternatives first so a changed one cannot claim the
+	// counterpart of an unchanged one.
+	for i, ov := range oa {
+		for j, nv := range na {
+			if !used[j] && key(ov) == key(nv) {
+				used[j], matched[i] = true, true
+				break
+			}
+		}
+	}
+	for i, ov := range oa {
+		if matched[i] {
+			continue
+		}
+		for j, nv := range na {
+			if !used[j] && len(Diff("", ov, nv)) == 0 {
+				used[j], matched[i] = true, true
+				break
+			}
+		}
+	}
+	var out []string
+	for i, ov := range oa {
+		if matched[i] {
+			continue
+		}
+		// With the same number of alternatives, report what changed in the
+		// one at the same position.
+		if len(oa) == len(na) {
+			if d := Diff(fmt.Sprintf("%s/%s/%d", at, kw, i), ov, na[i]); len(d) > 0 {
+				out = append(out, d...)
+				continue
+			}
+		}
+		out = append(out, fmt.Sprintf("%s: %s alternative %d removed or narrowed", at, kw, i))
 	}
 	return out
 }
