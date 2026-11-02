@@ -12,7 +12,6 @@ spec:
   scope:
     org: true
   trust:
-    requireSignature: true
     allowedAuthors: [security@acme.example]
   refresh: { interval: 6h }
   onError: keep-last
@@ -27,8 +26,6 @@ metadata:
   name: vendor-tea-release
 spec:
   format: cyclonedx
-  scope:
-    products: ["urn:tei:uuid:products.acme.example:7f3c1a52-1b8e-4d0e-9c3f-2a6b8e5d4c10"]
   refresh: { interval: 1d }
   tea:
     productRelease: "urn:tei:uuid:products.acme.example:4b2e9d17-6a3c-4f81-b5d0-8e1c7a9f2d36"
@@ -67,15 +64,15 @@ spec:
 apiVersion: vulnetix.com/v1
 kind: VexSource
 metadata:
-  name: vex-r2-object
+  name: vex-bucket-object
 spec:
   format: openvex
   refresh: { interval: 30m }
   s3:
     bucket: acme-vex-public
+    region: us-east-1
     key: products/ledger/ledger.openvex.json
-    endpoint: https://0123456789abcdef0123456789abcdef.r2.cloudflarestorage.com
-    credentialRef: r2-vex-reader
+    roleArn: arn:aws:iam::123456789012:role/VulnetixVexRead
 ---
 # yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/VexSource.schema.json
 apiVersion: vulnetix.com/v1
@@ -85,7 +82,6 @@ metadata:
 spec:
   scope:
     repos: [acme/payments-api, acme/ledger]
-    products: [7f3c1a52-1b8e-4d0e-9c3f-2a6b8e5d4c10]
   git:
     url: https://github.com/acme/security-advisories.git
     ref: main

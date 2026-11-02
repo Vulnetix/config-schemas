@@ -1,0 +1,43 @@
+# Fields the VexSource schema accepts and a plan blocks as `unsupported` until
+# the server can honour them. This file validates against the schema but is not
+# an applicable example: minimal.yaml and advanced.yaml are. Move a field back
+# into advanced.yaml when the engine supports it.
+#
+#   trust.requireSignature   The server does not verify signatures on fetched
+#                            VEX documents yet.
+#   scope.products           Findings do not record the TEA product they belong
+#                            to, so a product scope cannot be enforced yet.
+#   s3.endpoint, credentialRef
+#                            An S3-compatible store (R2, MinIO) has no vault
+#                            shape for its access key yet. Use roleArn on AWS.
+#
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/VexSource.schema.json
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata:
+  name: signed-vendor-tea
+spec:
+  format: auto
+  scope:
+    products: ["urn:tei:uuid:products.acme.example:7f3c1a52-1b8e-4d0e-9c3f-2a6b8e5d4c10"]
+  trust:
+    requireSignature: true
+    allowedAuthors: [security@acme.example]
+  refresh: { interval: 6h }
+  tea:
+    product: 7f3c1a52-1b8e-4d0e-9c3f-2a6b8e5d4c10
+    server: https://tea.acme.example
+---
+# yaml-language-server: $schema=https://github.com/Vulnetix/config-schemas/releases/latest/download/VexSource.schema.json
+apiVersion: vulnetix.com/v1
+kind: VexSource
+metadata:
+  name: vex-r2-object
+spec:
+  format: openvex
+  refresh: { interval: 30m }
+  s3:
+    bucket: acme-vex-public
+    key: products/ledger/ledger.openvex.json
+    endpoint: https://0123456789abcdef0123456789abcdef.r2.cloudflarestorage.com
+    credentialRef: r2-vex-reader

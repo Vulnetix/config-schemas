@@ -16,7 +16,9 @@ import (
 // requires, and examples/<Kind>/advanced.yaml, which sets every field the
 // kind's spec defines (across its documents, so mutually exclusive forms can
 // each have one), a CEL field wherever the kind has one, and every secret as a
-// valueFrom env. The Terraform provider generator and the docs build both
+// valueFrom env, except the fields in examples/<Kind>/unsupported-features.yaml,
+// which a server cannot honour yet. The Terraform provider generator and the
+// docs build both
 // render these two files, so they are held to that shape here.
 func TestMinimalAndAdvancedExamples(t *testing.T) {
 	v := validator(t)
@@ -59,6 +61,15 @@ func TestMinimalAndAdvancedExamples(t *testing.T) {
 			have := map[string]bool{}
 			for _, doc := range raws {
 				docPaths(docField(doc, "spec"), "spec", have)
+			}
+			// A field the schema accepts and a server cannot honour yet is
+			// kept out of advanced.yaml, which is applied, and shown in
+			// unsupported-features.yaml, which is only validated. Together
+			// the two still set every field.
+			if up := filepath.Join("examples", k, "unsupported-features.yaml"); fileExists(up) {
+				for _, doc := range rawDocs(t, up) {
+					docPaths(docField(doc, "spec"), "spec", have)
+				}
 			}
 			var missing []string
 			for p := range want {
@@ -303,4 +314,9 @@ func valuesAtPath(v any, path []string) []any {
 		return nil
 	}
 	return valuesAtPath(c, path[1:])
+}
+
+func fileExists(p string) bool {
+	_, err := os.Stat(p)
+	return err == nil
 }
