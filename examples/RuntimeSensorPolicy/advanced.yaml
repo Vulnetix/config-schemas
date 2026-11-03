@@ -46,3 +46,4 @@ spec:
     - feedRef: edge-suricata
   protection: locked
   heartbeatAlertMinutes: 5
+  autoUpdate: false

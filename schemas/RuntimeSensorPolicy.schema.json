@@ -120,7 +120,7 @@
           "items": { "const": "siem" }
         },
         "inventoryEvery": {
-          "description": "How often the sensor reports the packages running processes load, as a Go duration from 1m to 168h.",
+          "description": "How often the sensor reports the packages on its host, installed and loaded by a running process, as a Go duration from 1m to 168h.",
           "type": "string",
           "pattern": "^([0-9]+(\\.[0-9]+)?(ns|us|µs|ms|s|m|h))+$",
           "default": "6h"
@@ -142,6 +142,11 @@
           "minimum": 1,
           "maximum": 10080,
           "default": 15
+        },
+        "autoUpdate": {
+          "description": "Let enrolled sensors install new CLI releases themselves. The guard checks the latest release about every 6 hours, verifies its checksum, keeps the previous binary as .prev and restarts onto the new one. false holds a sensor on its installed version, for hosts that take releases on a change window.",
+          "type": "boolean",
+          "default": true
         }
       }
     }

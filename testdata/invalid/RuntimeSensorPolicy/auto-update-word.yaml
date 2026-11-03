@@ -1,0 +1,5 @@
+# autoUpdate is true or false
+apiVersion: vulnetix.com/v1
+kind: RuntimeSensorPolicy
+metadata: {name: x}
+spec: {autoUpdate: "yes"}
