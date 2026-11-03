@@ -12,3 +12,4 @@ spec:
   companyEmailDomains:
     - acme.com
     - acme.co.uk
+  driftProtection: true

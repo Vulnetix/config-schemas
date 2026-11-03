@@ -3,7 +3,7 @@
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/Organization.schema.json",
   "title": "Organization",
   "x-vulnetix": {"validateOnly":false,"singleton":true,"dependsOn":[],"secrets":[],"celFields":[]},
-  "description": "The organisation's own settings: its display name and its company email domains. One per tenant, named default. A field left out is left as it is. Applying needs an owner or admin. Deleting the document only stops managing these settings: the organisation itself is never deleted, and the settings keep their values.",
+  "description": "The organisation's own settings: its display name, its company email domains and whether Drift protection is on. One per tenant, named default. A field left out is left as it is. Applying needs an owner or admin. Deleting the document only stops managing these settings: the organisation itself is never deleted, and the settings keep their values.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],
   "additionalProperties": false,
@@ -34,6 +34,11 @@
             "maxLength": 253,
             "pattern": "^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$"
           }
+        },
+        "driftProtection": {
+          "description": "Whether the console and the legacy APIs refuse changes to settings that are managed by Platform IaC. false is advisory only: the console shows which settings are managed as code and still lets an owner or admin change them. true enforces it: a write from the console, an ApiKey or a legacy endpoint to a kind that has an object managed by Terraform or GitOps is refused with HTTP 409 managed_by_platform_iac. Writes from Platform IaC (the config API with a management token) are never refused, and neither is this setting, so an owner or admin can always turn it off.",
+          "type": "boolean",
+          "default": false
         }
       }
     }

@@ -1,0 +1,5 @@
+# driftProtection is true or false
+apiVersion: vulnetix.com/v1
+kind: Organization
+metadata: {name: default}
+spec: {driftProtection: "yes"}
