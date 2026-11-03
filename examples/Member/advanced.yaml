@@ -18,3 +18,11 @@ metadata:
 spec:
   email: bob@acme.com
   role: member
+---
+apiVersion: vulnetix.com/v1
+kind: Member
+metadata:
+  name: carol
+spec:
+  email: carol@acme.com
+  role: developer

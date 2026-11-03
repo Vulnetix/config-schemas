@@ -25,9 +25,9 @@
           "pattern": "^[^A-Z\\s]+@[^A-Z\\s]+$"
         },
         "role": {
-          "description": "owner or member. Only an owner may grant owner. admin is the retired role: a member who already holds it keeps it while the document says admin, but no apply grants it.",
+          "description": "owner, developer or member. developer can plan, apply and export every kind except Organization, Member, ServiceAccount and VaultEntry, and cannot manage members, invitations, billing, the vault or service accounts. Only an owner may grant owner or developer. admin is the retired role: a member who already holds it keeps it while the document says admin, but no apply grants it.",
           "type": "string",
-          "enum": ["owner", "admin", "member"],
+          "enum": ["owner", "developer", "member", "admin"],
           "default": "member"
         }
       }
