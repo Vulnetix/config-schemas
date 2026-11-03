@@ -1,0 +1,5 @@
+# a published workflow (publish left out means true) needs at least one setting on every step but config-apply
+apiVersion: vulnetix.com/v1
+kind: FactoryWorkflow
+metadata: {name: x}
+spec: {graph: {nodes: [{id: start, type: trigger, title: Start, config: {}}]}}

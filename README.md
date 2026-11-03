@@ -49,7 +49,7 @@ Reference documentation for every kind is at https://docs.vulnetix.com (the Plat
 | `ScannerProfile` | v1.6.0 | The factory's scanners, minimum SLSA level and build evidence. One per tenant. |
 | `FactoryManagedOrg` | v1.6.0 | An organisation or account the Software Factory manages. Which repositories the GitHub App reaches stays on GitHub. |
 | `RepositorySettings` | v1.6.0 | The factory's autonomy, kanban mode, token cap, branch protection, TEA publishing and default workflow opt-outs for one repository. Since v1.7.0 it also carries the repository's asset labels, owner and criticality, which are CEL `finding` variables. |
-| `FactoryWorkflow` | v1.6.0 | A Software Factory workflow graph, saved as a new version on every change and published with `publish: true`. |
+| `FactoryWorkflow` | v1.6.0 | A Software Factory workflow graph, saved as a new version on every change and published with `publish: true`. Since v1.13.0 a draft (`publish: false`) and a `config-apply` step may have an empty `config`; a published step of any other type still needs one setting. |
 | `FactoryTrigger` | v1.6.0 | A trigger node of a workflow: a webhook event with typed conditions, a finding, a label, a kanban move, a firewall sighting or a manual run. |
 | `FactorySchedule` | v1.6.0 | A cron schedule that starts a workflow, with its time zone and timer. |
 | `FactoryBudget` | v1.6.0 | A token or call budget for the factory, an organisation, a repository, a workflow or one step, with alerts and the action at the limit. |

@@ -273,21 +273,29 @@ func checkMinimal(t *testing.T, file string, root map[string]any, schema, val an
 				t.Errorf("%s: %s.%s is not required, so it does not belong in the minimal example", file, path, k)
 				continue
 			}
-			var cs any
+			// A rule a branch adds (a conditional that requires config only
+			// when the workflow publishes) describes the same property, so
+			// every branch that defines it counts.
+			var defs []any
 			for _, b := range bs {
 				if props, ok := b["properties"].(map[string]any); ok && props[k] != nil {
 					if _, isBool := props[k].(bool); !isBool {
-						cs = props[k]
-						break
+						defs = append(defs, props[k])
 					}
 				}
 			}
+			cs := allOf(defs)
 			checkMinimal(t, file, root, cs, c, path+"."+k)
 		}
 	case []any:
-		m, _ := resolveLocal(root, schema).(map[string]any)
+		var items []any
+		for _, b := range branches(root, schema) {
+			if it, ok := b["items"]; ok {
+				items = append(items, it)
+			}
+		}
 		for _, c := range n {
-			checkMinimal(t, file, root, m["items"], c, path+"[]")
+			checkMinimal(t, file, root, allOf(items), c, path+"[]")
 		}
 	}
 }
@@ -319,4 +327,16 @@ func valuesAtPath(v any, path []string) []any {
 func fileExists(p string) bool {
 	_, err := os.Stat(p)
 	return err == nil
+}
+
+// allOf is the one schema that holds every one of schemas, so branches reads
+// the required fields and minProperties of all of them.
+func allOf(schemas []any) any {
+	switch len(schemas) {
+	case 0:
+		return nil
+	case 1:
+		return schemas[0]
+	}
+	return map[string]any{"allOf": schemas}
 }

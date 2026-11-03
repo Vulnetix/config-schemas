@@ -1,0 +1,21 @@
+# A published config-apply step may have an empty config: the phase, path, prune and approval all have defaults.
+apiVersion: vulnetix.com/v1
+kind: FactoryWorkflow
+metadata:
+  name: apply-config-on-push
+spec:
+  graph:
+    nodes:
+      - id: start
+        type: trigger
+        title: On a push to the default branch
+        config:
+          kind: webhook
+          event: push
+      - id: apply
+        type: config-apply
+        title: Plan and apply the config
+        config: {}
+    edges:
+      - from: start
+        to: apply

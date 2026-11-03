@@ -1,0 +1,20 @@
+# A draft keeps its steps as the console saved them, including steps that are not configured yet: config: {} is accepted while publish is false.
+apiVersion: vulnetix.com/v1
+kind: FactoryWorkflow
+metadata:
+  name: triage-sketch
+spec:
+  publish: false
+  graph:
+    nodes:
+      - id: start
+        type: trigger
+        title: When a finding arrives
+        config: {}
+      - id: scan
+        type: scan
+        title: Scan
+        config: {}
+    edges:
+      - from: start
+        to: scan

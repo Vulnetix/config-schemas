@@ -1,0 +1,5 @@
+# a published step other than config-apply cannot leave config out
+apiVersion: vulnetix.com/v1
+kind: FactoryWorkflow
+metadata: {name: x}
+spec: {graph: {nodes: [{id: start, type: trigger, title: Start}]}}

@@ -1,0 +1,5 @@
+# publish: true needs at least one setting on a gate step too
+apiVersion: vulnetix.com/v1
+kind: FactoryWorkflow
+metadata: {name: x}
+spec: {publish: true, graph: {nodes: [{id: g, type: gate, title: Gate, config: {}}]}}

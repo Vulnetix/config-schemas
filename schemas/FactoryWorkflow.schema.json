@@ -29,7 +29,7 @@
           "maxLength": 2000
         },
         "publish": {
-          "description": "true: the graph is the workflow's published version, and new runs use it; a changed graph is saved as the next version and published, which needs a graph that passes the full publish checks (a trigger, every step reachable, no cycle, every decision outcome routed). false: the graph is kept as the workflow's draft and runs keep using the last published version. Apply refuses to publish over a draft someone left unpublished in the console unless the draft already holds this graph.",
+          "description": "true, or left out: the graph is the workflow's published version, and new runs use it; a changed graph is saved as the next version and published, which needs a graph that passes the full publish checks (a trigger, every step reachable, no cycle, every decision outcome routed, and every step but config-apply configured, not left with an empty config). false: the graph is kept as the workflow's draft and runs keep using the last published version. Apply refuses to publish over a draft someone left unpublished in the console unless the draft already holds this graph. A draft may hold steps that are not configured yet (config: {}).",
           "type": "boolean",
           "default": true
         },
@@ -76,13 +76,37 @@
             }
           }
         }
+      },
+      "if": {
+        "required": ["publish"],
+        "properties": { "publish": { "const": false } }
+      },
+      "else": {
+        "properties": {
+          "graph": {
+            "properties": {
+              "nodes": { "items": { "$ref": "#/$defs/publishedNode" } }
+            }
+          }
+        }
       }
     }
   },
   "$defs": {
+    "publishedNode": {
+      "description": "What publishing adds to a step (publish true, or left out). A draft step may have an empty config, or none: the graph is saved as it is and the builder asks for the rest. A published step needs at least one setting, such as a trigger's kind or a gate's profile, except config-apply, whose settings (approval, path, prune) all have defaults.",
+      "if": {
+        "required": ["type"],
+        "properties": { "type": { "const": "config-apply" } }
+      },
+      "else": {
+        "required": ["config"],
+        "properties": { "config": { "minProperties": 1 } }
+      }
+    },
     "node": {
       "type": "object",
-      "required": ["id", "type", "title", "config"],
+      "required": ["id", "type", "title"],
       "additionalProperties": false,
       "properties": {
         "id": {
@@ -101,9 +125,8 @@
           "maxLength": 200
         },
         "config": {
-          "description": "The step's settings, which depend on its type; every type has at least one, such as a trigger's kind or a gate's profile. They are the settings the workflow builder edits, under the same names; the server checks them with the builder's own rules, so a step the builder would refuse is refused here too. A trigger step's config is the same as a FactoryTrigger or FactorySchedule spec, with the type under kind (kind: cron for a schedule, with cron, tz and runsOn).",
-          "type": "object",
-          "minProperties": 1
+          "description": "The step's settings, which depend on its type. A published workflow needs at least one on every step except config-apply, such as a trigger's kind or a gate's profile; a draft (publish: false) may leave them empty (config: {}), and so may a config-apply step, whose settings all have defaults. They are the settings the workflow builder edits, under the same names; the server checks them with the builder's own rules, so a step the builder would refuse is refused here too. A trigger step's config is the same as a FactoryTrigger or FactorySchedule spec, with the type under kind (kind: cron for a schedule, with cron, tz and runsOn).",
+          "type": "object"
         },
         "budget": {
           "description": "The step's token budget.",
