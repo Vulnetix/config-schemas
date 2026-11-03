@@ -33,7 +33,7 @@ Reference documentation for every kind is at https://docs.vulnetix.com (the Plat
 | `AwsAccount` | v1.3.0 | One connected AWS account, whether it is swept, and its stack deploy. |
 | `CloudSensors` | v1.3.0 | Which AWS-native sources and Vulnetix passes are read, for every account or one. |
 | `DetectionRuleFeed` | v1.3.0 | A published feed of virtual patches, countermeasures and catalogue rules in one format. |
-| `RuntimeSensorPolicy` | v1.3.0 | The configuration runtime sensors enroll with: mode, hold, feeds, forwarding and tamper protection. Since v1.12.0 it also says whether sensors update themselves (`autoUpdate`). |
+| `RuntimeSensorPolicy` | v1.3.0 | The configuration runtime sensors enroll with: mode, hold, feeds, forwarding and tamper protection. Since v1.12.0 it also says whether sensors update themselves (`autoUpdate`), and since v1.14.0 whether they may take a new major version (`allowMajorUpdate`). |
 | `Organization` | v1.5.0 | The organisation's display name and company email domains. One per tenant. |
 | `Member` | v1.5.0 | A person in the organisation by email, with their role. A new member is invited and reports `Pending` until they accept. |
 | `ServiceAccount` | v1.5.0 | A CI credential that is not a person. Its API key is returned once, by the apply that creates it. |

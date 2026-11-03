@@ -147,6 +147,11 @@
           "description": "Let enrolled sensors install new CLI releases themselves. The guard checks the latest release about every 6 hours, verifies its checksum, keeps the previous binary as .prev and restarts onto the new one. false holds a sensor on its installed version, for hosts that take releases on a change window.",
           "type": "boolean",
           "default": true
+        },
+        "allowMajorUpdate": {
+          "description": "Let enrolled sensors take a release with a higher major version. Off by default: a major release can change the profile format, the units and the protocol, so a sensor stays on its major version until the profile says otherwise. Has no effect when autoUpdate is false.",
+          "type": "boolean",
+          "default": false
         }
       }
     }

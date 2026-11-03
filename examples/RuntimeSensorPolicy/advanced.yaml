@@ -30,6 +30,7 @@ spec:
   protection: hardened
   allowUserStop: false
   heartbeatAlertMinutes: 30
+  allowMajorUpdate: true
 ---
 apiVersion: vulnetix.com/v1
 kind: RuntimeSensorPolicy
