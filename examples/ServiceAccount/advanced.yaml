@@ -7,7 +7,15 @@ metadata:
     pipeline: github-actions
   annotations:
     owner: platform-team
-spec: {}
+spec:
+  role: member
+---
+apiVersion: vulnetix.com/v1
+kind: ServiceAccount
+metadata:
+  name: terraform-apply
+spec:
+  role: admin
 ---
 apiVersion: vulnetix.com/v1
 kind: ServiceAccount

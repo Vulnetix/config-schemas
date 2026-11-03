@@ -1,0 +1,5 @@
+# role is member, admin or owner
+apiVersion: vulnetix.com/v1
+kind: ServiceAccount
+metadata: {name: ci-scanner}
+spec: {role: superuser}
