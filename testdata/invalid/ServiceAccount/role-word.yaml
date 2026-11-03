@@ -1,4 +1,4 @@
-# role is member, admin or owner
+# role is member, developer or owner
 apiVersion: vulnetix.com/v1
 kind: ServiceAccount
 metadata: {name: ci-scanner}

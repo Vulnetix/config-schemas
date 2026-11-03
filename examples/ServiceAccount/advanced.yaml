@@ -15,7 +15,7 @@ kind: ServiceAccount
 metadata:
   name: terraform-apply
 spec:
-  role: admin
+  role: developer
 ---
 apiVersion: vulnetix.com/v1
 kind: ServiceAccount
