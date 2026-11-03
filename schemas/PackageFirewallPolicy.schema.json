@@ -52,7 +52,7 @@
           "default": 0
         },
         "versionLag": {
-          "description": "Block a version more than this many releases behind its package's newest release (rank 0 is the newest, so 2 serves the three newest). 0 turns it off. Enforced only for ecosystems whose proxy can list every version, and not in warn mode. Note that this is the opposite of the QualityGate versionLag check.",
+          "description": "Block a version more than this many releases behind its package's newest servable release (rank 0 is the newest, so 2 serves the three newest). Versions already blocked, and on npm versions still inside the cooldown, are not counted, so lag and cooldown together never remove every version. 0 turns it off. Enforced only for ecosystems whose proxy can list every version, and not in warn mode. Note that this is the opposite of the QualityGate versionLag check.",
           "type": "integer",
           "minimum": 0,
           "default": 0
