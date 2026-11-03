@@ -36,7 +36,7 @@
           }
         },
         "driftProtection": {
-          "description": "Whether the console and the legacy APIs refuse changes to settings that are managed by Platform IaC. false is advisory only: the console shows which settings are managed as code and still lets an owner or admin change them. true enforces it: a write from the console, an ApiKey or a legacy endpoint to a kind that has an object managed by Terraform or GitOps is refused with HTTP 409 managed_by_platform_iac. Writes from Platform IaC (the config API with a management token) are never refused, and neither is this setting, so an owner or admin can always turn it off.",
+          "description": "Whether the console and the legacy APIs refuse changes to settings that are managed by Platform IaC. false is advisory only: the console shows which settings are managed as code and still lets an owner or admin change them. true enforces it: a write from the console, an ApiKey or a legacy endpoint to a kind that has an object managed by Terraform or GitOps is refused with HTTP 409 managed_by_platform_iac. Writes from Platform IaC (the config API, under /v1/config) are never refused, and neither is this setting, so an owner or admin can always turn it off.",
           "type": "boolean",
           "default": false
         }
