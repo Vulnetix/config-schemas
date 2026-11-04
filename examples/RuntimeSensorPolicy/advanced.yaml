@@ -31,6 +31,7 @@ spec:
   allowUserStop: false
   heartbeatAlertMinutes: 30
   allowMajorUpdate: true
+  updateBaseUrl: https://mirror.example.com/vulnetix/cli
 ---
 apiVersion: vulnetix.com/v1
 kind: RuntimeSensorPolicy

@@ -1,0 +1,5 @@
+# updateBaseUrl must be https
+apiVersion: vulnetix.com/v1
+kind: RuntimeSensorPolicy
+metadata: {name: x}
+spec: {updateBaseUrl: "http://mirror.example.com/cli"}

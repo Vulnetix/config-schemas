@@ -152,6 +152,13 @@
           "description": "Let enrolled sensors take a release with a higher major version. Off by default: a major release can change the profile format, the units and the protocol, so a sensor stays on its major version until the profile says otherwise. Has no effect when autoUpdate is false.",
           "type": "boolean",
           "default": false
+        },
+        "updateBaseUrl": {
+          "description": "An https mirror of the sensor's release layout (<base>/latest redirecting to <base>/tag/<tag>, and <base>/download/<tag>/checksums.txt with the binaries) for hosts that cannot reach GitHub. Absent: GitHub. Credentials in the URL are refused; a pinned release signing key still applies to a mirror.",
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://[^/@\\s]+(/[^\\s]*)?$",
+          "maxLength": 512
         }
       }
     }
