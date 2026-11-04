@@ -3,7 +3,7 @@
   "$id": "https://github.com/Vulnetix/config-schemas/releases/download/v0.0.0-dev/Member.schema.json",
   "title": "Member",
   "x-vulnetix": {"validateOnly":false,"singleton":false,"dependsOn":[],"secrets":[],"celFields":[]},
-  "description": "A person in the organisation, by email address, with their role. Applying a Member for someone who is not yet in the organisation sends them an invitation, the same one the members page sends; the object then reports phase Pending, with the invitation's expiry, until they sign in and accept it. A role change on a member takes effect at once; on a pending invitation it replaces the invitation. Deleting the document revokes an outstanding invitation, or removes the member: their account is deactivated and kept for the audit trail, and they lose access to the organisation. Applying needs an owner or admin. An apply that would leave the organisation without an owner, or remove the person applying, is refused.",
+  "description": "A person in the organisation, by email address, with their role. Applying a Member for someone who is not yet in the organisation sends them an invitation, the same one the members page sends; the object then reports phase Pending, with the invitation's expiry, until they sign in and accept it. A role change on a member takes effect at once; on a pending invitation it replaces the invitation. Deleting the document revokes an outstanding invitation, or removes the member: their account is deactivated and kept for the audit trail, and they lose access to the organisation. Applying needs an owner, an admin or a developer; a developer grants up to developer and cannot change or remove an owner. An apply that would leave the organisation without an owner, or remove the person applying, is refused.",
   "type": "object",
   "required": ["apiVersion", "kind", "metadata", "spec"],
   "additionalProperties": false,
@@ -25,7 +25,7 @@
           "pattern": "^[^A-Z\\s]+@[^A-Z\\s]+$"
         },
         "role": {
-          "description": "owner, developer or member. developer can plan, apply and export every kind except Organization, Member, ServiceAccount and VaultEntry, and cannot manage members, invitations, billing, the vault or service accounts. Only an owner may grant owner or developer. admin is the retired role: a member who already holds it keeps it while the document says admin, but no apply grants it.",
+          "description": "owner, developer or member. developer can plan, apply and export every kind as code, Member included, but in the console cannot manage members, invitations, billing, the vault or service accounts. Only an owner may grant owner; as code a developer may grant member or developer, and may not change or remove an owner. admin is the retired role: a member who already holds it keeps it while the document says admin, but no apply grants it.",
           "type": "string",
           "enum": ["owner", "developer", "member", "admin"],
           "default": "member"
