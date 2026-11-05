@@ -44,7 +44,7 @@ jobs:
       # Big Go builds overflow the runner's small /tmp; build in the job's temp.
       - name: Use the job temp dir for Go
         run: echo "GOTMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v5.1.0
         with:
           ref: ${{ github.event.inputs.tag || github.ref }}
           fetch-depth: 0
@@ -60,7 +60,7 @@ jobs:
           git checkout FETCH_HEAD -- cmd/schemacheck
           echo "schemacheck from $(git rev-parse --short FETCH_HEAD)"
 
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v6.5.0
         with:
           go-version-file: go.mod
 
@@ -81,7 +81,7 @@ jobs:
       - name: Build the release files
         run: go run ./cmd/schemacheck release --version "$TAG" --out dist
 
-      - uses: sigstore/cosign-installer@v3
+      - uses: sigstore/cosign-installer@v3.9.1
 
       - name: Sign every file
         run: |
