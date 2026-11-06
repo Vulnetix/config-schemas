@@ -1190,6 +1190,391 @@
                   "default": true
                 }
               }
+            },
+            "repo-scout": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the repo scout default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-scan-nightly": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the nightly scan default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-sca": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the dependency findings default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-sca-fix": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the dependency fixes default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-sast": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the code findings default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-sast-fix": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the code fixes default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-secrets": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the secrets default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-iac": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the infrastructure findings default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-iac-fix": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the infrastructure fixes default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-containers": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the container findings default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-containers-fix": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the container fixes default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-image": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the published image inventory default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-cbom-pqc": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the cryptography inventory default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-cbom-pqc-fix": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the cryptography migration default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-aibom": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the AI inventory default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-license": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the licence policy default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-malscan": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the malware scan default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-sbom-publish": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the SBOM publishing default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-bom-diff": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the SBOM change on a pull request default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-bom-hygiene": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the SBOM hygiene default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-vex-triage": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the VEX triage default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-ignore-sync": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the suppression sync default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-defend": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the rules for findings with no fix default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-jail-gate": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the jail gate on a pull request default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-gha-posture": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the workflow posture default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-gha-posture-fix": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the workflow fixes default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-gha-onboard": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the onboard to Vulnetix workflows default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-advisories": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the draft security advisories default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-config-plan": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the Vulnetix configuration plan default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-ai-firewall": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the AI firewall policy default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-package-firewall": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the package firewall advice default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-attest": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the release provenance check default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-tea-release": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the release to TEA default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-api-surface": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the API surface default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "cli-analyze": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "description": "Whether the exposure analysis default workflow is on for the tenant. A repository can still opt out with defaultsOff.",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
             }
           }
         },

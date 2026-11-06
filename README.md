@@ -45,10 +45,10 @@ Reference documentation for every kind is at https://docs.vulnetix.com (the Plat
 | `MessagingConnection` | v1.5.0 | A messaging destination: Slack (authorized in a browser), Teams, Discord, Google Chat, Jira or a signed webhook. Its credential is kept in the secrets vault. |
 | `MessagingRoute` | v1.5.0 | Which events go to which messaging connections, with filters, mentions, template, digest and rate limit. |
 | `MessagingTemplate` | v1.5.0 | An organisation's own message template, compiled at plan and versioned on every change. |
-| `FactorySettings` | v1.6.0 | The Software Factory settings document: autonomy, System One, crews, forge, Pix, budgets, schedules, defaults and delivery settings. One per tenant. |
+| `FactorySettings` | v1.6.0 | The Software Factory settings document: autonomy, System One, crews, forge, Pix, budgets, schedules, defaults and delivery settings. One per tenant. Since v1.20.0 `defaults` also has a switch for the repo scout and for each of the 34 Vulnetix CLI workflows (`cli-*`). |
 | `ScannerProfile` | v1.6.0 | The factory's scanners, minimum SLSA level and build evidence. One per tenant. |
 | `FactoryManagedOrg` | v1.6.0 | An organisation or account the Software Factory manages. Which repositories the GitHub App reaches stays on GitHub. |
-| `RepositorySettings` | v1.6.0 | The factory's autonomy, kanban mode, token cap, branch protection, TEA publishing and default workflow opt-outs for one repository. Since v1.7.0 it also carries the repository's asset labels, owner and criticality, which are CEL `finding` variables. |
+| `RepositorySettings` | v1.6.0 | The factory's autonomy, kanban mode, token cap, branch protection, TEA publishing and default workflow opt-outs for one repository. Since v1.7.0 it also carries the repository's asset labels, owner and criticality, which are CEL `finding` variables. Since v1.20.0 `defaultsOff` also names the repo scout and the 34 Vulnetix CLI workflows (`cli-*`). |
 | `FactoryWorkflow` | v1.6.0 | A Software Factory workflow graph, saved as a new version on every change and published with `publish: true`. Since v1.13.0 a draft (`publish: false`) and a `config-apply` step may have an empty `config`; a published step of any other type still needs one setting. |
 | `FactoryTrigger` | v1.6.0 | A trigger node of a workflow: a webhook event with typed conditions, a finding, a label, a kanban move, a firewall sighting or a manual run. |
 | `FactorySchedule` | v1.6.0 | A cron schedule that starts a workflow, with its time zone and timer. |

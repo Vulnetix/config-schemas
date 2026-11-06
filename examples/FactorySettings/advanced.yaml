@@ -165,6 +165,76 @@ spec:
       enabled: true
     conflict-fix:
       enabled: true
+    repo-scout:
+      enabled: true
+    cli-scan-nightly:
+      enabled: true
+    cli-sca:
+      enabled: true
+    cli-sca-fix:
+      enabled: true
+    cli-sast:
+      enabled: true
+    cli-sast-fix:
+      enabled: true
+    cli-secrets:
+      enabled: true
+    cli-iac:
+      enabled: true
+    cli-iac-fix:
+      enabled: true
+    cli-containers:
+      enabled: true
+    cli-containers-fix:
+      enabled: true
+    cli-image:
+      enabled: true
+    cli-cbom-pqc:
+      enabled: true
+    cli-cbom-pqc-fix:
+      enabled: true
+    cli-aibom:
+      enabled: true
+    cli-license:
+      enabled: true
+    cli-malscan:
+      enabled: true
+    cli-sbom-publish:
+      enabled: true
+    cli-bom-diff:
+      enabled: true
+    cli-bom-hygiene:
+      enabled: true
+    cli-vex-triage:
+      enabled: true
+    cli-ignore-sync:
+      enabled: true
+    cli-defend:
+      enabled: true
+    cli-jail-gate:
+      enabled: true
+    cli-gha-posture:
+      enabled: true
+    cli-gha-posture-fix:
+      enabled: true
+    cli-gha-onboard:
+      enabled: true
+    cli-advisories:
+      enabled: true
+    cli-config-plan:
+      enabled: true
+    cli-ai-firewall:
+      enabled: true
+    cli-package-firewall:
+      enabled: true
+    cli-attest:
+      enabled: true
+    cli-tea-release:
+      enabled: true
+    cli-api-surface:
+      enabled: true
+    cli-analyze:
+      enabled: true
   delivery:
     enabled: true
     value: true
